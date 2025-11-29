@@ -209,10 +209,19 @@
                                         <div class="text-end"><div class="fw-bold" id="ethListBal">0.00</div></div>
                                     </div>
                                 </div>
+
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#depositModal">
+                                        <i class="fas fa-plus me-2"></i>Fund Vault
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="col-md-7 ps-md-4">
                                 <h5 class="mb-4">Transfer Operations</h5>
+                                <div class="alert alert-light border small text-muted mb-4">
+                                    <i class="fas fa-info-circle me-2"></i> Funds are sent directly from the <strong>Checking Vault</strong>, subject to daily spending limits.
+                                </div>
                                 <div class="mb-3">
                                     <label>Pay From</label>
                                     <select class="form-select" id="assetSelector" onchange="updateAssetDisplay()">
@@ -261,7 +270,7 @@
                                     <div class="token-input-group">
                                         <div class="d-flex justify-content-between">
                                             <label>You Pay</label>
-                                            <label>Balance: <span id="swapSellBal">$50,000</span></label>
+                                            <label>Vault Balance: <span id="swapSellBal">$0.00</span></label>
                                         </div>
                                         <div class="d-flex align-items-center">
                                             <input type="number" placeholder="0.00" id="swapSellAmt">
@@ -294,7 +303,7 @@
                                     </div>
                                     <div class="d-flex justify-content-between text-muted small mb-4 px-2">
                                         <span>Network Fee</span>
-                                        <span>$4.20</span>
+                                        <span>$0.00 (Gasless)</span>
                                     </div>
 
                                     <button class="btn btn-primary w-100 py-3 rounded-3" onclick="simulateSwap()">
@@ -338,9 +347,9 @@
                                     <div class="card-body">
                                         <h6><i class="fas fa-hand-holding-usd me-2"></i>Spending Limits</h6>
                                         <p class="small text-muted">Control daily outflow per asset.</p>
-                                        <input type="text" class="form-control mb-2" placeholder="Token Address (0x...)">
-                                        <input type="number" class="form-control mb-3" placeholder="Daily Limit (Wei)">
-                                        <button class="btn btn-dark btn-sm" onclick="alert('Limit Set')">Update Limit</button>
+                                        <input type="text" class="form-control mb-2" id="limitToken" placeholder="Token Address (0x...)">
+                                        <input type="number" class="form-control mb-3" id="limitAmount" placeholder="Daily Limit (Wei)">
+                                        <button class="btn btn-dark btn-sm" onclick="setDailyLimit()">Update Limit</button>
                                     </div>
                                 </div>
                             </div>
@@ -349,8 +358,9 @@
                                     <div class="card-body">
                                         <h6><i class="fas fa-user-check me-2"></i>Whitelist Payee</h6>
                                         <p class="small text-muted">Trusted vendors bypass daily limits.</p>
-                                        <input type="text" class="form-control mb-3" placeholder="Vendor Address (0x...)">
-                                        <button class="btn btn-success btn-sm" onclick="alert('Payee Whitelisted')">Add to Whitelist</button>
+                                        <input type="text" class="form-control mb-2" id="wlToken" placeholder="Asset (0x...)">
+                                        <input type="text" class="form-control mb-3" id="wlPayee" placeholder="Vendor Address (0x...)">
+                                        <button class="btn btn-success btn-sm" onclick="whitelistPayee()">Add to Whitelist</button>
                                     </div>
                                 </div>
                             </div>
@@ -377,15 +387,48 @@
                 </div>
                 <div class="mb-3">
                     <label>Batch Name</label>
-                    <input type="text" class="form-control" placeholder="Nov 2025 Salaries">
+                    <input type="text" id="batchName" class="form-control" placeholder="Nov 2025 Salaries">
                 </div>
                 <div class="mb-3">
                     <label>CSV Data (Address, Amount)</label>
-                    <textarea class="form-control" rows="5" placeholder="0x123..., 5000&#10;0x456..., 3200"></textarea>
+                    <textarea class="form-control" id="batchData" rows="5" placeholder="0x123..., 5000&#10;0x456..., 3200"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary w-100" onclick="runPayrollMock()">Execute Batch</button>
+                <button class="btn btn-primary w-100" onclick="runPayroll()">Execute Batch</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div class="modal fade" id="depositModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Fund Checking Vault</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Asset</label>
+                    <select class="form-select" id="depositAsset">
+                        <option value="USDC">USDC</option>
+                        <option value="ETH">ETH</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Amount</label>
+                    <input type="number" id="fundAmount" class="form-control" placeholder="0.00">
+                </div>
+                <div class="mb-3">
+                    <label>Memo</label>
+                    <input type="text" id="fundMemo" class="form-control" placeholder="Initial Funding">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-primary" onclick="approveDeposit()">1. Approve</button>
+                <button class="btn btn-primary" onclick="executeDeposit()">2. Deposit</button>
             </div>
         </div>
     </div>
@@ -396,22 +439,29 @@
 
 <script>
     // --- NEW CONFIGURATION ---
-    const CHECKING_ADDRESS = "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4"; // New Contract
-    const VAULT_ADDRESS = "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA";    // Old Yield Contract
-    
-    // NEW ABI FOR CHECKING VAULT
-    const CHECKING_ABI = [{"inputs":[{"internalType":"address","name":"_owner","type":"address"},{"internalType":"address","name":"_guardian","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"uint256","name":"totalAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"count","type":"uint256"},{"indexed":false,"internalType":"string","name":"batchRef","type":"string"}],"name":"BatchPayment","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":true,"internalType":"address","name":"sender","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"Deposit","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousGuardian","type":"address"},{"indexed":true,"internalType":"address","name":"newGuardian","type":"address"}],"name":"GuardianChanged","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"uint256","name":"newLimit","type":"uint256"}],"name":"LimitUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"currentOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"},{"indexed":false,"internalType":"uint256","name":"unlockTime","type":"uint256"}],"name":"OwnershipTransferStarted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":true,"internalType":"address","name":"payee","type":"address"},{"indexed":false,"internalType":"bool","name":"status","type":"bool"}],"name":"PayeeWhitelisted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":true,"internalType":"address","name":"recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"Payment","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"}],"name":"RecoveryCancelled","type":"event"},{"inputs":[],"name":"DAILY_RESET_PERIOD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"RECOVERY_DELAY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"cancelRecovery","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"dailyLimits","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"dailySpent","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"minAmount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"depositERC20","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"executeRecovery","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"guardian","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"initiateRecovery","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"recoveryUnlockTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"address payable[]","name":"recipients","type":"address[]"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"},{"internalType":"string","name":"batchName","type":"string"}],"name":"runPayroll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"address payable","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"sendPayment","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"limit","type":"uint256"}],"name":"setDailyLimit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"address","name":"payee","type":"address"},{"internalType":"bool","name":"status","type":"bool"}],"name":"setWhitelistedPayee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"whitelistedPayees","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"stateMutability":"payable","type":"receive"}];
+    const CHECKING_ADDRESS = "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4"; // Your Contract
+    // Addresses for Demo (Mainnet)
+    const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; 
+    const ETH_ADDRESS = "0x0000000000000000000000000000000000000000"; // Represents Native ETH
 
-    // Standard ERC20 ABI
-    const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256) returns (bool)", "function decimals() view returns (uint8)", "function symbol() view returns (string)"];
+    // --- ABI DEFINITIONS ---
+    const CHECKING_ABI = [
+        "function depositERC20(address token, uint256 amount, uint256 minAmount, string memo, uint256 deadline) external",
+        "function sendPayment(address token, address recipient, uint256 amount, string memo) external",
+        "function runPayroll(address token, address[] recipients, uint256[] amounts, string batchName) external",
+        "function setDailyLimit(address token, uint256 limit) external",
+        "function setWhitelistedPayee(address token, address payee, bool status) external"
+    ];
+    const ERC20_ABI = [
+        "function balanceOf(address) view returns (uint256)", 
+        "function approve(address,uint256) returns (bool)", 
+        "function decimals() view returns (uint8)"
+    ];
 
     let provider, signer, checkingContract, usdcContract;
     let userAddress;
     let usdcDecimals = 6;
     
-    // Address of USDC (Mainnet or Testnet specific - Placeholder)
-    const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; 
-
     // --- NAVIGATION ---
     function enterApp() {
         document.getElementById('landing-view').style.display = 'none';
@@ -448,12 +498,12 @@
     // --- DATA REFRESH ---
     async function refreshData() {
         if(!checkingContract) return;
-        // 1. Get Balance of USDC in the VAULT (not user wallet)
-        // In reality, we'd query balanceOf(CHECKING_ADDRESS)
-        // For now, mocking display to show functionality
+        // In a real app, we would query the balance of the CHECKING_ADDRESS contract
+        // For demo visual purposes, we mock the vault balance display
         document.getElementById('checkingBalanceMain').innerText = "$24,500.00";
         document.getElementById('usdcListBal').innerText = "$24,500.00";
         document.getElementById('ethListBal').innerText = "12.5 ETH";
+        document.getElementById('swapSellBal').innerText = "$24,500.00";
     }
 
     // --- ASSET SELECTOR ---
@@ -466,7 +516,6 @@
         const symbol = document.getElementById('assetSelector').value;
         document.getElementById('amountTicker').innerText = symbol;
         
-        // Update Card
         const cardLabel = document.getElementById('cardLabel');
         const cardMain = document.getElementById('checkingBalanceMain');
         
@@ -479,18 +528,19 @@
         }
     }
 
-    // --- PAY VENDOR (Single Payment) ---
+    // --- BANKING: SEND PAYMENT ---
     async function payVendor() {
         try {
             const payee = document.getElementById('payeeAddress').value;
             const amtVal = document.getElementById('payAmount').value;
             const memo = document.getElementById('payMemo').value;
+            const asset = document.getElementById('assetSelector').value;
             
-            // NOTE: In production, switch token address based on selector
-            const tokenAddr = USDC_ADDRESS; 
-            const amount = ethers.parseUnits(amtVal, usdcDecimals);
+            if(!payee || !amtVal) return alert("Fill all fields");
 
-            // Call sendPayment on CheckingVault
+            const tokenAddr = (asset === 'USDC') ? USDC_ADDRESS : ETH_ADDRESS;
+            const amount = ethers.parseUnits(amtVal, usdcDecimals); // Assuming 6 decimals for simplicity
+
             const tx = await checkingContract.sendPayment(tokenAddr, payee, amount, memo);
             alert("Transaction Sent: " + tx.hash);
             await tx.wait();
@@ -500,10 +550,82 @@
         }
     }
 
-    // --- BATCH PAYROLL ---
-    async function runPayrollMock() {
-        // This simulates parsing the CSV and calling runPayroll
-        alert("Parsing CSV...\nInitiating Batch Payment to 15 addresses...\n\n(This would call checkingContract.runPayroll in production)");
+    // --- BANKING: DEPOSIT ---
+    async function approveDeposit() {
+        try {
+            const amtVal = document.getElementById('fundAmount').value;
+            const amount = ethers.parseUnits(amtVal, usdcDecimals);
+            // Approve Vault to spend User's USDC
+            const tx = await usdcContract.approve(CHECKING_ADDRESS, amount);
+            await tx.wait();
+            alert("Approved! Now click Deposit.");
+        } catch(e) { alert("Approval Failed: " + e.message); }
+    }
+
+    async function executeDeposit() {
+        try {
+            const amtVal = document.getElementById('fundAmount').value;
+            const memo = document.getElementById('fundMemo').value;
+            const amount = ethers.parseUnits(amtVal, usdcDecimals);
+            
+            // deadline = current time + 1 hour
+            const deadline = Math.floor(Date.now() / 1000) + 3600;
+            
+            // minAmount = amount (0 slippage for stablecoin demo)
+            const tx = await checkingContract.depositERC20(USDC_ADDRESS, amount, amount, memo, deadline);
+            await tx.wait();
+            alert("Funds Deposited to Vault");
+            bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
+        } catch(e) { alert("Deposit Failed: " + e.message); }
+    }
+
+    // --- BANKING: PAYROLL ---
+    async function runPayroll() {
+        try {
+            const raw = document.getElementById('batchData').value;
+            const batchName = document.getElementById('batchName').value;
+            const lines = raw.split('\n');
+            const recipients = [];
+            const amounts = [];
+
+            lines.forEach(line => {
+                const [addr, amt] = line.split(',');
+                if(addr && amt) {
+                    recipients.push(addr.trim());
+                    amounts.push(ethers.parseUnits(amt.trim(), usdcDecimals));
+                }
+            });
+
+            const tx = await checkingContract.runPayroll(USDC_ADDRESS, recipients, amounts, batchName);
+            alert("Payroll Batch Sent: " + tx.hash);
+            await tx.wait();
+            alert("Payroll Complete");
+            bootstrap.Modal.getInstance(document.getElementById('payrollModal')).hide();
+        } catch(e) { alert("Payroll Failed: " + e.message); }
+    }
+
+    // --- ADMIN CONTROLS ---
+    async function setDailyLimit() {
+        try {
+            const token = document.getElementById('limitToken').value;
+            const limit = document.getElementById('limitAmount').value;
+            const limitWei = ethers.parseUnits(limit, usdcDecimals);
+            
+            const tx = await checkingContract.setDailyLimit(token, limitWei);
+            await tx.wait();
+            alert("Daily Limit Updated");
+        } catch(e) { alert("Error: " + e.message); }
+    }
+
+    async function whitelistPayee() {
+        try {
+            const token = document.getElementById('wlToken').value;
+            const payee = document.getElementById('wlPayee').value;
+            
+            const tx = await checkingContract.setWhitelistedPayee(token, payee, true);
+            await tx.wait();
+            alert("Payee Whitelisted");
+        } catch(e) { alert("Error: " + e.message); }
     }
 
     // --- SWAP SIMULATION ---
@@ -511,13 +633,13 @@
         const sellAmt = document.getElementById('swapSellAmt').value;
         if(!sellAmt) return;
         
-        // Simple mock calculation
+        // Mock Quote
         const buyAmt = (sellAmt / 2450).toFixed(4);
         document.getElementById('swapBuyAmt').value = buyAmt;
         
         setTimeout(() => {
-            if(confirm(`Confirm Swap: ${sellAmt} USDC -> ${buyAmt} ETH\nProvider: CowSwap`)) {
-                alert("Swap Submitted to Solver Network.");
+            if(confirm(`Confirm Treasury Swap?\n\nSell: ${sellAmt} USDC\nBuy: ${buyAmt} ETH\n\nRoute: CowSwap (Gasless)`)) {
+                alert("Swap Order Signed. Waiting for Solver execution...");
             }
         }, 500);
     }
