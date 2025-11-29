@@ -145,7 +145,7 @@
                 <div class="card text-center border-0 bg-white">
                     <div class="card-body">
                         <div class="stats-label">Total Assets Under Management</div>
-                        <div class="stats-value" id="landingTVL">$0.00</div>
+                        <div class="stats-value" id="landingTVL">$...</div>
                     </div>
                 </div>
             </div>
@@ -161,7 +161,7 @@
                 <div class="card text-center border-0 bg-white">
                     <div class="card-body">
                         <div class="stats-label">Total Units Issued</div>
-                        <div class="stats-value" id="landingTotalShares">0</div>
+                        <div class="stats-value" id="landingTotalShares">...</div>
                     </div>
                 </div>
             </div>
@@ -294,7 +294,8 @@
                     <li class="nav-item">
                         <button class="nav-link" id="solver-tab" data-bs-toggle="tab" data-bs-target="#solver"><i class="fas fa-building me-2"></i>Merchant Portal</button>
                     </li>
-                    <li class="nav-item">
+                    <!-- ADMIN TAB (HIDDEN BY DEFAULT) -->
+                    <li class="nav-item" id="adminNavItem" style="display: none;">
                         <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin"><i class="fas fa-user-shield me-2"></i>Admin Controls</button>
                     </li>
                 </ul>
@@ -881,7 +882,8 @@
         "function sendPayment(address token, address recipient, uint256 amount, string memo) external",
         "function runPayroll(address token, address[] recipients, uint256[] amounts, string batchName) external",
         "function setDailyLimit(address token, uint256 limit) external",
-        "function setWhitelistedPayee(address token, address payee, bool status) external"
+        "function setWhitelistedPayee(address token, address payee, bool status) external",
+        "function owner() view returns (address)" // Added Owner check
     ];
     
     const YIELD_ABI = [
@@ -923,34 +925,37 @@
 
     // --- LANDING PAGE STATS ---
     async function fetchLandingStats() {
-        // Simple read-only fetch if window.ethereum is available (no login needed)
-        if(window.ethereum) {
-            try {
-                const readProv = new ethers.BrowserProvider(window.ethereum);
-                // Init contracts read-only
-                const yieldRo = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, readProv);
-                const usdcRo = new ethers.Contract("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", ERC20_ABI, readProv);
+        try {
+            // Use a public RPC for reliable fetching even without wallet connection
+            // Using Cloudflare's public ETH Mainnet RPC
+            const readProv = new ethers.JsonRpcProvider("https://eth.llamarpc.com");
+            
+            // Init contracts read-only
+            const yieldRo = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, readProv);
+            const usdcRo = new ethers.Contract("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", ERC20_ABI, readProv);
 
-                // 1. Get Yield TVL
-                const totalAssetsRaw = await yieldRo.totalManagedAssets();
-                const totalAssets = Number(ethers.formatUnits(totalAssetsRaw, 6));
-                
-                // 2. Get Checking TVL (USDC)
-                const checkBalRaw = await usdcRo.balanceOf(CHECKING_ADDRESS);
-                const checkBal = Number(ethers.formatUnits(checkBalRaw, 6));
+            // 1. Get Yield TVL
+            const totalAssetsRaw = await yieldRo.totalManagedAssets();
+            const totalAssets = Number(ethers.formatUnits(totalAssetsRaw, 6));
+            
+            // 2. Get Checking TVL (USDC)
+            const checkBalRaw = await usdcRo.balanceOf(CHECKING_ADDRESS);
+            const checkBal = Number(ethers.formatUnits(checkBalRaw, 6));
 
-                // 3. Update DOM
-                const combinedTVL = totalAssets + checkBal;
-                document.getElementById('landingTVL').innerText = "$" + combinedTVL.toLocaleString(undefined, {maximumFractionDigits:0});
-                
-                // 4. Total Shares
-                const totalSharesRaw = await yieldRo.totalShares();
-                const totalShares = Number(ethers.formatUnits(totalSharesRaw, 6));
-                document.getElementById('landingTotalShares').innerText = totalShares.toLocaleString(undefined, {maximumFractionDigits:0});
+            // 3. Update DOM
+            const combinedTVL = totalAssets + checkBal;
+            document.getElementById('landingTVL').innerText = "$" + combinedTVL.toLocaleString(undefined, {maximumFractionDigits:0});
+            
+            // 4. Total Shares
+            const totalSharesRaw = await yieldRo.totalShares();
+            const totalShares = Number(ethers.formatUnits(totalSharesRaw, 6));
+            document.getElementById('landingTotalShares').innerText = totalShares.toLocaleString(undefined, {maximumFractionDigits:0});
 
-            } catch(e) {
-                console.log("Landing stats fetch failed (likely network mismatch or no provider):", e);
-            }
+        } catch(e) {
+            console.log("Landing stats fetch failed:", e);
+            // Graceful fallback (maybe network is down)
+            document.getElementById('landingTVL').innerText = "$--";
+            document.getElementById('landingTotalShares').innerText = "--";
         }
     }
 
@@ -989,24 +994,14 @@
         const email = document.getElementById('web3authEmail').value;
         if(!email) return alert("Please enter email");
 
-        // SIMULATION: In a real app, this calls Web3Auth SDK
-        // Here we generate a deterministic wallet from the email to simulate the unique address behavior
         const mockPrivateKey = ethers.id(email); // Hash email to get a 'private key'
         const mockWallet = new ethers.Wallet(mockPrivateKey);
-        
-        // We can't use this wallet to sign real transactions without a provider, 
-        // so we treat this as a "View Only" or "Simulation" mode for the demo, 
-        // OR we just use the address to key the data.
         userAddress = mockWallet.address;
         
         alert(`Web3Auth Success!\nEmail: ${email}\nGenerated Wallet: ${userAddress.substring(0,6)}...`);
         
-        // Note: Since we don't have a real provider for this generated wallet in this static HTML demo,
-        // we will fall back to read-only provider for data, but write actions won't work.
-        // In production, Web3Auth returns a valid EIP-1193 provider here.
         if(window.ethereum) {
-             provider = new ethers.BrowserProvider(window.ethereum); // Use injected provider for reads
-             // signer = ... (Web3Auth provider)
+             provider = new ethers.BrowserProvider(window.ethereum); 
         }
         
         completeLogin(userAddress);
@@ -1019,10 +1014,9 @@
         
         // 2. Init Core Contracts
         if(provider) {
-            checkingContract = new ethers.Contract(CHECKING_ADDRESS, CHECKING_ABI, provider); // Read only if no signer
+            checkingContract = new ethers.Contract(CHECKING_ADDRESS, CHECKING_ABI, provider); 
             yieldVaultContract = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, provider);
             kernelContract = new ethers.Contract(KERNEL_ADDRESS, KERNEL_ABI_HUMAN, provider);
-            // If we have a signer (Metamask), upgrade contracts to writable
             if(signer) {
                 checkingContract = checkingContract.connect(signer);
                 yieldVaultContract = yieldVaultContract.connect(signer);
@@ -1043,8 +1037,17 @@
         document.getElementById('connectBtn').innerHTML = "Connected";
         document.getElementById('connectBtn').className = "btn btn-success";
         
-        // Pre-fill modal inputs
         document.getElementById('kycWalletAddress').value = address;
+
+        // 5. Check Admin Status (Ownership) to Reveal/Hide Admin Tab
+        try {
+            const owner = await checkingContract.owner();
+            if (address.toLowerCase() === owner.toLowerCase()) {
+                document.getElementById('adminNavItem').style.display = 'block';
+            } else {
+                document.getElementById('adminNavItem').style.display = 'none';
+            }
+        } catch(e) { console.log("Could not verify admin status", e); }
 
         enterApp();
         refreshData();
@@ -1054,13 +1057,13 @@
     async function refreshData() {
         if(!provider) return;
         
-        // 1. Update Asset Balances (Loop through tracked assets)
+        // 1. Update Asset Balances
         for(let asset of trackedAssets) {
             try {
                 let walletBal = "0.00";
                 let vaultBal = "0.00";
 
-                // A. Wallet Balance (My Wallet)
+                // A. Wallet Balance
                 if(asset.isEth) {
                     const raw = await provider.getBalance(userAddress);
                     walletBal = ethers.formatEther(raw);
@@ -1071,7 +1074,7 @@
                 }
                 asset.walletBalance = Number(walletBal).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
 
-                // B. Vault Balance (Checking Contract)
+                // B. Vault Balance
                 if(asset.isEth) {
                     const raw = await provider.getBalance(CHECKING_ADDRESS);
                     vaultBal = ethers.formatEther(raw);
@@ -1100,12 +1103,10 @@
 
     function toggleBalanceView(view) {
         currentView = view;
-        // Update UI State
         document.getElementById('viewWallet').checked = (view === 'wallet');
         document.getElementById('viewVault').checked = (view === 'vault');
-        
         renderAssetList();
-        updateCardDisplay(); // Update card to match view
+        updateCardDisplay(); 
     }
 
     function renderAssetList() {
@@ -1116,7 +1117,6 @@
             const displayBal = (currentView === 'wallet') ? asset.walletBalance : asset.vaultBalance;
             const isActive = (asset.symbol === activeAsset.symbol) ? 'active' : '';
             
-            // Icon Logic
             let iconClass = "fas fa-coins bg-secondary";
             if(asset.symbol === 'USDC') iconClass = "fas fa-dollar-sign bg-primary";
             if(asset.symbol === 'ETH') iconClass = "fab fa-ethereum bg-dark";
@@ -1139,10 +1139,9 @@
 
     function setActiveAsset(symbol) {
         activeAsset = trackedAssets.find(t => t.symbol === symbol);
-        renderAssetList(); // to update active highlight
+        renderAssetList();
         updateCardDisplay();
         
-        // Sync Selectors
         document.getElementById('assetSelector').value = symbol;
         document.getElementById('depositAssetSelector').value = symbol;
         document.getElementById('withdrawAssetSelector').value = symbol;
@@ -1152,8 +1151,6 @@
         const displayBal = (currentView === 'wallet') ? activeAsset.walletBalance : activeAsset.vaultBalance;
         document.getElementById('cardLabel').innerText = `Balance (${activeAsset.symbol})`;
         document.getElementById('checkingBalanceMain').innerText = displayBal || "0.00";
-        
-        // Top Stat
         document.getElementById('checkingDisplay').innerText = displayBal || "0.00";
     }
 
@@ -1175,10 +1172,7 @@
         const newAsset = { symbol: sym.toUpperCase(), address: addr, decimals: dec, isEth: false, walletBalance: "0.00", vaultBalance: "0.00" };
         trackedAssets.push(newAsset);
         
-        // Persist specific to user
         saveUserAssets(userAddress);
-        
-        // UI Refresh
         bootstrap.Modal.getInstance(document.getElementById('addTokenModal')).hide();
         renderAssetSelectors();
         refreshData();
@@ -1193,7 +1187,6 @@
         document.getElementById('displayCheckAddr').innerText = addr;
         document.getElementById('registryStatusResult').style.display = 'block';
         
-        // Check Investor
         try {
             const isInv = await yieldVaultContract.isWhitelisted(addr);
             const el = document.getElementById('statusInvestor');
@@ -1201,7 +1194,6 @@
             el.className = isInv ? "badge bg-success" : "badge bg-secondary";
         } catch(e) { console.error(e); }
 
-        // Check Merchant
         try {
             const isMerch = await kernelContract.whitelistedSolvers(addr);
             const el = document.getElementById('statusMerchant');
@@ -1263,9 +1255,6 @@
 
             let tx;
             if(asset.isEth) {
-                 // Native ETH deposit logic if contract supports check
-                 // For this CheckingVault, we might need to fallback to standard send if depositERC20 checks token!=0
-                 // However, the contract says if token==0 it handles ETH.
                  tx = await checkingContract.depositERC20(asset.address, amount, amount, memo, deadline, { value: amount });
             } else {
                  tx = await checkingContract.depositERC20(asset.address, amount, amount, memo, deadline);
@@ -1290,7 +1279,6 @@
             
             const amount = ethers.parseUnits(amtVal, asset.decimals);
             
-            // Calling sendPayment to send to self (userAddress)
             const tx = await checkingContract.sendPayment(asset.address, userAddress, amount, "Self Withdrawal");
             alert("Withdrawal Sent: " + tx.hash);
             await tx.wait();
@@ -1305,7 +1293,6 @@
     async function runPayroll() {
         if(!signer) return alert("Write actions require Metamask connection");
         try {
-            // Simplified for Demo: Always uses Active Asset
             const asset = activeAsset;
             const raw = document.getElementById('batchData').value;
             const batchName = document.getElementById('batchName').value;
@@ -1333,16 +1320,9 @@
     async function submitInvoiceRequest() {
          const buyer = document.getElementById("invoiceBuyer").value;
          const amt = document.getElementById("requestAmount").value;
-         
          if(!buyer || !amt) return alert("Please complete all fields.");
-         
-         // NOTE: This is a simulated submission (off-chain negotiation phase)
-         // In a real app, this would upload to IPFS then call deployCapital (if you were the lender)
-         // or emit an event. Since borrowers can't force capital deployment, this usually notifies the admin.
-         
          const simulatedHash = "0x" + Math.random().toString(16).substr(2, 40);
          const shortHash = simulatedHash.substring(0,10) + "...";
-         
          const message = encodeURIComponent(
              `🚀 *New Capital Request*\n\n` +
              `🏢 *Buyer:* ${buyer}\n` +
@@ -1350,7 +1330,6 @@
              `📄 *Invoice Hash:* \`${shortHash}\`\n\n` +
              `Requesting immediate approval.`
          );
-         
          window.open(`https://t.me/KernelFi_Admin?text=${message}`, '_blank');
     }
 
@@ -1359,7 +1338,6 @@
         try {
             const pVal = document.getElementById("repayPrincipal").value;
             const fVal = document.getElementById("repayFee").value;
-            // Use USDC address from tracked assets
             const asset = trackedAssets.find(t => t.symbol === 'USDC');
             const principal = ethers.parseUnits(pVal, asset.decimals);
             const fee = ethers.parseUnits(fVal, asset.decimals);
@@ -1395,7 +1373,6 @@
             const amtVal = document.getElementById('investAmount').value;
             if(!amtVal) return alert("Enter amount");
             
-            // Defaulting to USDC for Yield Vault as per contract design
             const usdcAsset = trackedAssets.find(t => t.symbol === 'USDC');
             const amount = ethers.parseUnits(amtVal, usdcAsset.decimals);
             
@@ -1416,7 +1393,6 @@
             const usdcAsset = trackedAssets.find(t => t.symbol === 'USDC');
             const amount = ethers.parseUnits(amtVal, usdcAsset.decimals);
             
-            // deposit(uint256 amount, uint256 minShares)
             const tx = await yieldVaultContract.deposit(amount, 0);
             await tx.wait();
             alert("Deposited into Yield Vault");
@@ -1432,9 +1408,8 @@
             if(!amtVal) return alert("Enter shares amount");
             
             const usdcAsset = trackedAssets.find(t => t.symbol === 'USDC');
-            const shares = ethers.parseUnits(amtVal, usdcAsset.decimals); // Assuming shares same decimals as underlying
+            const shares = ethers.parseUnits(amtVal, usdcAsset.decimals); 
             
-            // withdraw(uint256 shareAmount, uint256 minAssets)
             const tx = await yieldVaultContract.withdraw(shares, 0);
             await tx.wait();
             alert("Redeemed from Yield Vault");
@@ -1448,7 +1423,6 @@
         try {
             const token = document.getElementById('limitToken').value;
             const limit = document.getElementById('limitAmount').value;
-            // Assume 18 decimals for generic limit setting or ask user
             const limitWei = ethers.parseUnits(limit, 18); 
             const tx = await checkingContract.setDailyLimit(token, limitWei);
             await tx.wait();
@@ -1500,11 +1474,6 @@
         }, 500);
     }
 
-    function copyAddress() {
-        navigator.clipboard.writeText(CHECKING_ADDRESS);
-        alert("Vault Address Copied");
-    }
-    
     // --- FORM SUBMISSION ---
     function submitOnboarding() {
         const modalEl = document.getElementById('onboardingModal');
