@@ -157,6 +157,15 @@
             margin-bottom: 20px;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
+        
+        /* Fix for font color inside the dark card */
+        .checking-balance-card h1, 
+        .checking-balance-card h2, 
+        .checking-balance-card h3, 
+        .checking-balance-card h4, 
+        .checking-balance-card h5 {
+            color: white !important;
+        }
     </style>
 </head>
 <body>
@@ -467,7 +476,7 @@
                                     <h6 class="text-white-50 text-uppercase mb-1">Available Balance (USDC)</h6>
                                     <h2 class="mb-4" id="checkingBalanceMain">$0.00</h2>
                                     <div class="d-flex justify-content-between align-items-end">
-                                        <small class="text-white-50">**** **** **** 4242</small>
+                                        <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem;" id="cardAddressDisplay">0x0000...0000</small>
                                         <i class="fab fa-cc-visa fa-2x"></i>
                                     </div>
                                 </div>
@@ -926,6 +935,13 @@
             document.getElementById("checkingDisplay").innerText = checkDisplay;
             document.getElementById("checkingBalanceMain").innerText = checkDisplay;
             
+            // Update Card Address Display
+            if(userAddress) {
+                // Show first 6 and last 4 for the card look
+                const niceAddr = userAddress.substring(0, 8) + "...." + userAddress.substring(36);
+                document.getElementById("cardAddressDisplay").innerText = niceAddr;
+            }
+
             // Yield
             document.getElementById("userShares").innerText = Number(mySharesFmt).toLocaleString();
 
