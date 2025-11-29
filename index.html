@@ -316,7 +316,7 @@
                                     <h6 class="text-white-50 text-uppercase mb-1" id="cardLabel">Balance (USDC)</h6>
                                     <h2 class="mb-4" id="checkingBalanceMain">$0.00</h2>
                                     <div class="d-flex justify-content-between align-items-end">
-                                        <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem;" id="cardAddressDisplay">Not Connected</small>
+                                        <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem; cursor: pointer;" id="cardAddressDisplay" onclick="copyUserAddress()" title="Click to Copy">Not Connected</small>
                                         <i class="fab fa-cc-visa fa-2x"></i>
                                     </div>
                                 </div>
@@ -342,14 +342,19 @@
                                     <!-- Populated by JS -->
                                 </div>
 
-                                <!-- Actions: Fund & Withdraw -->
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-outline-dark flex-grow-1" data-bs-toggle="modal" data-bs-target="#depositModal">
-                                        <i class="fas fa-plus me-2"></i>Fund Vault
+                                <!-- Actions: Receive, Fund & Withdraw -->
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiveModal">
+                                        <i class="fas fa-arrow-down me-2"></i>Receive / Fund Wallet
                                     </button>
-                                    <button class="btn btn-outline-danger flex-grow-1" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-                                        <i class="fas fa-arrow-down me-2"></i>Withdraw
-                                    </button>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-outline-dark flex-grow-1" data-bs-toggle="modal" data-bs-target="#depositModal">
+                                            <i class="fas fa-plus me-2"></i>Deposit to Vault
+                                        </button>
+                                        <button class="btn btn-outline-danger flex-grow-1" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+                                            <i class="fas fa-arrow-up me-2"></i>Withdraw
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -690,11 +695,19 @@
                         <i class="fas fa-wallet me-2"></i> Metamask
                     </button>
                     <div class="text-center text-muted small">-- OR --</div>
-                    <div class="input-group">
-                        <input type="email" id="web3authEmail" class="form-control" placeholder="name@company.com">
-                        <button class="btn btn-primary" onclick="loginWithEmail()">
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
+                    <div class="mb-2">
+                         <label class="small text-muted mb-1">Email (Google Login)</label>
+                         <div class="input-group">
+                            <input type="email" id="web3authEmail" class="form-control" placeholder="name@company.com">
+                            <button class="btn btn-primary" onclick="loginWithEmail()">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                         </div>
+                         <!-- NEW: Live Address Preview -->
+                         <div class="mt-2 p-2 bg-light border rounded d-none" id="emailAddressPreview">
+                             <small class="d-block text-muted" style="font-size: 0.7rem;">Google Wallet Address:</small>
+                             <small class="font-monospace fw-bold" id="previewAddrString">0x...</small>
+                         </div>
                     </div>
                 </div>
                 <div class="mt-3 text-center">
@@ -790,6 +803,33 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-danger w-100" onclick="executeWithdrawal()">Confirm Withdrawal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RECEIVE MODAL (NEW) -->
+<div class="modal fade" id="receiveModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Receive Funds</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="text-muted mb-3">Send assets to this address to fund your wallet.</p>
+                <div class="bg-light p-3 rounded mb-3 border">
+                    <div class="font-monospace fw-bold text-break" id="fullWalletAddress">0x...</div>
+                </div>
+                <!-- Placeholder for QR Code -->
+                <div style="width: 200px; height: 200px; background-color: #f8f9fa; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc;">
+                    <i class="fas fa-qrcode fa-4x text-muted"></i>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-outline-primary btn-sm" onclick="copyUserAddress()">
+                        <i class="fas fa-copy me-1"></i> Copy Address
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -921,6 +961,23 @@
     // Initialize Landing Page Stats on Load
     window.onload = async function() {
         fetchLandingStats();
+        
+        // Listen for Email Input Changes to show address preview
+        const emailInput = document.getElementById('web3authEmail');
+        if(emailInput) {
+            emailInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                const previewBox = document.getElementById('emailAddressPreview');
+                if(val.includes('@')) {
+                     const mockPrivateKey = ethers.id(val);
+                     const mockWallet = new ethers.Wallet(mockPrivateKey);
+                     document.getElementById('previewAddrString').innerText = mockWallet.address;
+                     previewBox.classList.remove('d-none');
+                } else {
+                     previewBox.classList.add('d-none');
+                }
+            });
+        }
     };
 
     // --- LANDING PAGE STATS ---
@@ -998,17 +1055,19 @@
         const mockWallet = new ethers.Wallet(mockPrivateKey);
         userAddress = mockWallet.address;
         
-        alert(`Web3Auth Success!\nEmail: ${email}\nGenerated Wallet: ${userAddress.substring(0,6)}...`);
+        console.log(`Simulated Login for: ${email}`);
+        console.log(`Address: ${userAddress}`);
+        console.log(`Private Key (SIMULATION ONLY): ${mockPrivateKey}`);
         
         if(window.ethereum) {
              provider = new ethers.BrowserProvider(window.ethereum); 
         }
         
-        completeLogin(userAddress);
+        completeLogin(userAddress, email); // Pass email to completeLogin
         bootstrap.Modal.getInstance(document.getElementById('loginModal'))?.hide();
     }
 
-    async function completeLogin(address) {
+    async function completeLogin(address, email = null) {
         // 1. Load User Specific Assets
         loadUserAssets(address);
         
@@ -1030,10 +1089,19 @@
             trackedAssets[0].address = realUsdc; 
         } catch(e) {}
 
-        // 4. UI Updates
-        document.getElementById('walletAddress').innerText = address.substring(0,6) + "..." + address.substring(38);
+        // 4. UI Updates - SHOW EMAIL IF AVAILABLE
+        let identityDisplay = address.substring(0,6) + "..." + address.substring(38);
+        if(email) {
+             identityDisplay = `${email} (${address.substring(0,4)}...)`;
+        }
+        document.getElementById('walletAddress').innerText = identityDisplay;
+        
         document.getElementById('cardAddressDisplay').innerText = address.substring(0,6) + "..." + address.substring(38);
         document.getElementById('withdrawDestAddr').innerText = address.substring(0,6) + "..." + address.substring(38);
+        
+        // New Full Address Display Logic for Receive Modal
+        document.getElementById('fullWalletAddress').innerText = address;
+        
         document.getElementById('connectBtn').innerHTML = "Connected";
         document.getElementById('connectBtn').className = "btn btn-success";
         
@@ -1051,6 +1119,13 @@
 
         enterApp();
         refreshData();
+    }
+    
+    function copyUserAddress() {
+        if(userAddress) {
+            navigator.clipboard.writeText(userAddress);
+            alert("Wallet Address Copied: " + userAddress);
+        }
     }
 
     // --- DATA REFRESH ---
@@ -1423,6 +1498,7 @@
         try {
             const token = document.getElementById('limitToken').value;
             const limit = document.getElementById('limitAmount').value;
+            // Assume 18 decimals for generic limit setting or ask user
             const limitWei = ethers.parseUnits(limit, 18); 
             const tx = await checkingContract.setDailyLimit(token, limitWei);
             await tx.wait();
@@ -1474,6 +1550,11 @@
         }, 500);
     }
 
+    function copyAddress() {
+        navigator.clipboard.writeText(CHECKING_ADDRESS);
+        alert("Vault Address Copied");
+    }
+    
     // --- FORM SUBMISSION ---
     function submitOnboarding() {
         const modalEl = document.getElementById('onboardingModal');
