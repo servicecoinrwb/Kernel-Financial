@@ -219,9 +219,13 @@
                                     <!-- Populated by JS -->
                                 </div>
 
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#depositModal">
+                                <!-- Actions: Fund & Withdraw -->
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-dark flex-grow-1" data-bs-toggle="modal" data-bs-target="#depositModal">
                                         <i class="fas fa-plus me-2"></i>Fund Vault
+                                    </button>
+                                    <button class="btn btn-outline-danger flex-grow-1" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+                                        <i class="fas fa-arrow-down me-2"></i>Withdraw
                                     </button>
                                 </div>
                             </div>
@@ -541,6 +545,36 @@
     </div>
 </div>
 
+<!-- WITHDRAW MODAL -->
+<div class="modal fade" id="withdrawModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Withdraw from Vault</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Select Asset</label>
+                    <select class="form-select" id="withdrawAssetSelector">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Amount</label>
+                    <input type="number" id="withdrawAmountInput" class="form-control" placeholder="0.00">
+                </div>
+                <div class="alert alert-light border small text-muted">
+                    <i class="fas fa-info-circle me-2"></i> Funds will be sent to your connected wallet: <span id="withdrawDestAddr" class="font-monospace">...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger w-100" onclick="executeWithdrawal()">Confirm Withdrawal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
@@ -637,6 +671,7 @@
                 // UI Updates
                 document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
                 document.getElementById('cardAddressDisplay').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
+                document.getElementById('withdrawDestAddr').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38); // Sync withdraw modal destination
                 document.getElementById('connectBtn').innerHTML = "Connected";
                 document.getElementById('connectBtn').className = "btn btn-success";
 
@@ -700,6 +735,7 @@
         document.getElementById('viewVault').checked = (view === 'vault');
         
         renderAssetList();
+        updateCardDisplay(); // Update card to match view
     }
 
     function renderAssetList() {
@@ -739,6 +775,7 @@
         // Sync Selectors
         document.getElementById('assetSelector').value = symbol;
         document.getElementById('depositAssetSelector').value = symbol;
+        document.getElementById('withdrawAssetSelector').value = symbol;
     }
 
     function updateCardDisplay() {
@@ -754,6 +791,7 @@
         const options = trackedAssets.map(t => `<option value="${t.symbol}">${t.symbol}</option>`).join('');
         document.getElementById('assetSelector').innerHTML = options;
         document.getElementById('depositAssetSelector').innerHTML = options;
+        document.getElementById('withdrawAssetSelector').innerHTML = options;
     }
 
     // --- ADD NEW ASSET ---
@@ -865,6 +903,28 @@
             bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
             refreshData(); 
         } catch(e) { alert("Deposit Failed: " + e.message); }
+    }
+
+    // --- BANKING: WITHDRAW ---
+    async function executeWithdrawal() {
+        try {
+            const symbol = document.getElementById('withdrawAssetSelector').value;
+            const asset = trackedAssets.find(t => t.symbol === symbol);
+            const amtVal = document.getElementById('withdrawAmountInput').value;
+            
+            if(!amtVal) return alert("Please enter an amount");
+            
+            const amount = ethers.parseUnits(amtVal, asset.decimals);
+            
+            // Calling sendPayment to send to self (userAddress)
+            const tx = await checkingContract.sendPayment(asset.address, userAddress, amount, "Self Withdrawal");
+            alert("Withdrawal Sent: " + tx.hash);
+            await tx.wait();
+            alert("Withdrawal Complete");
+            
+            bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
+            refreshData(); 
+        } catch(e) { alert("Withdrawal Failed: " + e.message); }
     }
 
     // --- BANKING: PAYROLL ---
