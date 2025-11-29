@@ -198,16 +198,25 @@
                                     </div>
                                 </div>
 
-                                <h6 class="text-muted text-uppercase small fw-bold mb-3">Wallet Holdings (Depositable)</h6>
-                                <div class="list-group list-group-flush border rounded mb-4">
-                                    <div class="list-group-item d-flex justify-content-between align-items-center asset-row active" onclick="selectAsset('USDC')">
-                                        <div class="d-flex align-items-center"><i class="fas fa-dollar-sign bg-primary text-white rounded-circle p-2 me-3" style="width:36px;text-align:center;"></i> <div><strong>USDC</strong><br><small class="text-muted">USD Coin</small></div></div>
-                                        <div class="text-end"><div class="fw-bold" id="usdcListBal">$0.00</div></div>
+                                <!-- Toggle View Switch -->
+                                <div class="d-flex justify-content-center mb-3">
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="balanceView" id="viewWallet" autocomplete="off" checked onclick="toggleBalanceView('wallet')">
+                                        <label class="btn btn-outline-primary btn-sm" for="viewWallet">My Wallet</label>
+                                      
+                                        <input type="radio" class="btn-check" name="balanceView" id="viewVault" autocomplete="off" onclick="toggleBalanceView('vault')">
+                                        <label class="btn btn-outline-primary btn-sm" for="viewVault">Checking Vault</label>
                                     </div>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center asset-row" onclick="selectAsset('ETH')">
-                                        <div class="d-flex align-items-center"><i class="fab fa-ethereum bg-dark text-white rounded-circle p-2 me-3" style="width:36px;text-align:center;"></i> <div><strong>ETH</strong><br><small class="text-muted">Ethereum</small></div></div>
-                                        <div class="text-end"><div class="fw-bold" id="ethListBal">0.00</div></div>
-                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="text-muted text-uppercase small fw-bold mb-0">Holdings List</h6>
+                                    <button class="btn btn-link btn-sm text-decoration-none p-0" data-bs-toggle="modal" data-bs-target="#addTokenModal">+ Add Asset</button>
+                                </div>
+                                
+                                <!-- Dynamic Asset List -->
+                                <div class="list-group list-group-flush border rounded mb-4" id="assetListContainer">
+                                    <!-- Populated by JS -->
                                 </div>
 
                                 <div class="d-grid gap-2">
@@ -223,10 +232,9 @@
                                     <i class="fas fa-info-circle me-2"></i> Funds are sent directly from the <strong>Checking Vault</strong>, subject to daily spending limits.
                                 </div>
                                 <div class="mb-3">
-                                    <label>Pay From</label>
+                                    <label>Pay From Asset</label>
                                     <select class="form-select" id="assetSelector" onchange="updateAssetDisplay()">
-                                        <option value="USDC">USDC (USD Coin)</option>
-                                        <option value="ETH">ETH (Ethereum)</option>
+                                        <!-- Dynamic Options -->
                                     </select>
                                 </div>
                                 <div class="mb-3">
@@ -237,7 +245,6 @@
                                     <label>Amount</label>
                                     <div class="input-group">
                                         <input type="number" id="payAmount" class="form-control" placeholder="0.00">
-                                        <span class="input-group-text" id="amountTicker">USDC</span>
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -263,7 +270,7 @@
                             <div class="col-md-6">
                                 <div class="text-center mb-4">
                                     <h5>Treasury Swap</h5>
-                                    <p class="text-muted">Convert corporate assets using aggregated liquidity.</p>
+                                    <p class="text-muted">Convert corporate assets via CowSwap Solvers.</p>
                                 </div>
                                 <div class="swap-card">
                                     <!-- Sell -->
@@ -307,11 +314,16 @@
                                     </div>
 
                                     <button class="btn btn-primary w-100 py-3 rounded-3" onclick="simulateSwap()">
-                                        Review Swap
+                                        Sign Order
                                     </button>
                                 </div>
-                                <div class="text-center mt-3">
-                                    <small class="text-muted"><i class="fas fa-shield-alt me-1"></i> Protected from MEV bots via CowSwap</small>
+                                <div class="mt-3 p-3 bg-light rounded border small">
+                                    <strong><i class="fas fa-info-circle text-primary me-1"></i> How CowSwap Works:</strong>
+                                    <ul class="mb-0 mt-2 ps-3 text-muted">
+                                        <li>You sign an "Intent" to trade off-chain (no gas).</li>
+                                        <li>Solvers compete to find the best price.</li>
+                                        <li>Trades are settled in batches. No MEV attacks.</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -341,6 +353,42 @@
 
                     <!-- 4. ADMIN TAB -->
                     <div class="tab-pane fade" id="admin">
+                        
+                        <!-- Protocol Access Management (NEW SECTION) -->
+                        <div class="row g-4 mb-5">
+                            <div class="col-12">
+                                <h5 class="mb-3 text-muted border-bottom pb-2">Registry Explorer (Check Status)</h5>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="card h-100 border bg-white shadow-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-end">
+                                            <div class="col-md-8">
+                                                <label class="small text-muted">Enter Wallet Address to Check Permissions</label>
+                                                <input type="text" class="form-control" id="checkAddr" placeholder="0x...">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button class="btn btn-primary w-100" onclick="checkRegistryStatus()">Check Status</button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4" id="registryStatusResult" style="display:none;">
+                                            <h6>Status for: <span id="displayCheckAddr" class="font-monospace text-muted"></span></h6>
+                                            <div class="d-flex gap-3 mt-2">
+                                                <div class="p-3 border rounded bg-light w-50 text-center">
+                                                    <small class="d-block text-muted mb-1">Yield Investor</small>
+                                                    <span id="statusInvestor" class="badge bg-secondary">Unknown</span>
+                                                </div>
+                                                <div class="p-3 border rounded bg-light w-50 text-center">
+                                                    <small class="d-block text-muted mb-1">Approved Merchant</small>
+                                                    <span id="statusMerchant" class="badge bg-secondary">Unknown</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- ROW 1: Checking Vault Admin -->
                         <div class="row g-4 mb-4">
                             <div class="col-12">
@@ -370,10 +418,10 @@
                             </div>
                         </div>
 
-                        <!-- ROW 2: Protocol Access Management -->
+                        <!-- ROW 2: Protocol Access Add -->
                         <div class="row g-4">
                             <div class="col-12">
-                                <h5 class="mb-3 text-muted border-bottom pb-2">Protocol Access Management</h5>
+                                <h5 class="mb-3 text-muted border-bottom pb-2">Add to Registry</h5>
                             </div>
                             <div class="col-md-6">
                                 <div class="card h-100 border bg-white shadow-sm">
@@ -399,6 +447,35 @@
                     </div>
 
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD TOKEN MODAL -->
+<div class="modal fade" id="addTokenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Track New Asset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Token Address</label>
+                    <input type="text" id="newTokenAddr" class="form-control" placeholder="0x...">
+                </div>
+                <div class="mb-3">
+                    <label>Symbol</label>
+                    <input type="text" id="newTokenSymbol" class="form-control" placeholder="e.g. DAI">
+                </div>
+                <div class="mb-3">
+                    <label>Decimals</label>
+                    <input type="number" id="newTokenDecimals" class="form-control" value="18">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" onclick="addNewAsset()">Add to Dashboard</button>
             </div>
         </div>
     </div>
@@ -443,9 +520,8 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label>Asset</label>
-                    <select class="form-select" id="depositAsset">
-                        <option value="USDC">USDC</option>
-                        <option value="ETH">ETH</option>
+                    <select class="form-select" id="depositAssetSelector">
+                        <!-- Populated JS -->
                     </select>
                 </div>
                 <div class="mb-3">
@@ -469,11 +545,29 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
 <script>
-    // --- NEW CONFIGURATION ---
+    // --- CONFIGURATION ---
     const CHECKING_ADDRESS = "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4"; // Checking Vault
     const VAULT_ADDRESS = "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA";    // Yield Vault
     const KERNEL_ADDRESS = "0xC5ABA20edBF35544E5Adb9983b52831ec5d40FDD";    // Kernel/Merchant Contract
     
+    // Addresses for Demo (Mainnet) - UPDATE THESE FOR YOUR NETWORK
+    const ETH_ADDRESS = "0x0000000000000000000000000000000000000000"; 
+    
+    // Default Asset List
+    let trackedAssets = [
+        { symbol: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6, isEth: false },
+        { symbol: "ETH", address: ETH_ADDRESS, decimals: 18, isEth: true }
+    ];
+
+    // Load local storage assets
+    if(localStorage.getItem('kernelAssets')) {
+        const stored = JSON.parse(localStorage.getItem('kernelAssets'));
+        // Merge ensuring no duplicates
+        stored.forEach(s => {
+            if(!trackedAssets.find(t => t.symbol === s.symbol)) trackedAssets.push(s);
+        });
+    }
+
     // --- ABI DEFINITIONS ---
     const CHECKING_ABI = [
         "function depositERC20(address token, uint256 amount, uint256 minAmount, string memo, uint256 deadline) external",
@@ -483,13 +577,17 @@
         "function setWhitelistedPayee(address token, address payee, bool status) external"
     ];
     
-    // UPDATED: Full interfaces based on your JSON to ensure correct calls
     const YIELD_ABI = [
         "function setInvestorStatus(address investor, bool status) external",
-        "function shares(address account) view returns (uint256)", // Correct mapping name
-        "function usdc() view returns (address)" // Fetch USDC address dynamically
+        "function shares(address account) view returns (uint256)", 
+        "function isWhitelisted(address account) view returns (bool)", // Check investor status
+        "function usdc() view returns (address)" 
     ];
-    const KERNEL_ABI_HUMAN = ["function setSolver(address solver, bool status) external"];
+    
+    const KERNEL_ABI_HUMAN = [
+        "function setSolver(address solver, bool status) external",
+        "function whitelistedSolvers(address solver) view returns (bool)" // Check merchant status
+    ];
 
     const ERC20_ABI = [
         "function balanceOf(address) view returns (uint256)", 
@@ -498,14 +596,19 @@
     ];
 
     let provider, signer; 
-    let checkingContract, yieldVaultContract, kernelContract, usdcContract;
-    let userAddress, usdcAddress;
-    let usdcDecimals = 6;
+    let checkingContract, yieldVaultContract, kernelContract;
+    let userAddress;
     
+    // State
+    let currentView = 'wallet'; // 'wallet' or 'vault'
+    let activeAsset = trackedAssets[0]; // Default USDC
+
     // --- NAVIGATION ---
     function enterApp() {
         document.getElementById('landing-view').style.display = 'none';
         document.getElementById('dashboard-view').style.display = 'block';
+        renderAssetList();
+        renderAssetSelectors();
     }
     function exitApp() {
         document.getElementById('dashboard-view').style.display = 'none';
@@ -525,17 +628,11 @@
                 yieldVaultContract = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, signer);
                 kernelContract = new ethers.Contract(KERNEL_ADDRESS, KERNEL_ABI_HUMAN, signer);
 
-                // DYNAMIC: Fetch the correct USDC address from the Vault itself
+                // Try to fetch real USDC address from Vault to ensure alignment
                 try {
-                    usdcAddress = await yieldVaultContract.usdc();
-                    console.log("USDC Address found:", usdcAddress);
-                } catch(e) {
-                    console.warn("Could not fetch USDC from Vault, defaulting...");
-                    usdcAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; // Fallback
-                }
-                
-                // Init USDC Contract
-                usdcContract = new ethers.Contract(usdcAddress, ERC20_ABI, signer);
+                    const realUsdc = await yieldVaultContract.usdc();
+                    trackedAssets[0].address = realUsdc; // Update USDC logic
+                } catch(e) {}
 
                 // UI Updates
                 document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
@@ -548,75 +645,163 @@
         } else { alert("Install Metamask"); }
     }
 
-    // --- DATA REFRESH (LIVE DATA) ---
+    // --- DATA REFRESH ---
     async function refreshData() {
-        if(!checkingContract) return;
+        if(!signer) return;
         
+        // 1. Update Asset Balances (Loop through tracked assets)
+        for(let asset of trackedAssets) {
+            try {
+                let walletBal = "0.00";
+                let vaultBal = "0.00";
+
+                // A. Wallet Balance (My Wallet)
+                if(asset.isEth) {
+                    const raw = await provider.getBalance(userAddress);
+                    walletBal = ethers.formatEther(raw);
+                } else {
+                    const tokenCtx = new ethers.Contract(asset.address, ERC20_ABI, signer);
+                    const raw = await tokenCtx.balanceOf(userAddress);
+                    walletBal = ethers.formatUnits(raw, asset.decimals);
+                }
+                asset.walletBalance = Number(walletBal).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
+
+                // B. Vault Balance (Checking Contract)
+                if(asset.isEth) {
+                    const raw = await provider.getBalance(CHECKING_ADDRESS);
+                    vaultBal = ethers.formatEther(raw);
+                } else {
+                    const tokenCtx = new ethers.Contract(asset.address, ERC20_ABI, signer);
+                    const raw = await tokenCtx.balanceOf(CHECKING_ADDRESS);
+                    vaultBal = ethers.formatUnits(raw, asset.decimals);
+                }
+                asset.vaultBalance = Number(vaultBal).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
+
+            } catch(e) { console.log("Error fetching " + asset.symbol, e); }
+        }
+
+        // 2. Get Yield Vault Balance
         try {
-            // 1. Get Checking Vault Balances (Contract Funds)
-            const vaultUsdcRaw = await usdcContract.balanceOf(CHECKING_ADDRESS);
-            const vaultUsdc = ethers.formatUnits(vaultUsdcRaw, 6);
-            const vaultUsdcStr = "$" + Number(vaultUsdc).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-            // 2. Get User Wallet Balances (For Holdings List)
-            const userUsdcRaw = await usdcContract.balanceOf(userAddress);
-            const userUsdc = ethers.formatUnits(userUsdcRaw, 6);
-            const userUsdcStr = "$" + Number(userUsdc).toLocaleString(undefined, {minimumFractionDigits: 2});
-
-            const userEthRaw = await provider.getBalance(userAddress);
-            const userEth = ethers.formatEther(userEthRaw);
-            const userEthStr = Number(userEth).toLocaleString(undefined, {minimumFractionDigits: 4}) + " ETH";
-
-            // 3. Get Yield Vault Balance (User's Investment)
-            // FIX: Using 'shares' mapping instead of 'balanceOf'
             const yieldSharesRaw = await yieldVaultContract.shares(userAddress);
             const yieldShares = ethers.formatUnits(yieldSharesRaw, 6); 
-            const yieldStr = Number(yieldShares).toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('userShares').innerText = Number(yieldShares).toLocaleString(undefined, {minimumFractionDigits: 2});
+        } catch(e) {}
 
-            // 4. Update UI
-            document.getElementById('checkingBalanceMain').innerText = vaultUsdcStr; 
-            document.getElementById('checkingDisplay').innerText = vaultUsdcStr;
-            
-            // LIST shows WALLET funds now (to match your screenshot)
-            document.getElementById('usdcListBal').innerText = userUsdcStr;          
-            document.getElementById('ethListBal').innerText = userEthStr;
-            
-            // YIELD STAT
-            document.getElementById('userShares').innerText = yieldStr;              
-            
-            // Swap Balance
-            document.getElementById('swapSellBal').innerText = vaultUsdcStr; 
-            
-            updateAssetDisplay();
-
-        } catch (e) {
-            console.error("Error fetching balances:", e);
-        }
+        renderAssetList();
+        updateCardDisplay();
     }
 
-    // --- ASSET SELECTOR ---
-    function selectAsset(symbol) {
+    // --- UI RENDER LOGIC ---
+
+    function toggleBalanceView(view) {
+        currentView = view;
+        // Update UI State
+        document.getElementById('viewWallet').checked = (view === 'wallet');
+        document.getElementById('viewVault').checked = (view === 'vault');
+        
+        renderAssetList();
+    }
+
+    function renderAssetList() {
+        const container = document.getElementById('assetListContainer');
+        container.innerHTML = "";
+
+        trackedAssets.forEach(asset => {
+            const displayBal = (currentView === 'wallet') ? asset.walletBalance : asset.vaultBalance;
+            const isActive = (asset.symbol === activeAsset.symbol) ? 'active' : '';
+            
+            // Icon Logic
+            let iconClass = "fas fa-coins bg-secondary";
+            if(asset.symbol === 'USDC') iconClass = "fas fa-dollar-sign bg-primary";
+            if(asset.symbol === 'ETH') iconClass = "fab fa-ethereum bg-dark";
+
+            const html = `
+                <div class="list-group-item d-flex justify-content-between align-items-center asset-row ${isActive}" onclick="setActiveAsset('${asset.symbol}')">
+                    <div class="d-flex align-items-center">
+                        <div class="${iconClass} text-white rounded-circle p-2 me-3" style="width:36px;text-align:center;"></div> 
+                        <div><strong>${asset.symbol}</strong></div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold">${displayBal || '0.00'}</div>
+                        <small class="text-muted">${currentView === 'wallet' ? 'Wallet' : 'Vault'}</small>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += html;
+        });
+    }
+
+    function setActiveAsset(symbol) {
+        activeAsset = trackedAssets.find(t => t.symbol === symbol);
+        renderAssetList(); // to update active highlight
+        updateCardDisplay();
+        
+        // Sync Selectors
         document.getElementById('assetSelector').value = symbol;
-        updateAssetDisplay();
+        document.getElementById('depositAssetSelector').value = symbol;
     }
 
-    function updateAssetDisplay() {
-        const symbol = document.getElementById('assetSelector').value;
-        document.getElementById('amountTicker').innerText = symbol;
+    function updateCardDisplay() {
+        const displayBal = (currentView === 'wallet') ? activeAsset.walletBalance : activeAsset.vaultBalance;
+        document.getElementById('cardLabel').innerText = `Balance (${activeAsset.symbol})`;
+        document.getElementById('checkingBalanceMain').innerText = displayBal || "0.00";
         
-        const cardLabel = document.getElementById('cardLabel');
-        const cardMain = document.getElementById('checkingBalanceMain');
-        
-        if(symbol === 'USDC') {
-            cardLabel.innerText = "Balance (USDC)";
-            cardMain.innerText = document.getElementById('checkingBalanceMain').innerText; 
-        } else {
-            cardLabel.innerText = "Balance (ETH)";
-            // For demo, showing 0 for ETH in Vault since we only deposit USDC usually
-            // In prod, you'd fetch ETH balance of Vault
-            cardMain.innerText = "0.0000 ETH";
-        }
+        // Top Stat
+        document.getElementById('checkingDisplay').innerText = displayBal || "0.00";
     }
+
+    function renderAssetSelectors() {
+        const options = trackedAssets.map(t => `<option value="${t.symbol}">${t.symbol}</option>`).join('');
+        document.getElementById('assetSelector').innerHTML = options;
+        document.getElementById('depositAssetSelector').innerHTML = options;
+    }
+
+    // --- ADD NEW ASSET ---
+    function addNewAsset() {
+        const addr = document.getElementById('newTokenAddr').value;
+        const sym = document.getElementById('newTokenSymbol').value;
+        const dec = document.getElementById('newTokenDecimals').value;
+
+        if(!addr || !sym) return alert("Invalid Input");
+
+        const newAsset = { symbol: sym.toUpperCase(), address: addr, decimals: dec, isEth: false, walletBalance: "0.00", vaultBalance: "0.00" };
+        trackedAssets.push(newAsset);
+        
+        // Persist
+        localStorage.setItem('kernelAssets', JSON.stringify(trackedAssets));
+        
+        // UI Refresh
+        bootstrap.Modal.getInstance(document.getElementById('addTokenModal')).hide();
+        renderAssetSelectors();
+        refreshData();
+        alert("Asset Added");
+    }
+
+    // --- REGISTRY LOOKUP ---
+    async function checkRegistryStatus() {
+        const addr = document.getElementById('checkAddr').value;
+        if(!addr) return;
+
+        document.getElementById('displayCheckAddr').innerText = addr;
+        document.getElementById('registryStatusResult').style.display = 'block';
+        
+        // Check Investor
+        try {
+            const isInv = await yieldVaultContract.isWhitelisted(addr);
+            const el = document.getElementById('statusInvestor');
+            el.innerText = isInv ? "Whitelisted" : "Not Listed";
+            el.className = isInv ? "badge bg-success" : "badge bg-secondary";
+        } catch(e) { console.error(e); }
+
+        // Check Merchant
+        try {
+            const isMerch = await kernelContract.whitelistedSolvers(addr);
+            const el = document.getElementById('statusMerchant');
+            el.innerText = isMerch ? "Approved" : "Not Listed";
+            el.className = isMerch ? "badge bg-success" : "badge bg-secondary";
+        } catch(e) { console.error(e); }
+    }
+
 
     // --- BANKING: SEND PAYMENT ---
     async function payVendor() {
@@ -624,17 +809,17 @@
             const payee = document.getElementById('payeeAddress').value;
             const amtVal = document.getElementById('payAmount').value;
             const memo = document.getElementById('payMemo').value;
-            const asset = document.getElementById('assetSelector').value;
+            const symbol = document.getElementById('assetSelector').value;
+            const asset = trackedAssets.find(t => t.symbol === symbol);
             
             if(!payee || !amtVal) return alert("Fill all fields");
 
-            const tokenAddr = (asset === 'USDC') ? usdcAddress : ETH_ADDRESS;
-            const amount = ethers.parseUnits(amtVal, usdcDecimals); 
-
-            const tx = await checkingContract.sendPayment(tokenAddr, payee, amount, memo);
+            const amount = ethers.parseUnits(amtVal, asset.decimals); 
+            const tx = await checkingContract.sendPayment(asset.address, payee, amount, memo);
             alert("Transaction Sent: " + tx.hash);
             await tx.wait();
             alert("Payment Confirmed");
+            refreshData();
         } catch(e) {
             alert("Payment Failed: " + e.message);
         }
@@ -643,9 +828,14 @@
     // --- BANKING: DEPOSIT ---
     async function approveDeposit() {
         try {
+            const symbol = document.getElementById('depositAssetSelector').value;
+            const asset = trackedAssets.find(t => t.symbol === symbol);
+            if(asset.isEth) return alert("ETH does not require approval.");
+
             const amtVal = document.getElementById('fundAmount').value;
-            const amount = ethers.parseUnits(amtVal, usdcDecimals);
-            const tx = await usdcContract.approve(CHECKING_ADDRESS, amount);
+            const amount = ethers.parseUnits(amtVal, asset.decimals);
+            const tokenCtx = new ethers.Contract(asset.address, ERC20_ABI, signer);
+            const tx = await tokenCtx.approve(CHECKING_ADDRESS, amount);
             await tx.wait();
             alert("Approved! Now click Deposit.");
         } catch(e) { alert("Approval Failed: " + e.message); }
@@ -653,22 +843,35 @@
 
     async function executeDeposit() {
         try {
+            const symbol = document.getElementById('depositAssetSelector').value;
+            const asset = trackedAssets.find(t => t.symbol === symbol);
             const amtVal = document.getElementById('fundAmount').value;
             const memo = document.getElementById('fundMemo').value;
-            const amount = ethers.parseUnits(amtVal, usdcDecimals);
-            
+            const amount = ethers.parseUnits(amtVal, asset.decimals);
             const deadline = Math.floor(Date.now() / 1000) + 3600;
-            const tx = await checkingContract.depositERC20(usdcAddress, amount, amount, memo, deadline);
+
+            let tx;
+            if(asset.isEth) {
+                 // Native ETH deposit logic if contract supports check
+                 // For this CheckingVault, we might need to fallback to standard send if depositERC20 checks token!=0
+                 // However, the contract says if token==0 it handles ETH.
+                 tx = await checkingContract.depositERC20(asset.address, amount, amount, memo, deadline, { value: amount });
+            } else {
+                 tx = await checkingContract.depositERC20(asset.address, amount, amount, memo, deadline);
+            }
+
             await tx.wait();
             alert("Funds Deposited to Vault");
             bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
-            refreshData(); // Update balance
+            refreshData(); 
         } catch(e) { alert("Deposit Failed: " + e.message); }
     }
 
     // --- BANKING: PAYROLL ---
     async function runPayroll() {
         try {
+            // Simplified for Demo: Always uses Active Asset
+            const asset = activeAsset;
             const raw = document.getElementById('batchData').value;
             const batchName = document.getElementById('batchName').value;
             const lines = raw.split('\n');
@@ -679,11 +882,11 @@
                 const [addr, amt] = line.split(',');
                 if(addr && amt) {
                     recipients.push(addr.trim());
-                    amounts.push(ethers.parseUnits(amt.trim(), usdcDecimals));
+                    amounts.push(ethers.parseUnits(amt.trim(), asset.decimals));
                 }
             });
 
-            const tx = await checkingContract.runPayroll(usdcAddress, recipients, amounts, batchName);
+            const tx = await checkingContract.runPayroll(asset.address, recipients, amounts, batchName);
             alert("Payroll Batch Sent: " + tx.hash);
             await tx.wait();
             alert("Payroll Complete");
@@ -691,13 +894,13 @@
         } catch(e) { alert("Payroll Failed: " + e.message); }
     }
 
-    // --- ADMIN: CHECKING CONTROLS ---
+    // --- ADMIN FUNCTIONS ---
     async function setDailyLimit() {
         try {
             const token = document.getElementById('limitToken').value;
             const limit = document.getElementById('limitAmount').value;
-            const limitWei = ethers.parseUnits(limit, usdcDecimals);
-            
+            // Assume 18 decimals for generic limit setting or ask user
+            const limitWei = ethers.parseUnits(limit, 18); 
             const tx = await checkingContract.setDailyLimit(token, limitWei);
             await tx.wait();
             alert("Daily Limit Updated");
@@ -708,18 +911,15 @@
         try {
             const token = document.getElementById('wlToken').value;
             const payee = document.getElementById('wlPayee').value;
-            
             const tx = await checkingContract.setWhitelistedPayee(token, payee, true);
             await tx.wait();
             alert("Payee Whitelisted");
         } catch(e) { alert("Error: " + e.message); }
     }
 
-    // --- ADMIN: PROTOCOL ACCESS ---
     async function whitelistInvestor() {
         try {
             const addr = document.getElementById('investorAddress').value;
-            // Calls setInvestorStatus on Yield Vault
             const tx = await yieldVaultContract.setInvestorStatus(addr, true);
             await tx.wait();
             alert("Investor Wallet Whitelisted");
@@ -729,7 +929,6 @@
     async function whitelistMerchant() {
         try {
             const addr = document.getElementById('merchantAddress').value;
-            // Calls setSolver on Kernel Contract
             const tx = await kernelContract.setSolver(addr, true);
             await tx.wait();
             alert("Company Whitelisted");
@@ -743,8 +942,8 @@
         const buyAmt = (sellAmt / 2450).toFixed(4);
         document.getElementById('swapBuyAmt').value = buyAmt;
         setTimeout(() => {
-            if(confirm(`Confirm Treasury Swap?\n\nSell: ${sellAmt} USDC\nBuy: ${buyAmt} ETH\n\nRoute: CowSwap (Gasless)`)) {
-                alert("Swap Order Signed. Waiting for Solver execution...");
+            if(confirm(`Sign CowSwap Order?\n\nSell: ${sellAmt} USDC\nBuy: ${buyAmt} ETH\n\nThis uses off-chain signing (EIP-712). No gas required.`)) {
+                alert("Order Signed. Solvers are executing...");
             }
         }, 500);
     }
