@@ -440,7 +440,7 @@
 <script>
     // --- NEW CONFIGURATION ---
     const CHECKING_ADDRESS = "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4"; // Your Contract
-    // Addresses for Demo (Mainnet)
+    // Addresses for Demo (Mainnet) - UPDATE THESE FOR YOUR NETWORK
     const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; 
     const ETH_ADDRESS = "0x0000000000000000000000000000000000000000"; // Represents Native ETH
 
@@ -495,15 +495,37 @@
         } else { alert("Install Metamask"); }
     }
 
-    // --- DATA REFRESH ---
+    // --- DATA REFRESH (LIVE DATA) ---
     async function refreshData() {
         if(!checkingContract) return;
-        // In a real app, we would query the balance of the CHECKING_ADDRESS contract
-        // For demo visual purposes, we mock the vault balance display
-        document.getElementById('checkingBalanceMain').innerText = "$24,500.00";
-        document.getElementById('usdcListBal').innerText = "$24,500.00";
-        document.getElementById('ethListBal').innerText = "12.5 ETH";
-        document.getElementById('swapSellBal').innerText = "$24,500.00";
+        
+        try {
+            // 1. Get Real USDC Balance of the Vault
+            // Note: We need a contract instance for USDC to check the balance of the VAULT address
+            // usdcContract is already defined globally and init in connectWallet
+            const usdcBalRaw = await usdcContract.balanceOf(CHECKING_ADDRESS);
+            const usdcBal = ethers.formatUnits(usdcBalRaw, 6); // USDC has 6 decimals
+            const usdcString = "$" + Number(usdcBal).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            // 2. Get Real ETH Balance of the Vault
+            const ethBalRaw = await provider.getBalance(CHECKING_ADDRESS);
+            const ethBal = ethers.formatEther(ethBalRaw);
+            const ethString = Number(ethBal).toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4}) + " ETH";
+
+            // 3. Update UI
+            document.getElementById('checkingBalanceMain').innerText = usdcString; // Default view
+            document.getElementById('checkingDisplay').innerText = usdcString;
+            document.getElementById('usdcListBal').innerText = usdcString;
+            document.getElementById('ethListBal').innerText = ethString;
+            document.getElementById('swapSellBal').innerText = usdcString; // Default swap sell balance
+            
+            // Also update the card display based on current selection
+            updateAssetDisplay();
+
+        } catch (e) {
+            console.error("Error fetching balances:", e);
+            // Fallback or alert if fetch fails
+        }
     }
 
     // --- ASSET SELECTOR ---
@@ -521,10 +543,12 @@
         
         if(symbol === 'USDC') {
             cardLabel.innerText = "Balance (USDC)";
-            cardMain.innerText = "$24,500.00";
+            // Grab the real value we just fetched into the list
+            cardMain.innerText = document.getElementById('usdcListBal').innerText; 
         } else {
             cardLabel.innerText = "Balance (ETH)";
-            cardMain.innerText = "12.50 ETH";
+            // Grab the real value we just fetched into the list
+            cardMain.innerText = document.getElementById('ethListBal').innerText;
         }
     }
 
