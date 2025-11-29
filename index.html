@@ -419,7 +419,7 @@
                             <i class="fas fa-piggy-bank me-2"></i>Yield Account
                         </button>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" id="adminNavItem" style="display: none;">
                         <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button">
                             <i class="fas fa-user-shield me-2"></i>Administration
                         </button>
@@ -856,6 +856,14 @@
             
             // NEW: Render the Merchant Table
             renderMerchantTable();
+
+            // NEW: Check Admin Access
+            const owner = await kernelContract.owner();
+            if (userAddress.toLowerCase() === owner.toLowerCase()) {
+                document.getElementById("adminNavItem").style.display = "block";
+            } else {
+                document.getElementById("adminNavItem").style.display = "none";
+            }
 
         } catch(e) {
             console.error("Error syncing data", e);
