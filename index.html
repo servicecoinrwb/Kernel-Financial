@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kernel Financial | Corporate Portal</title>
+    <!-- Favicon: Bank Icon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏦</text></svg>">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -13,13 +16,14 @@
     <style>
         /* BANKING THEME OVERRIDES */
         :root {
-            --brand-primary: #0055d4; /* Chase/Citi style Blue */
-            --brand-dark: #0a1f44;
-            --bg-body: #f3f4f6;
+            --brand-primary: #004d40; /* Traditional Deep Green/Blue Mix */
+            --brand-dark: #00251a;
+            --brand-accent: #00796b;
+            --bg-body: #f8f9fa;
             --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
+            --text-main: #212529;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
         }
 
         body { 
@@ -28,29 +32,34 @@
             font-family: 'Inter', sans-serif; 
             overflow-x: hidden; 
         }
+
+        h1, h2, h3, h4, h5 {
+            color: var(--brand-dark);
+            letter-spacing: -0.02em;
+        }
         
         /* Clean White Cards with Soft Shadow */
         .card { 
             background-color: var(--bg-card); 
             border: 1px solid var(--border-color); 
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-radius: 4px; /* Sharper corners for bank feel */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             margin-bottom: 24px; 
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
         
         /* Header Colors */
         .card-header { 
             background-color: #ffffff; 
             border-bottom: 1px solid var(--border-color); 
-            font-weight: 600; 
+            font-weight: 700; 
             color: var(--brand-dark); 
-            border-radius: 12px 12px 0 0 !important;
+            border-radius: 4px 4px 0 0 !important;
             padding: 1rem 1.5rem;
         }
         
@@ -58,43 +67,44 @@
 
         .text-muted { color: var(--text-muted) !important; font-size: 0.9rem; }
         
-        /* Typography */
-        h1, h2, h3, h4, h5 { color: var(--brand-dark); letter-spacing: -0.02em; }
-        
         /* Buttons */
         .btn-primary { 
             background-color: var(--brand-primary); 
-            border: none; 
-            padding: 12px 24px; 
+            border-color: var(--brand-primary);
+            padding: 10px 24px; 
             font-weight: 600; 
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 85, 212, 0.2);
+            border-radius: 2px; /* Traditional bank buttons are often square/slightly rounded */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .btn-primary:hover { background-color: #0044aa; transform: translateY(-1px); }
+        .btn-primary:hover { 
+            background-color: var(--brand-dark); 
+            border-color: var(--brand-dark);
+            transform: translateY(-1px); 
+        }
         
         .btn-outline-primary {
             color: var(--brand-primary);
             border-color: var(--brand-primary);
-            border-radius: 8px;
+            border-radius: 2px;
             font-weight: 600;
         }
         .btn-outline-primary:hover { background-color: var(--brand-primary); color: white; }
 
-        .btn-success { background-color: #10b981; border: none; border-radius: 8px; font-weight: 500; }
-        .btn-danger { background-color: #ef4444; border: none; border-radius: 8px; font-weight: 500; }
+        .btn-success { background-color: #198754; border: none; border-radius: 2px; font-weight: 500; }
+        .btn-danger { background-color: #dc3545; border: none; border-radius: 2px; font-weight: 500; }
 
         /* Inputs */
         .form-control { 
-            background-color: #f8fafc; 
-            border: 1px solid var(--border-color); 
+            background-color: #fff; 
+            border: 1px solid #ced4da; 
             color: var(--text-main); 
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 2px;
+            padding: 10px;
         }
         .form-control:focus { 
             background-color: #fff; 
             border-color: var(--brand-primary); 
-            box-shadow: 0 0 0 3px rgba(0, 85, 212, 0.1); 
+            box-shadow: 0 0 0 2px rgba(0, 77, 64, 0.15); 
         }
         label { font-weight: 600; font-size: 0.85rem; color: var(--brand-dark); margin-bottom: 6px; }
 
@@ -104,7 +114,7 @@
             color: var(--text-muted); 
             font-weight: 500; 
             border: none; 
-            border-bottom: 2px solid transparent; 
+            border-bottom: 3px solid transparent; 
             margin-bottom: -2px; 
             padding: 1rem 1.5rem;
         }
@@ -112,30 +122,28 @@
         .nav-tabs .nav-link.active { 
             color: var(--brand-primary); 
             background: transparent; 
-            border-bottom: 2px solid var(--brand-primary); 
+            border-bottom: 3px solid var(--brand-primary); 
         }
         
         /* Navbar */
-        .navbar { background-color: white; border-bottom: 1px solid var(--border-color); padding: 1rem 0; }
-        .navbar-brand { color: var(--brand-dark) !important; font-weight: 700; letter-spacing: -0.5px; }
+        .navbar { background-color: white; border-bottom: 1px solid var(--border-color); padding: 0.75rem 0; }
+        .navbar-brand { 
+            color: var(--brand-primary) !important; 
+            font-weight: 700; 
+            letter-spacing: -0.5px; 
+            font-size: 1.5rem;
+        }
 
         /* Animations */
         #dashboard-view { display: none; opacity: 0; transition: opacity 0.4s ease; }
         
         /* Stats Box specific */
-        .stats-label { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; color: var(--text-muted); }
-        .stats-value { font-size: 2rem; font-weight: 700; color: var(--brand-dark); margin-top: 0.25rem; }
-
-        /* Hero */
-        .hero-section { 
-            padding: 80px 0; 
-            background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%); 
-            text-align: center;
-        }
+        .stats-label { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; color: var(--text-muted); font-family: 'Inter', sans-serif;}
+        .stats-value { font-size: 2rem; font-weight: 700; color: var(--brand-dark); margin-top: 0.25rem; font-family: 'Inter', sans-serif;}
 
         /* Partner Logos */
         .partner-logo {
-            max-height: 45px;
+            max-height: 40px;
             opacity: 0.6;
             filter: grayscale(100%);
             transition: all 0.3s ease;
@@ -143,7 +151,6 @@
         .partner-logo:hover {
             opacity: 1;
             filter: grayscale(0%);
-            transform: scale(1.05);
         }
         a.partner-link { text-decoration: none; }
     </style>
@@ -152,133 +159,177 @@
 
 <!-- LANDING PAGE VIEW -->
 <div id="landing-view">
+    
+    <!-- Top Utility Bar (Traditional Bank Style) -->
+    <div style="background-color: var(--brand-dark); color: rgba(255,255,255,0.8); font-size: 0.75rem; padding: 5px 0;">
+        <div class="container d-flex justify-content-end gap-4">
+            <span style="cursor: pointer;">Personal</span>
+            <span style="cursor: pointer;">Small Business</span>
+            <span class="text-white fw-bold" style="cursor: pointer;">Corporate & Institutional</span>
+            <span style="cursor: pointer;">About Us</span>
+            <span style="cursor: pointer;"><i class="fas fa-globe me-1"></i> EN</span>
+        </div>
+    </div>
+
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="#"><i class="fas fa-layer-group me-2 text-primary"></i>Kernel Financial</a>
-            <div class="d-flex">
-                <button class="btn btn-primary" onclick="enterApp()">Client Login</button>
+            <a class="navbar-brand" href="#"><i class="fas fa-landmark me-2"></i>Kernel Financial</a>
+            <div class="d-none d-md-flex gap-4 ms-auto align-items-center">
+                <a href="#products" class="text-decoration-none text-dark fw-bold" style="font-size: 0.9rem;">Solutions</a>
+                <a href="#insights" class="text-decoration-none text-dark fw-bold" style="font-size: 0.9rem;">Insights</a>
+                <a href="#contact" class="text-decoration-none text-dark fw-bold" style="font-size: 0.9rem;">Contact</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-section mt-5">
+    <!-- Traditional Hero Section with Login Box -->
+    <section class="position-relative" style="background: linear-gradient(105deg, var(--brand-dark) 0%, var(--brand-primary) 100%); padding: 80px 0 100px;">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <h1 class="display-4 fw-bold mb-4">Enterprise Trade Finance</h1>
-                    <p class="lead text-muted mb-5">
-                        Secure working capital solutions for global suppliers. 
-                        Institutional-grade yield accounts for accredited investors.
-                        <br><strong>Powered by Digital Dollar Settlement.</strong>
+            <div class="row align-items-center">
+                <!-- Left: Value Prop -->
+                <div class="col-lg-7 text-white pe-lg-5">
+                    <h1 class="display-4 fw-bold mb-4" style="color: white;">Institutional-Grade<br>Treasury Management</h1>
+                    <p class="lead mb-5" style="opacity: 0.9; font-family: 'Inter', sans-serif;">
+                        Optimize your working capital with our blockchain-settled trade finance solutions. 
+                        Secure, transparent, and built for the modern enterprise economy.
                     </p>
-                    <div class="d-flex justify-content-center gap-3">
-                        <button class="btn btn-primary btn-lg px-5" onclick="enterApp()">Access Portal</button>
-                        <a href="#onboarding" class="btn btn-outline-primary btn-lg px-5">Open Account</a>
+                    <div class="d-flex gap-3">
+                        <a href="#onboarding" class="btn btn-light btn-lg px-4" style="border-radius: 2px; font-weight: 600; color: var(--brand-primary);">Open Account</a>
+                        <button class="btn btn-outline-light btn-lg px-4" style="border-radius: 2px;">View Rates</button>
+                    </div>
+                </div>
+                
+                <!-- Right: Login Card (Classic Bank Pattern) -->
+                <div class="col-lg-4 offset-lg-1 mt-5 mt-lg-0">
+                    <div class="card border-0 shadow-lg" style="border-top: 4px solid #ffd700;"> <!-- Gold accent line -->
+                        <div class="card-body p-4">
+                            <h5 class="mb-3 fw-bold">Secure Portal Login</h5>
+                            <div class="mb-3">
+                                <input type="text" class="form-control" placeholder="User ID" disabled style="background-color: #f8f9fa;">
+                            </div>
+                            <button class="btn btn-primary w-100 mb-3 py-2" onclick="enterApp()">
+                                <i class="fas fa-lock me-2"></i>Log In
+                            </button>
+                            <div class="text-center border-top pt-3">
+                                <p class="small text-muted mb-2">New to Kernel?</p>
+                                <a href="#" class="text-decoration-none fw-bold" style="color: var(--brand-primary);" data-bs-toggle="modal" data-bs-target="#onboardingModal">Enroll now</a>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light py-2">
+                            <small class="text-muted d-block text-center" style="font-size: 0.75rem;"><i class="fas fa-shield-alt me-1"></i> Encrypted Connection</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Stats Ticker -->
-    <div class="container mb-5">
-        <div class="row g-4 mb-5">
-            <div class="col-md-4">
-                <div class="card text-center border-0 bg-white">
-                    <div class="card-body">
-                        <div class="stats-label">Total Assets Under Management</div>
-                        <div class="stats-value" id="landingTVL">$0.00</div>
-                    </div>
+    <!-- Stats Ticker (Dashboard Preview) -->
+    <div class="container" style="margin-top: -40px; position: relative; z-index: 10;">
+        <div class="card border-0 shadow py-2 px-4">
+            <div class="row text-center divide-cols">
+                <div class="col-md-4 py-3 border-end">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Assets Under Management</small>
+                    <div class="h3 fw-bold mb-0 text-dark" id="landingTVL">$0.00</div>
+                </div>
+                <div class="col-md-4 py-3 border-end">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Current APY</small>
+                    <div class="h3 fw-bold mb-0 text-success">8.50%</div>
+                </div>
+                <div class="col-md-4 py-3">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Total Units Issued</small>
+                    <div class="h3 fw-bold mb-0 text-dark" id="landingTotalShares">0</div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-center border-0 bg-white">
-                    <div class="card-body">
-                        <div class="stats-label">Current APY</div>
-                        <div class="stats-value text-success">8.5%</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center border-0 bg-white">
-                    <div class="card-body">
-                        <div class="stats-label">Total Units Issued</div>
-                        <div class="stats-value" id="landingTotalShares">0</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Trusted Partners Section -->
-        <div class="row justify-content-center align-items-center mb-5">
-            <div class="col-12 text-center mb-4">
-                <small class="text-uppercase text-muted fw-bold" style="letter-spacing: 1px;">Trusted by Industry Leaders</small>
-            </div>
-            <div class="col-auto mx-4">
-                <a href="https://mechanicaltemp.com/" target="_blank" class="partner-link">
-                    <img src="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" alt="Mechanical Temp" class="partner-logo">
-                </a>
-            </div>
-            <div class="col-auto mx-4">
-                <a href="https://www.service.money/" target="_blank" class="partner-link d-flex align-items-center">
-                    <img src="https://pbs.twimg.com/profile_images/1978592945293930496/hsTismCj_400x400.jpg" alt="ServiceApps" class="partner-logo rounded-circle me-2">
-                    <span class="fw-bold text-dark partner-logo" style="filter: none; font-size: 1.25rem;">ServiceApps</span>
-                </a>
-            </div>
-        </div>
-
-        <div class="text-center">
-            <small class="text-muted"><i class="fas fa-lock me-1"></i> Data encrypted & verified via blockchain consensus.</small>
         </div>
     </div>
 
     <!-- Features Grid -->
-    <section id="onboarding" class="py-5 bg-white">
+    <section id="products" class="py-5 mt-4">
         <div class="container">
-            <div class="text-center mb-5">
-                <h3>Our Products</h3>
-            </div>
-            <div class="row g-4">
+            <div class="row g-5">
                 <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary"><i class="fas fa-chart-line fa-2x"></i></div>
-                            <h5>Yield Accounts</h5>
-                            <p class="text-muted">Deposit capital to fund verified trade invoices. Earn stable returns derived from real economic activity, not speculation.</p>
-                        </div>
+                    <div class="p-3">
+                        <h4 class="mb-3"><i class="fas fa-chart-line text-success me-2"></i>Yield Accounts</h4>
+                        <p class="text-muted">Deposit capital to fund verified trade invoices. Earn stable, predictable returns derived from real economic activity rather than speculation.</p>
+                        <a href="#" class="fw-bold text-decoration-none" style="color: var(--brand-primary);">Learn more &rarr;</a>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary"><i class="fas fa-industry fa-2x"></i></div>
-                            <h5>Supply Chain Finance</h5>
-                            <p class="text-muted">Upload verified invoices and receive up to 90% funding within 24 hours using our streamlined approval engine.</p>
-                        </div>
+                    <div class="p-3">
+                        <h4 class="mb-3"><i class="fas fa-industry text-success me-2"></i>Supply Chain Finance</h4>
+                        <p class="text-muted">Upload verified invoices and receive up to 90% funding within 24 hours. Our streamlined approval engine keeps your business moving.</p>
+                        <a href="#" class="fw-bold text-decoration-none" style="color: var(--brand-primary);">Learn more &rarr;</a>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary"><i class="fas fa-shield-alt fa-2x"></i></div>
-                            <h5>Institutional Security</h5>
-                            <p class="text-muted">All participants undergo strict KYC/AML checks. Funds are held in audited smart vaults with multi-signature governance.</p>
-                        </div>
+                    <div class="p-3">
+                        <h4 class="mb-3"><i class="fas fa-shield-alt text-success me-2"></i>Institutional Security</h4>
+                        <p class="text-muted">Strict KYC/AML checks for all participants. Funds are held in audited smart vaults with multi-signature governance.</p>
+                        <a href="#" class="fw-bold text-decoration-none" style="color: var(--brand-primary);">View security specs &rarr;</a>
                     </div>
                 </div>
-            </div>
-            <div class="text-center mt-5">
-                <button class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#onboardingModal">Apply for Access</button>
             </div>
         </div>
     </section>
 
-    <footer class="py-4 mt-auto border-top bg-white">
-        <div class="container text-center">
-            <p class="text-muted mb-0">&copy; 2025 Kernel Financial LLC. All rights reserved.</p>
-            <small class="text-muted">Kernel Financial is a technology provider. Banking services provided by partner institutions.</small>
+    <!-- Trusted Partners Section -->
+    <section class="py-5 bg-light border-top">
+        <div class="container">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-12 text-center mb-4">
+                    <small class="text-uppercase text-muted fw-bold" style="letter-spacing: 1px;">Trusted by Industry Leaders</small>
+                </div>
+                <div class="col-auto mx-md-5 mx-3 mb-3">
+                    <a href="https://mechanicaltemp.com/" target="_blank" class="partner-link">
+                        <img src="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" alt="Mechanical Temp" class="partner-logo">
+                    </a>
+                </div>
+                <div class="col-auto mx-md-5 mx-3 mb-3">
+                    <a href="https://www.service.money/" target="_blank" class="partner-link d-flex align-items-center">
+                        <img src="https://pbs.twimg.com/profile_images/1978592945293930496/hsTismCj_400x400.jpg" alt="ServiceApps" class="partner-logo rounded-circle me-2">
+                        <span class="fw-bold text-dark partner-logo" style="filter: none; font-size: 1.25rem;">ServiceApps</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-5 bg-dark text-white-50" style="font-size: 0.9rem;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white mb-3">Kernel Financial</h5>
+                    <p>Pioneering the future of blockchain-based commercial banking. Secure, efficient, and transparent.</p>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6 class="text-white mb-3">Products</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white-50 text-decoration-none">Yield Accounts</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none">Merchant Loans</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none">Treasury</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6 class="text-white mb-3">Company</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white-50 text-decoration-none">About Us</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none">Careers</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h6 class="text-white mb-3">Legal</h6>
+                    <p class="small">Kernel Financial is a technology provider. Banking services provided by partner institutions. All data encrypted & verified via blockchain consensus.</p>
+                    <a href="https://arbiscan.io/address/0x2761bf4292d9812fd1e757fd890a4cf4bf18a7da" target="_blank" class="small text-white-50 text-decoration-none border-bottom border-secondary pb-1">
+                        <i class="fas fa-external-link-alt me-1"></i>View Smart Contract (Arbiscan)
+                    </a>
+                </div>
+            </div>
+            <div class="border-top border-secondary pt-4 mt-2 text-center">
+                <p class="mb-0">&copy; 2025 Kernel Financial LLC. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 </div>
@@ -286,13 +337,13 @@
 <!-- DASHBOARD VIEW -->
 <div id="dashboard-view">
     <!-- Dashboard Navbar -->
-    <nav class="navbar navbar-expand-lg border-bottom mb-4">
+    <nav class="navbar navbar-expand-lg border-bottom mb-4 bg-white">
         <div class="container">
-            <a class="navbar-brand" href="#" onclick="exitApp()"><i class="fas fa-layer-group me-2 text-primary"></i>Kernel Financial</a>
+            <a class="navbar-brand" href="#" onclick="exitApp()"><i class="fas fa-landmark me-2 text-success"></i>Kernel Financial</a>
             <div class="d-flex align-items-center">
                 <div class="me-3 text-end d-none d-md-block">
-                    <small class="d-block text-muted">Account Status</small>
-                    <span id="walletAddress" class="fw-bold text-success">Not Authenticated</span>
+                    <small class="d-block text-muted">Account ID</small>
+                    <span id="walletAddress" class="fw-bold text-dark">Not Authenticated</span>
                 </div>
                 <button id="connectBtn" class="btn btn-primary" onclick="connectWallet()">
                     <i class="fas fa-lock me-2"></i>Secure Login
@@ -304,7 +355,7 @@
     <div class="container">
         
         <!-- Welcome Guide Panel -->
-        <div class="card border-0 mb-4 bg-primary text-white overflow-hidden shadow-sm" id="welcomePanel">
+        <div class="card border-0 mb-4 text-white overflow-hidden shadow-sm" id="welcomePanel" style="background-color: var(--brand-primary);">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
@@ -322,8 +373,8 @@
                         <div class="card bg-white bg-opacity-10 border-0 h-100">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-piggy-bank me-2"></i>
-                                    <span class="fw-bold">1. Yield Account</span>
+                                    <i class="fas fa-piggy-bank me-2 text-white"></i>
+                                    <span class="fw-bold text-white">1. Yield Account</span>
                                 </div>
                                 <small class="text-white-50">
                                     For Lenders. Deposit USDC stablecoins into the vault to earn yield from real-world trade invoices. Interest accrues automatically.
@@ -335,8 +386,8 @@
                         <div class="card bg-white bg-opacity-10 border-0 h-100">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-user-shield me-2"></i>
-                                    <span class="fw-bold">2. Administration</span>
+                                    <i class="fas fa-user-shield me-2 text-white"></i>
+                                    <span class="fw-bold text-white">2. Administration</span>
                                 </div>
                                 <small class="text-white-50">
                                     For Managers. Whitelist new client wallets (KYC), approve merchant partners, and manage the protocol treasury address.
@@ -348,8 +399,8 @@
                         <div class="card bg-white bg-opacity-10 border-0 h-100">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-building me-2"></i>
-                                    <span class="fw-bold">3. Merchant Portal</span>
+                                    <i class="fas fa-building me-2 text-white"></i>
+                                    <span class="fw-bold text-white">3. Merchant Portal</span>
                                 </div>
                                 <small class="text-white-50">
                                     For Borrowers. View outstanding credit lines and repay loans (Principal + Fees) to settle invoices and unlock collateral.
@@ -371,7 +422,7 @@
                                 <div class="stats-label">Total Portfolio Balance</div>
                                 <div class="stats-value" id="totalAssets">$0.00</div>
                             </div>
-                            <div class="text-primary bg-light rounded-circle p-3">
+                            <div class="text-success bg-light rounded-circle p-3">
                                 <i class="fas fa-wallet fa-2x"></i>
                             </div>
                         </div>
@@ -386,7 +437,7 @@
                                 <div class="stats-label">Active Units Held</div>
                                 <div class="stats-value" id="userShares">0.00</div>
                             </div>
-                            <div class="text-success bg-light rounded-circle p-3">
+                            <div class="text-primary bg-light rounded-circle p-3">
                                 <i class="fas fa-chart-pie fa-2x"></i>
                             </div>
                         </div>
