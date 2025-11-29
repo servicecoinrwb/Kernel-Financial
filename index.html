@@ -198,7 +198,7 @@
                                     </div>
                                 </div>
 
-                                <h6 class="text-muted text-uppercase small fw-bold mb-3">Vault Holdings</h6>
+                                <h6 class="text-muted text-uppercase small fw-bold mb-3">Wallet Holdings (Depositable)</h6>
                                 <div class="list-group list-group-flush border rounded mb-4">
                                     <div class="list-group-item d-flex justify-content-between align-items-center asset-row active" onclick="selectAsset('USDC')">
                                         <div class="d-flex align-items-center"><i class="fas fa-dollar-sign bg-primary text-white rounded-circle p-2 me-3" style="width:36px;text-align:center;"></i> <div><strong>USDC</strong><br><small class="text-muted">USD Coin</small></div></div>
@@ -474,10 +474,6 @@
     const VAULT_ADDRESS = "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA";    // Yield Vault
     const KERNEL_ADDRESS = "0xC5ABA20edBF35544E5Adb9983b52831ec5d40FDD";    // Kernel/Merchant Contract
     
-    // Addresses for Demo (Mainnet) - UPDATE THESE FOR YOUR NETWORK
-    const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; 
-    const ETH_ADDRESS = "0x0000000000000000000000000000000000000000"; // Represents Native ETH
-
     // --- ABI DEFINITIONS ---
     const CHECKING_ABI = [
         "function depositERC20(address token, uint256 amount, uint256 minAmount, string memo, uint256 deadline) external",
@@ -487,8 +483,12 @@
         "function setWhitelistedPayee(address token, address payee, bool status) external"
     ];
     
-    // Partial ABIs for Protocol Admin features
-    const YIELD_ABI = ["function setInvestorStatus(address investor, bool status) external"];
+    // UPDATED: Full interfaces based on your JSON to ensure correct calls
+    const YIELD_ABI = [
+        "function setInvestorStatus(address investor, bool status) external",
+        "function shares(address account) view returns (uint256)", // Correct mapping name
+        "function usdc() view returns (address)" // Fetch USDC address dynamically
+    ];
     const KERNEL_ABI_HUMAN = ["function setSolver(address solver, bool status) external"];
 
     const ERC20_ABI = [
@@ -499,7 +499,7 @@
 
     let provider, signer; 
     let checkingContract, yieldVaultContract, kernelContract, usdcContract;
-    let userAddress;
+    let userAddress, usdcAddress;
     let usdcDecimals = 6;
     
     // --- NAVIGATION ---
@@ -520,11 +520,22 @@
                 signer = await provider.getSigner();
                 userAddress = await signer.getAddress();
                 
-                // Init Contracts
+                // Init Core Contracts
                 checkingContract = new ethers.Contract(CHECKING_ADDRESS, CHECKING_ABI, signer);
                 yieldVaultContract = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, signer);
                 kernelContract = new ethers.Contract(KERNEL_ADDRESS, KERNEL_ABI_HUMAN, signer);
-                usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
+
+                // DYNAMIC: Fetch the correct USDC address from the Vault itself
+                try {
+                    usdcAddress = await yieldVaultContract.usdc();
+                    console.log("USDC Address found:", usdcAddress);
+                } catch(e) {
+                    console.warn("Could not fetch USDC from Vault, defaulting...");
+                    usdcAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; // Fallback
+                }
+                
+                // Init USDC Contract
+                usdcContract = new ethers.Contract(usdcAddress, ERC20_ABI, signer);
 
                 // UI Updates
                 document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
@@ -533,7 +544,7 @@
                 document.getElementById('connectBtn').className = "btn btn-success";
 
                 refreshData();
-            } catch(e) { console.error(e); alert("Connection Failed"); }
+            } catch(e) { console.error(e); alert("Connection Failed: " + e.message); }
         } else { alert("Install Metamask"); }
     }
 
@@ -542,22 +553,39 @@
         if(!checkingContract) return;
         
         try {
-            // 1. Get Real USDC Balance of the Vault
-            const usdcBalRaw = await usdcContract.balanceOf(CHECKING_ADDRESS);
-            const usdcBal = ethers.formatUnits(usdcBalRaw, 6); // USDC has 6 decimals
-            const usdcString = "$" + Number(usdcBal).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            // 1. Get Checking Vault Balances (Contract Funds)
+            const vaultUsdcRaw = await usdcContract.balanceOf(CHECKING_ADDRESS);
+            const vaultUsdc = ethers.formatUnits(vaultUsdcRaw, 6);
+            const vaultUsdcStr = "$" + Number(vaultUsdc).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-            // 2. Get Real ETH Balance of the Vault
-            const ethBalRaw = await provider.getBalance(CHECKING_ADDRESS);
-            const ethBal = ethers.formatEther(ethBalRaw);
-            const ethString = Number(ethBal).toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4}) + " ETH";
+            // 2. Get User Wallet Balances (For Holdings List)
+            const userUsdcRaw = await usdcContract.balanceOf(userAddress);
+            const userUsdc = ethers.formatUnits(userUsdcRaw, 6);
+            const userUsdcStr = "$" + Number(userUsdc).toLocaleString(undefined, {minimumFractionDigits: 2});
 
-            // 3. Update UI
-            document.getElementById('checkingBalanceMain').innerText = usdcString; 
-            document.getElementById('checkingDisplay').innerText = usdcString;
-            document.getElementById('usdcListBal').innerText = usdcString;
-            document.getElementById('ethListBal').innerText = ethString;
-            document.getElementById('swapSellBal').innerText = usdcString; 
+            const userEthRaw = await provider.getBalance(userAddress);
+            const userEth = ethers.formatEther(userEthRaw);
+            const userEthStr = Number(userEth).toLocaleString(undefined, {minimumFractionDigits: 4}) + " ETH";
+
+            // 3. Get Yield Vault Balance (User's Investment)
+            // FIX: Using 'shares' mapping instead of 'balanceOf'
+            const yieldSharesRaw = await yieldVaultContract.shares(userAddress);
+            const yieldShares = ethers.formatUnits(yieldSharesRaw, 6); 
+            const yieldStr = Number(yieldShares).toLocaleString(undefined, {minimumFractionDigits: 2});
+
+            // 4. Update UI
+            document.getElementById('checkingBalanceMain').innerText = vaultUsdcStr; 
+            document.getElementById('checkingDisplay').innerText = vaultUsdcStr;
+            
+            // LIST shows WALLET funds now (to match your screenshot)
+            document.getElementById('usdcListBal').innerText = userUsdcStr;          
+            document.getElementById('ethListBal').innerText = userEthStr;
+            
+            // YIELD STAT
+            document.getElementById('userShares').innerText = yieldStr;              
+            
+            // Swap Balance
+            document.getElementById('swapSellBal').innerText = vaultUsdcStr; 
             
             updateAssetDisplay();
 
@@ -581,10 +609,12 @@
         
         if(symbol === 'USDC') {
             cardLabel.innerText = "Balance (USDC)";
-            cardMain.innerText = document.getElementById('usdcListBal').innerText; 
+            cardMain.innerText = document.getElementById('checkingBalanceMain').innerText; 
         } else {
             cardLabel.innerText = "Balance (ETH)";
-            cardMain.innerText = document.getElementById('ethListBal').innerText;
+            // For demo, showing 0 for ETH in Vault since we only deposit USDC usually
+            // In prod, you'd fetch ETH balance of Vault
+            cardMain.innerText = "0.0000 ETH";
         }
     }
 
@@ -598,7 +628,7 @@
             
             if(!payee || !amtVal) return alert("Fill all fields");
 
-            const tokenAddr = (asset === 'USDC') ? USDC_ADDRESS : ETH_ADDRESS;
+            const tokenAddr = (asset === 'USDC') ? usdcAddress : ETH_ADDRESS;
             const amount = ethers.parseUnits(amtVal, usdcDecimals); 
 
             const tx = await checkingContract.sendPayment(tokenAddr, payee, amount, memo);
@@ -628,10 +658,11 @@
             const amount = ethers.parseUnits(amtVal, usdcDecimals);
             
             const deadline = Math.floor(Date.now() / 1000) + 3600;
-            const tx = await checkingContract.depositERC20(USDC_ADDRESS, amount, amount, memo, deadline);
+            const tx = await checkingContract.depositERC20(usdcAddress, amount, amount, memo, deadline);
             await tx.wait();
             alert("Funds Deposited to Vault");
             bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
+            refreshData(); // Update balance
         } catch(e) { alert("Deposit Failed: " + e.message); }
     }
 
@@ -652,7 +683,7 @@
                 }
             });
 
-            const tx = await checkingContract.runPayroll(USDC_ADDRESS, recipients, amounts, batchName);
+            const tx = await checkingContract.runPayroll(usdcAddress, recipients, amounts, batchName);
             alert("Payroll Batch Sent: " + tx.hash);
             await tx.wait();
             alert("Payroll Complete");
