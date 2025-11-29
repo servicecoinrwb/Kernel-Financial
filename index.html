@@ -85,14 +85,14 @@
         .btn-dark { background-color: var(--brand-dark); border: none; border-radius: 8px; font-weight: 600; }
 
         /* Inputs */
-        .form-control { 
+        .form-control, .form-select { 
             background-color: #f8fafc; 
             border: 1px solid var(--border-color); 
             color: var(--text-main); 
             border-radius: 8px;
             padding: 12px;
         }
-        .form-control:focus { 
+        .form-control:focus, .form-select:focus { 
             background-color: #fff; 
             border-color: var(--brand-primary); 
             box-shadow: 0 0 0 3px rgba(0, 85, 212, 0.1); 
@@ -148,23 +148,52 @@
         }
         a.partner-link { text-decoration: none; }
 
-        /* NEW: Checking Card Style */
+        /* NEW: Checking Card Style - ENHANCED FOR VISIBILITY */
         .checking-balance-card {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            color: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff !important; /* Force white text on container */
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
         }
         
-        /* Fix for font color inside the dark card */
-        .checking-balance-card h1, 
-        .checking-balance-card h2, 
-        .checking-balance-card h3, 
-        .checking-balance-card h4, 
-        .checking-balance-card h5 {
-            color: white !important;
+        /* Glassy shine effect */
+        .checking-balance-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Force all children to have z-index and white color */
+        .checking-balance-card * {
+            position: relative;
+            z-index: 1;
+            color: #ffffff !important;
+        }
+        
+        /* Specifically lighten secondary text */
+        .checking-balance-card .text-white-50 {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        /* Asset Row Hover */
+        .asset-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .asset-row:hover {
+            background-color: #f8fafc;
+        }
+        .asset-row.active {
+            background-color: #f0f4ff;
+            border-left: 3px solid var(--brand-primary);
         }
     </style>
 </head>
@@ -342,10 +371,10 @@
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-university me-2"></i>
-                                    <span class="fw-bold">1. Checking Account</span>
+                                    <span class="fw-bold">1. Checking Vault</span>
                                 </div>
                                 <small class="text-white-50">
-                                    Your liquid operating balance. Use this for day-to-day vendor payments and payroll. Instant settlement.
+                                    Multi-token liquid account. Use this for day-to-day vendor payments, payroll, and asset management.
                                 </small>
                             </div>
                         </div>
@@ -463,51 +492,141 @@
             <div class="card-body">
                 <div class="tab-content" id="myTabContent">
                     
-                    <!-- 1. CHECKING ACCOUNT TAB (NEW) -->
+                    <!-- 1. MULTI-ASSET CHECKING VAULT -->
                     <div class="tab-pane fade show active" id="checking">
                         <div class="row">
+                            <!-- Left: Card & Asset List -->
                             <div class="col-md-5 border-end">
-                                <!-- Digital Card Design -->
+                                <!-- Digital Card -->
                                 <div class="checking-balance-card">
                                     <div class="d-flex justify-content-between mb-4">
                                         <i class="fas fa-wifi fa-rotate-90"></i>
-                                        <span class="text-white-50">CORPORATE</span>
+                                        <span class="text-white-50">CORPORATE VAULT</span>
                                     </div>
-                                    <h6 class="text-white-50 text-uppercase mb-1">Available Balance (USDC)</h6>
+                                    <h6 class="text-white-50 text-uppercase mb-1" id="cardLabel">Total Balance (USDC)</h6>
                                     <h2 class="mb-4" id="checkingBalanceMain">$0.00</h2>
                                     <div class="d-flex justify-content-between align-items-end">
-                                        <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem;" id="cardAddressDisplay">0x0000...0000</small>
+                                        <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem;" id="cardAddressDisplay">Wallet Not Connected</small>
                                         <i class="fab fa-cc-visa fa-2x"></i>
                                     </div>
                                 </div>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-dark" onclick="copyAddress()">
-                                        <i class="fas fa-qrcode me-2"></i>Show Deposit Address
-                                    </button>
-                                </div>
-                                <div class="mt-3 text-center">
-                                    <small class="text-muted"><i class="fas fa-circle text-success me-1" style="font-size:8px;"></i> Operating Liquidity</small>
-                                </div>
-                            </div>
-                            <div class="col-md-7 ps-md-4">
-                                <h5 class="mb-4">Wire Transfer (ERC20)</h5>
-                                <div class="mb-3">
-                                    <label>Recipient Address</label>
-                                    <input type="text" id="payeeAddress" class="form-control" placeholder="0x...">
-                                </div>
-                                <div class="mb-3">
-                                    <label>Amount (USD)</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">$</span>
-                                        <input type="number" id="payAmount" class="form-control" placeholder="0.00">
+
+                                <!-- Asset Holdings List -->
+                                <h6 class="text-muted text-uppercase small fw-bold mb-3">Vault Holdings</h6>
+                                <div class="list-group list-group-flush border rounded mb-4">
+                                    <div class="list-group-item d-flex justify-content-between align-items-center asset-row active" onclick="selectAsset('USDC')">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle p-2 text-white me-3" style="width: 40px; height: 40px; text-align: center;"><i class="fas fa-dollar-sign"></i></div>
+                                            <div>
+                                                <div class="fw-bold">USDC</div>
+                                                <small class="text-muted">USD Coin</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold" id="usdcListBal">$0.00</div>
+                                            <small class="text-success">Liquid</small>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center asset-row" onclick="selectAsset('ETH')">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-dark rounded-circle p-2 text-white me-3" style="width: 40px; height: 40px; text-align: center;"><i class="fab fa-ethereum"></i></div>
+                                            <div>
+                                                <div class="fw-bold">ETH</div>
+                                                <small class="text-muted">Ethereum</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold" id="ethListBal">0.00 ETH</div>
+                                            <small class="text-success">Liquid</small>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center asset-row" onclick="selectAsset('WBTC')">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-warning rounded-circle p-2 text-white me-3" style="width: 40px; height: 40px; text-align: center;"><i class="fab fa-bitcoin"></i></div>
+                                            <div>
+                                                <div class="fw-bold">WBTC</div>
+                                                <small class="text-muted">Wrapped Bitcoin</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold" id="wbtcListBal">0.00 WBTC</div>
+                                            <small class="text-success">Liquid</small>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="alert alert-light border small text-muted">
-                                    <i class="fas fa-info-circle me-2"></i> Transferred funds are moved instantly from your wallet. No approval required.
+                                
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-dark" onclick="copyAddress()">
+                                        <i class="fas fa-qrcode me-2"></i>Show Vault Address
+                                    </button>
                                 </div>
-                                <button class="btn btn-dark w-100 py-3" onclick="payVendor()">
+                            </div>
+
+                            <!-- Right: Transfer & History -->
+                            <div class="col-md-7 ps-md-4">
+                                <h5 class="mb-4">Wire Transfer</h5>
+                                
+                                <!-- Asset Selector Dropdown -->
+                                <div class="mb-3">
+                                    <label>Select Asset</label>
+                                    <select class="form-select" id="assetSelector" onchange="updateAssetDisplay()">
+                                        <option value="USDC">USDC (USD Coin)</option>
+                                        <option value="ETH">ETH (Ethereum)</option>
+                                        <option value="WBTC">WBTC (Bitcoin)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label>Recipient Address / ENS</label>
+                                    <input type="text" id="payeeAddress" class="form-control" placeholder="0x... or name.eth">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Amount</label>
+                                    <div class="input-group">
+                                        <input type="number" id="payAmount" class="form-control" placeholder="0.00">
+                                        <span class="input-group-text" id="amountTicker">USDC</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-dark w-100 py-3 mb-4" onclick="payVendor()">
                                     <i class="fas fa-paper-plane me-2"></i>Send Payment
                                 </button>
+
+                                <!-- Recent Activity Table -->
+                                <h6 class="text-muted text-uppercase small fw-bold mb-3">Recent Activity</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover" style="font-size: 0.9rem;">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-muted">Date</th>
+                                                <th class="text-muted">Type</th>
+                                                <th class="text-muted">Counterparty</th>
+                                                <th class="text-end text-muted">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="txHistoryBody">
+                                            <!-- Mock Data -->
+                                            <tr>
+                                                <td>Today</td>
+                                                <td><span class="badge bg-light text-dark border">Wire</span></td>
+                                                <td>0x42...8a91</td>
+                                                <td class="text-end text-danger">- $1,250.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Yesterday</td>
+                                                <td><span class="badge bg-light text-dark border">Deposit</span></td>
+                                                <td>Coinbase</td>
+                                                <td class="text-end text-success">+ $5,000.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Nov 22</td>
+                                                <td><span class="badge bg-light text-dark border">Swap</span></td>
+                                                <td>Uniswap</td>
+                                                <td class="text-end">- 0.5 ETH</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -802,6 +921,49 @@
         }, 400);
     }
 
+    // --- ASSET SELECTOR LOGIC (NEW) ---
+    function selectAsset(symbol) {
+        // Update Selector Dropdown
+        document.getElementById("assetSelector").value = symbol;
+        updateAssetDisplay();
+    }
+
+    function updateAssetDisplay() {
+        const symbol = document.getElementById("assetSelector").value;
+        const tickerEl = document.getElementById("amountTicker");
+        const cardMain = document.getElementById("checkingBalanceMain");
+        const cardLabel = document.getElementById("cardLabel");
+
+        // Update ticker text next to input
+        tickerEl.innerText = symbol;
+
+        // Mock Balance Update Logic (for UI demo)
+        // In production, we'd fetch balance of selected token address
+        let balanceDisplay = "$0.00";
+        if (symbol === "USDC") {
+            const currentUSDC = document.getElementById("usdcListBal").innerText;
+            balanceDisplay = currentUSDC;
+            cardLabel.innerText = "Available Balance (USDC)";
+        } else if (symbol === "ETH") {
+            balanceDisplay = document.getElementById("ethListBal").innerText;
+            cardLabel.innerText = "Available Balance (ETH)";
+        } else if (symbol === "WBTC") {
+            balanceDisplay = document.getElementById("wbtcListBal").innerText;
+            cardLabel.innerText = "Available Balance (WBTC)";
+        }
+        
+        // Update Card
+        cardMain.innerText = balanceDisplay;
+
+        // Highlight Active Row
+        document.querySelectorAll('.asset-row').forEach(row => row.classList.remove('active'));
+        // Find row with this symbol and add active class (simple implementation)
+        // (In real React app this would be state-based)
+        if(symbol === 'USDC') document.querySelectorAll('.asset-row')[0].classList.add('active');
+        if(symbol === 'ETH') document.querySelectorAll('.asset-row')[1].classList.add('active');
+        if(symbol === 'WBTC') document.querySelectorAll('.asset-row')[2].classList.add('active');
+    }
+
     // --- FORM SUBMISSION ---
     function submitOnboarding() {
         const modalEl = document.getElementById('onboardingModal');
@@ -930,10 +1092,11 @@
             const walletBalFmt = ethers.formatUnits(walletBal, usdcDecimals);
 
             // Update DOM
-            // Checking
+            // Checking - Default view is USDC
             const checkDisplay = "$" + Number(walletBalFmt).toLocaleString(undefined, {minimumFractionDigits: 2});
             document.getElementById("checkingDisplay").innerText = checkDisplay;
             document.getElementById("checkingBalanceMain").innerText = checkDisplay;
+            document.getElementById("usdcListBal").innerText = checkDisplay; // Update list item
             
             // Update Card Address Display
             if(userAddress) {
@@ -961,6 +1124,10 @@
             } else {
                 document.getElementById("adminNavItem").style.display = "none";
             }
+
+            // Mock Data for other tokens (Simulating Multi-Asset)
+            document.getElementById("ethListBal").innerText = "1.45 ETH";
+            document.getElementById("wbtcListBal").innerText = "0.05 WBTC";
 
         } catch(e) {
             console.error("Error syncing data", e);
@@ -1006,29 +1173,33 @@
         try {
             const payee = document.getElementById("payeeAddress").value;
             const val = document.getElementById("payAmount").value;
+            const asset = document.getElementById("assetSelector").value;
             
             if(!payee || !val || val <= 0) return alert("Please fill all fields correctly.");
 
-            const amount = ethers.parseUnits(val, usdcDecimals);
-            
-            // Checking payments are direct ERC20 transfers
-            const tx = await usdcContract.transfer(payee, amount);
-            
-            // UI Feedback
-            const btn = document.querySelector("#checking button.btn-dark");
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "Processing...";
-            btn.disabled = true;
+            // Logic to switch based on asset
+            if (asset === 'USDC') {
+                const amount = ethers.parseUnits(val, usdcDecimals);
+                const tx = await usdcContract.transfer(payee, amount);
+                
+                const btn = document.querySelector("#checking button.btn-dark");
+                const originalText = btn.innerHTML;
+                btn.innerHTML = "Processing...";
+                btn.disabled = true;
 
-            await tx.wait();
-            
-            alert("Payment Sent Successfully!");
-            document.getElementById("payAmount").value = "";
-            document.getElementById("payeeAddress").value = "";
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            
-            refreshData();
+                await tx.wait();
+                
+                alert("Payment Sent Successfully!");
+                document.getElementById("payAmount").value = "";
+                document.getElementById("payeeAddress").value = "";
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+                refreshData();
+            } else {
+                alert("Simulated: " + asset + " payment sent to " + payee);
+            }
+
         } catch(e) {
             alert("Payment failed: " + e.message);
             // Reset button if error
