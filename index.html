@@ -492,65 +492,6 @@
                         </div>
                     </div>
 
-                    <!-- 4. MERCHANT TAB -->
-                    <div class="tab-pane fade" id="solver">
-                        <div class="row justify-content-center">
-                            <div class="col-md-8">
-                                <!-- REQUEST FUNDING SECTION -->
-                                <div class="card border-0 shadow-sm mb-4">
-                                    <div class="card-header bg-primary text-white">
-                                        <h6 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Request Capital</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Counterparty / Buyer</label>
-                                                <input type="text" class="form-control" id="invoiceBuyer" placeholder="e.g. Walmart, Inc.">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Invoice Amount (USD)</label>
-                                                <input type="number" class="form-control" id="requestAmount">
-                                            </div>
-                                            <div class="col-12">
-                                                <label class="form-label">Upload Invoice (PDF/Img)</label>
-                                                <input type="file" class="form-control" id="invoiceFile">
-                                                <div class="form-text">Document will be hashed on-chain for verification.</div>
-                                            </div>
-                                            <div class="col-12 text-end">
-                                                <button class="btn btn-primary px-4" onclick="submitInvoiceRequest()">
-                                                    <i class="fas fa-paper-plane me-2"></i>Submit for Approval
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="text-center mb-4">
-                                    <h5>Invoice Settlement</h5>
-                                    <p class="text-muted">Repay outstanding credit lines to release collateral.</p>
-                                </div>
-                                <div class="card bg-light border-0">
-                                    <div class="card-body">
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label>Principal Amount</label>
-                                                <input type="number" id="repayPrincipal" class="form-control">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label>Accrued Fees</label>
-                                                <input type="number" id="repayFee" class="form-control">
-                                            </div>
-                                        </div>
-                                        <div class="d-grid gap-2">
-                                            <button class="btn btn-outline-primary" onclick="approveKernelUSDC()">1. Authorize Debit</button>
-                                            <button class="btn btn-success" onclick="repayLoan()">2. Settle Invoice</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- 5. ADMIN TAB -->
                     <div class="tab-pane fade" id="admin">
                         
@@ -1055,13 +996,16 @@
         const mockWallet = new ethers.Wallet(mockPrivateKey);
         userAddress = mockWallet.address;
         
+        // FIX: Initialize provider if missing (read-only fallback)
+        if(!provider) {
+            provider = new ethers.JsonRpcProvider("https://eth.llamarpc.com");
+        }
+        
+        // FIX: Assign signer so write functions work
+        signer = mockWallet.connect(provider);
+        
         console.log(`Simulated Login for: ${email}`);
         console.log(`Address: ${userAddress}`);
-        console.log(`Private Key (SIMULATION ONLY): ${mockPrivateKey}`);
-        
-        if(window.ethereum) {
-             provider = new ethers.BrowserProvider(window.ethereum); 
-        }
         
         completeLogin(userAddress, email); // Pass email to completeLogin
         bootstrap.Modal.getInstance(document.getElementById('loginModal'))?.hide();
@@ -1280,7 +1224,7 @@
 
     // --- BANKING: SEND PAYMENT ---
     async function payVendor() {
-        if(!signer) return alert("Write actions require Metamask connection (not simulation)");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const payee = document.getElementById('payeeAddress').value;
             const amtVal = document.getElementById('payAmount').value;
@@ -1303,7 +1247,7 @@
 
     // --- BANKING: DEPOSIT ---
     async function approveDeposit() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const symbol = document.getElementById('depositAssetSelector').value;
             const asset = trackedAssets.find(t => t.symbol === symbol);
@@ -1319,7 +1263,7 @@
     }
 
     async function executeDeposit() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const symbol = document.getElementById('depositAssetSelector').value;
             const asset = trackedAssets.find(t => t.symbol === symbol);
@@ -1344,7 +1288,7 @@
 
     // --- BANKING: WITHDRAW ---
     async function executeWithdrawal() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const symbol = document.getElementById('withdrawAssetSelector').value;
             const asset = trackedAssets.find(t => t.symbol === symbol);
@@ -1366,7 +1310,7 @@
 
     // --- BANKING: PAYROLL ---
     async function runPayroll() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const asset = activeAsset;
             const raw = document.getElementById('batchData').value;
@@ -1409,7 +1353,7 @@
     }
 
     async function approveKernelUSDC() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const pVal = document.getElementById("repayPrincipal").value;
             const fVal = document.getElementById("repayFee").value;
@@ -1426,7 +1370,7 @@
     }
 
     async function repayLoan() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const pVal = document.getElementById("repayPrincipal").value;
             const fVal = document.getElementById("repayFee").value;
@@ -1443,7 +1387,7 @@
 
     // --- YIELD VAULT: APPROVE DEPOSIT ---
     async function approveYieldDeposit() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const amtVal = document.getElementById('investAmount').value;
             if(!amtVal) return alert("Enter amount");
@@ -1460,7 +1404,7 @@
 
     // --- YIELD VAULT: DEPOSIT ---
     async function investInYield() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const amtVal = document.getElementById('investAmount').value;
             if(!amtVal) return alert("Enter amount");
@@ -1477,7 +1421,7 @@
 
     // --- YIELD VAULT: REDEEM ---
     async function redeemFromYield() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const amtVal = document.getElementById('redeemAmount').value;
             if(!amtVal) return alert("Enter shares amount");
@@ -1494,7 +1438,7 @@
 
     // --- ADMIN FUNCTIONS ---
     async function setDailyLimit() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const token = document.getElementById('limitToken').value;
             const limit = document.getElementById('limitAmount').value;
@@ -1507,7 +1451,7 @@
     }
 
     async function whitelistPayee() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const token = document.getElementById('wlToken').value;
             const payee = document.getElementById('wlPayee').value;
@@ -1518,7 +1462,7 @@
     }
 
     async function whitelistInvestor() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const addr = document.getElementById('investorAddress').value;
             const tx = await yieldVaultContract.setInvestorStatus(addr, true);
@@ -1528,7 +1472,7 @@
     }
 
     async function whitelistMerchant() {
-        if(!signer) return alert("Write actions require Metamask connection");
+        if(!signer) return alert("Please connect a wallet first.");
         try {
             const addr = document.getElementById('merchantAddress').value;
             const tx = await kernelContract.setSolver(addr, true);
