@@ -59,6 +59,8 @@
         .btn-primary { background-color: var(--brand-primary); border: none; padding: 12px 24px; font-weight: 600; border-radius: 8px; }
         .btn-primary:hover { background-color: #0044aa; transform: translateY(-1px); }
         .btn-dark { background-color: var(--brand-dark); border: none; border-radius: 8px; font-weight: 600; }
+        .btn-outline-primary { color: var(--brand-primary); border-color: var(--brand-primary); border-radius: 8px; font-weight: 600; padding: 12px 24px; }
+        .btn-outline-primary:hover { background-color: var(--brand-primary); color: white; }
         
         /* CHECKING CARD STYLE */
         .checking-balance-card {
@@ -129,7 +131,11 @@
         <div class="container">
             <h1 class="display-4 fw-bold mb-4">Enterprise Treasury OS</h1>
             <p class="lead text-muted mb-5">Banking-grade checking limits, automated payroll, and yield optimization.<br>All on-chain. All non-custodial.</p>
-            <button class="btn btn-primary btn-lg px-5" onclick="enterApp()">Access Vault</button>
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-primary btn-lg px-5" onclick="enterApp()">Access Vault</button>
+                <!-- RESTORED BUTTON -->
+                <button class="btn btn-outline-primary btn-lg px-5" data-bs-toggle="modal" data-bs-target="#onboardingModal">Open Account</button>
+            </div>
         </div>
     </section>
     
@@ -140,6 +146,7 @@
                 <div class="card text-center border-0 bg-white">
                     <div class="card-body">
                         <div class="stats-label">Total Assets Under Management</div>
+                        <!-- Live data hook -->
                         <div class="stats-value" id="landingTVL">$0.00</div>
                     </div>
                 </div>
@@ -162,7 +169,7 @@
             </div>
         </div>
 
-        <!-- Trusted Partners Section (Restored & Prominent) -->
+        <!-- Trusted Partners Section -->
         <div class="row justify-content-center align-items-center mb-5 py-4 bg-light rounded-3 border-0">
             <div class="col-12 text-center mb-4">
                 <small class="text-uppercase text-muted fw-bold" style="letter-spacing: 1px;">Trusted by Industry Leaders</small>
@@ -760,6 +767,49 @@
     </div>
 </div>
 
+<!-- ONBOARDING MODAL -->
+<div class="modal fade" id="onboardingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Client Application</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="onboardingForm">
+              <div class="mb-3">
+                  <label class="form-label">Company / Individual Name</label>
+                  <input type="text" class="form-control" id="entityName" name="name" placeholder="Legal Name">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label">Business Email</label>
+                  <input type="email" class="form-control" id="contactEmail" name="email" placeholder="name@company.com">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label">Account ID (Wallet)</label>
+                  <input type="text" class="form-control" id="kycWalletAddress" name="wallet" placeholder="0x...">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Account Type</label>
+                <select class="form-select" id="participantType" name="type">
+                    <option value="Investor">Yield Account (Lender)</option>
+                    <option value="Solver">Merchant Account (Borrower)</option>
+                </select>
+            </div>
+              <div class="mb-3 form-check">
+                  <input type="checkbox" class="form-check-input" id="termsCheck">
+                  <label class="form-check-label text-muted" for="termsCheck">I agree to the Terms of Service and consent to KYC/AML screening.</label>
+              </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitOnboarding()">Submit Application</button>
+        </div>
+      </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
@@ -802,7 +852,9 @@
         "function isWhitelisted(address account) view returns (bool)", // Check investor status
         "function usdc() view returns (address)",
         "function deposit(uint256 amount, uint256 minShares) external",
-        "function withdraw(uint256 shareAmount, uint256 minAssets) external"
+        "function withdraw(uint256 shareAmount, uint256 minAssets) external",
+        "function totalManagedAssets() view returns (uint256)", // Add for TVL
+        "function totalShares() view returns (uint256)"
     ];
     
     const KERNEL_ABI_HUMAN = [
@@ -825,6 +877,44 @@
     // State
     let currentView = 'wallet'; // 'wallet' or 'vault'
     let activeAsset = trackedAssets[0]; // Default USDC
+
+    // Initialize Landing Page Stats on Load
+    window.onload = async function() {
+        fetchLandingStats();
+    };
+
+    // --- LANDING PAGE STATS ---
+    async function fetchLandingStats() {
+        // Simple read-only fetch if window.ethereum is available (no login needed)
+        if(window.ethereum) {
+            try {
+                const readProv = new ethers.BrowserProvider(window.ethereum);
+                // Init contracts read-only
+                const yieldRo = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, readProv);
+                const usdcRo = new ethers.Contract("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", ERC20_ABI, readProv);
+
+                // 1. Get Yield TVL
+                const totalAssetsRaw = await yieldRo.totalManagedAssets();
+                const totalAssets = Number(ethers.formatUnits(totalAssetsRaw, 6));
+                
+                // 2. Get Checking TVL (USDC)
+                const checkBalRaw = await usdcRo.balanceOf(CHECKING_ADDRESS);
+                const checkBal = Number(ethers.formatUnits(checkBalRaw, 6));
+
+                // 3. Update DOM
+                const combinedTVL = totalAssets + checkBal;
+                document.getElementById('landingTVL').innerText = "$" + combinedTVL.toLocaleString(undefined, {maximumFractionDigits:0});
+                
+                // 4. Total Shares
+                const totalSharesRaw = await yieldRo.totalShares();
+                const totalShares = Number(ethers.formatUnits(totalSharesRaw, 6));
+                document.getElementById('landingTotalShares').innerText = totalShares.toLocaleString(undefined, {maximumFractionDigits:0});
+
+            } catch(e) {
+                console.log("Landing stats fetch failed (likely network mismatch or no provider):", e);
+            }
+        }
+    }
 
     // --- NAVIGATION ---
     function enterApp() {
@@ -863,6 +953,9 @@
                 document.getElementById('withdrawDestAddr').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38); // Sync withdraw modal destination
                 document.getElementById('connectBtn').innerHTML = "Connected";
                 document.getElementById('connectBtn').className = "btn btn-success";
+                
+                // Pre-fill modal inputs
+                document.getElementById('kycWalletAddress').value = userAddress;
 
                 refreshData();
             } catch(e) { console.error(e); alert("Connection Failed: " + e.message); }
@@ -1308,6 +1401,58 @@
     function copyAddress() {
         navigator.clipboard.writeText(CHECKING_ADDRESS);
         alert("Vault Address Copied");
+    }
+    
+    // --- FORM SUBMISSION ---
+    function submitOnboarding() {
+        const modalEl = document.getElementById('onboardingModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        
+        if(!document.getElementById('termsCheck').checked) {
+            alert("Please agree to the terms to proceed.");
+            return;
+        }
+
+        const name = document.getElementById('entityName').value;
+        const email = document.getElementById('contactEmail').value;
+        const wallet = document.getElementById('kycWalletAddress').value;
+        const type = document.getElementById('participantType').value;
+
+        const data = {
+            name: name,                 
+            email: email,                
+            _replyto: email,            
+            _subject: `New Client Application: ${name}`,
+            message: `CLIENT APPLICATION\n------------------\nEntity: ${name}\nID: ${wallet}\nType: ${type}\nAgreed: Yes`,
+            participant_type: type,
+            wallet_address: wallet
+        };
+
+        const submitBtn = document.querySelector('#onboardingModal .btn-primary');
+        const originalText = submitBtn.innerText;
+        submitBtn.innerText = "Processing...";
+        submitBtn.disabled = true;
+
+        fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+        }).then(response => {
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
+            
+            if (response.ok) {
+                modal.hide();
+                alert("Application Received. Our compliance team will contact you shortly.");
+                document.getElementById('onboardingForm').reset();
+            } else {
+                alert("System Error: Unable to submit application at this time.");
+            }
+        }).catch(error => {
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
+            alert("Connection Error: Please check your network.");
+        });
     }
 </script>
 
