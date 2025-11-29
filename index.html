@@ -29,7 +29,6 @@
             overflow-x: hidden; 
         }
         
-        /* Clean White Cards with Soft Shadow */
         .card { 
             background-color: var(--bg-card); 
             border: 1px solid var(--border-color); 
@@ -44,7 +43,6 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
         
-        /* Header Colors */
         .card-header { 
             background-color: #ffffff; 
             border-bottom: 1px solid var(--border-color); 
@@ -55,530 +53,176 @@
         }
         
         .card-body { padding: 1.5rem; }
-
         .text-muted { color: var(--text-muted) !important; font-size: 0.9rem; }
-        
-        /* Typography */
         h1, h2, h3, h4, h5 { color: var(--brand-dark); letter-spacing: -0.02em; }
         
-        /* Buttons */
-        .btn-primary { 
-            background-color: var(--brand-primary); 
-            border: none; 
-            padding: 12px 24px; 
-            font-weight: 600; 
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 85, 212, 0.2);
-        }
+        .btn-primary { background-color: var(--brand-primary); border: none; padding: 12px 24px; font-weight: 600; border-radius: 8px; }
         .btn-primary:hover { background-color: #0044aa; transform: translateY(-1px); }
-        
-        .btn-outline-primary {
-            color: var(--brand-primary);
-            border-color: var(--brand-primary);
-            border-radius: 8px;
-            font-weight: 600;
-        }
-        .btn-outline-primary:hover { background-color: var(--brand-primary); color: white; }
-
-        .btn-success { background-color: #10b981; border: none; border-radius: 8px; font-weight: 500; }
-        .btn-danger { background-color: #ef4444; border: none; border-radius: 8px; font-weight: 500; }
         .btn-dark { background-color: var(--brand-dark); border: none; border-radius: 8px; font-weight: 600; }
-
-        /* Inputs */
-        .form-control, .form-select { 
-            background-color: #f8fafc; 
-            border: 1px solid var(--border-color); 
-            color: var(--text-main); 
-            border-radius: 8px;
-            padding: 12px;
-        }
-        .form-control:focus, .form-select:focus { 
-            background-color: #fff; 
-            border-color: var(--brand-primary); 
-            box-shadow: 0 0 0 3px rgba(0, 85, 212, 0.1); 
-        }
-        label { font-weight: 600; font-size: 0.85rem; color: var(--brand-dark); margin-bottom: 6px; }
-
-        /* Tabs */
-        .nav-tabs { border-bottom: 2px solid var(--border-color); margin-bottom: 1.5rem; }
-        .nav-tabs .nav-link { 
-            color: var(--text-muted); 
-            font-weight: 500; 
-            border: none; 
-            border-bottom: 2px solid transparent; 
-            margin-bottom: -2px; 
-            padding: 1rem 1.5rem;
-        }
-        .nav-tabs .nav-link:hover { color: var(--brand-primary); }
-        .nav-tabs .nav-link.active { 
-            color: var(--brand-primary); 
-            background: transparent; 
-            border-bottom: 2px solid var(--brand-primary); 
-        }
         
-        /* Navbar */
-        .navbar { background-color: white; border-bottom: 1px solid var(--border-color); padding: 1rem 0; }
-        .navbar-brand { color: var(--brand-dark) !important; font-weight: 700; letter-spacing: -0.5px; }
-
-        /* Animations */
-        #dashboard-view { display: none; opacity: 0; transition: opacity 0.4s ease; }
-        
-        /* Stats Box specific */
-        .stats-label { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; color: var(--text-muted); }
-        .stats-value { font-size: 2rem; font-weight: 700; color: var(--brand-dark); margin-top: 0.25rem; }
-
-        /* Hero */
-        .hero-section { 
-            padding: 80px 0; 
-            background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%); 
-            text-align: center;
-        }
-
-        /* Partner Logos */
-        .partner-logo {
-            max-height: 45px;
-            opacity: 0.6;
-            filter: grayscale(100%);
-            transition: all 0.3s ease;
-        }
-        .partner-logo:hover {
-            opacity: 1;
-            filter: grayscale(0%);
-            transform: scale(1.05);
-        }
-        a.partner-link { text-decoration: none; }
-
-        /* NEW: Checking Card Style - ENHANCED FOR VISIBILITY */
+        /* CHECKING CARD STYLE */
         .checking-balance-card {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #ffffff !important; /* Force white text on container */
+            color: #ffffff !important;
             border-radius: 16px;
             padding: 30px;
             margin-bottom: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
         }
-        
-        /* Glassy shine effect */
-        .checking-balance-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(45deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
-            z-index: 0;
-            pointer-events: none;
-        }
+        .checking-balance-card * { position: relative; z-index: 1; color: #ffffff !important; }
+        .checking-balance-card .text-white-50 { color: rgba(255, 255, 255, 0.7) !important; }
 
-        /* Force all children to have z-index and white color */
-        .checking-balance-card * {
-            position: relative;
-            z-index: 1;
-            color: #ffffff !important;
+        /* SWAP UI STYLES */
+        .swap-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
         }
-        
-        /* Specifically lighten secondary text */
-        .checking-balance-card .text-white-50 {
-            color: rgba(255, 255, 255, 0.7) !important;
-        }
-
-        /* Asset Row Hover */
-        .asset-row {
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .asset-row:hover {
+        .token-input-group {
             background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
         }
-        .asset-row.active {
-            background-color: #f0f4ff;
-            border-left: 3px solid var(--brand-primary);
+        .token-input-group label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: block; }
+        .token-input-group input { 
+            background: transparent; border: none; font-size: 1.5rem; font-weight: 600; color: var(--brand-dark); width: 100%; outline: none;
         }
+        .token-select { border: none; background: transparent; font-weight: 600; text-align: right; cursor: pointer; }
+        .swap-arrow { text-align: center; margin: -20px 0; position: relative; z-index: 10; }
+        .swap-arrow i { background: #fff; padding: 8px; border-radius: 50%; border: 1px solid var(--border-color); color: var(--text-muted); }
+
+        /* Asset Row */
+        .asset-row { cursor: pointer; transition: background-color 0.2s; }
+        .asset-row:hover { background-color: #f8fafc; }
+        .asset-row.active { background-color: #f0f4ff; border-left: 3px solid var(--brand-primary); }
     </style>
 </head>
 <body>
 
-<!-- LANDING PAGE VIEW -->
 <div id="landing-view">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top bg-white border-bottom">
         <div class="container">
             <a class="navbar-brand" href="#"><i class="fas fa-layer-group me-2 text-primary"></i>Kernel Financial</a>
-            <div class="d-flex">
-                <button class="btn btn-primary" onclick="enterApp()">Client Login</button>
-            </div>
+            <button class="btn btn-primary" onclick="enterApp()">Client Login</button>
         </div>
     </nav>
-
-    <!-- Hero Section -->
-    <section class="hero-section mt-5">
+    <section class="hero-section" style="padding-top: 120px; text-align: center; background: linear-gradient(180deg, #f8fafc 0%, #fff 100%); padding-bottom: 80px;">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <h1 class="display-4 fw-bold mb-4">Enterprise Trade Finance</h1>
-                    <p class="lead text-muted mb-5">
-                        Secure working capital solutions for global suppliers. 
-                        Institutional-grade yield accounts for accredited investors.
-                        <br><strong>Powered by Digital Dollar Settlement.</strong>
-                    </p>
-                    <div class="d-flex justify-content-center gap-3">
-                        <button class="btn btn-primary btn-lg px-5" onclick="enterApp()">Access Portal</button>
-                        <a href="#onboarding" class="btn btn-outline-primary btn-lg px-5">Open Account</a>
-                    </div>
-                </div>
-            </div>
+            <h1 class="display-4 fw-bold mb-4">Enterprise Treasury OS</h1>
+            <p class="lead text-muted mb-5">Banking-grade checking limits, automated payroll, and yield optimization.<br>All on-chain. All non-custodial.</p>
+            <button class="btn btn-primary btn-lg px-5" onclick="enterApp()">Access Vault</button>
         </div>
     </section>
-
-    <!-- Stats Ticker -->
-    <div class="container mb-5">
-        <div class="row g-4 mb-5">
-            <div class="col-md-4">
-                <div class="card text-center border-0 bg-white">
-                    <div class="card-body">
-                        <div class="stats-label">Total Assets Under Management</div>
-                        <div class="stats-value" id="landingTVL">$0.00</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center border-0 bg-white">
-                    <div class="card-body">
-                        <div class="stats-label">Current APY</div>
-                        <div class="stats-value text-success">8.5%</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center border-0 bg-white">
-                    <div class="card-body">
-                        <div class="stats-label">Total Units Issued</div>
-                        <div class="stats-value" id="landingTotalShares">0</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Trusted Partners Section -->
-        <div class="row justify-content-center align-items-center mb-5">
-            <div class="col-12 text-center mb-4">
-                <small class="text-uppercase text-muted fw-bold" style="letter-spacing: 1px;">Trusted by Industry Leaders</small>
-            </div>
-            <div class="col-auto mx-4">
-                <a href="https://mechanicaltemp.com/" target="_blank" class="partner-link">
-                    <img src="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" alt="Mechanical Temp" class="partner-logo">
-                </a>
-            </div>
-            <div class="col-auto mx-4">
-                <a href="https://www.service.money/" target="_blank" class="partner-link d-flex align-items-center">
-                    <img src="https://pbs.twimg.com/profile_images/1978592945293930496/hsTismCj_400x400.jpg" alt="ServiceApps" class="partner-logo rounded-circle me-2">
-                    <span class="fw-bold text-dark partner-logo" style="filter: none; font-size: 1.25rem;">ServiceApps</span>
-                </a>
-            </div>
-        </div>
-
-        <div class="text-center">
-            <small class="text-muted"><i class="fas fa-lock me-1"></i> Data encrypted & verified via blockchain consensus.</small>
-        </div>
-    </div>
-
-    <!-- Features Grid -->
-    <section id="onboarding" class="py-5 bg-white">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h3>Our Products</h3>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary"><i class="fas fa-chart-line fa-2x"></i></div>
-                            <h5>Yield Accounts</h5>
-                            <p class="text-muted">Deposit capital to fund verified trade invoices. Earn stable returns derived from real economic activity, not speculation.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary"><i class="fas fa-university fa-2x"></i></div>
-                            <h5>Checking & Payments</h5>
-                            <p class="text-muted">Direct digital dollar payments. Wire funds instantly to vendors or employees with full on-chain transparency.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="mb-3 text-primary"><i class="fas fa-industry fa-2x"></i></div>
-                            <h5>Supply Chain Finance</h5>
-                            <p class="text-muted">Upload verified invoices and receive up to 90% funding within 24 hours using our streamlined approval engine.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="text-center mt-5">
-                <button class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#onboardingModal">Apply for Access</button>
-            </div>
-        </div>
-    </section>
-
-    <footer class="py-4 mt-auto border-top bg-white">
-        <div class="container text-center">
-            <p class="text-muted mb-0">&copy; 2025 Kernel Financial LLC. All rights reserved.</p>
-            <small class="text-muted">Kernel Financial is a technology provider. Banking services provided by partner institutions.</small>
-        </div>
-    </footer>
 </div>
 
-<!-- DASHBOARD VIEW -->
-<div id="dashboard-view">
-    <!-- Dashboard Navbar -->
-    <nav class="navbar navbar-expand-lg border-bottom mb-4">
+<div id="dashboard-view" style="display: none;">
+    <nav class="navbar navbar-expand-lg border-bottom mb-4 bg-white">
         <div class="container">
             <a class="navbar-brand" href="#" onclick="exitApp()"><i class="fas fa-layer-group me-2 text-primary"></i>Kernel Financial</a>
             <div class="d-flex align-items-center">
                 <div class="me-3 text-end d-none d-md-block">
-                    <small class="d-block text-muted">Account Status</small>
-                    <span id="walletAddress" class="fw-bold text-success">Not Authenticated</span>
+                    <small class="d-block text-muted">Connected Wallet</small>
+                    <span id="walletAddress" class="fw-bold text-success">Not Connected</span>
                 </div>
-                <button id="connectBtn" class="btn btn-primary" onclick="connectWallet()">
-                    <i class="fas fa-lock me-2"></i>Secure Login
+                <button id="connectBtn" class="btn btn-dark" onclick="connectWallet()">
+                    <i class="fas fa-wallet me-2"></i>Connect
                 </button>
             </div>
         </div>
     </nav>
 
     <div class="container">
-        
-        <!-- Welcome Guide Panel -->
-        <div class="card border-0 mb-4 bg-primary text-white overflow-hidden shadow-sm" id="welcomePanel">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h4 class="fw-bold mb-2">Welcome to your Workspace</h4>
-                        <p class="mb-4 text-white-50" style="max-width: 600px;">
-                            Manage your operating capital and high-yield investments in one secure portal.
-                        </p>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('welcomePanel').style.display='none'" aria-label="Close"></button>
-                </div>
-
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="card bg-white bg-opacity-10 border-0 h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-university me-2"></i>
-                                    <span class="fw-bold">1. Checking Vault</span>
-                                </div>
-                                <small class="text-white-50">
-                                    Multi-token liquid account. Use this for day-to-day vendor payments, payroll, and asset management.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-white bg-opacity-10 border-0 h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-piggy-bank me-2"></i>
-                                    <span class="fw-bold">2. Yield Vault</span>
-                                </div>
-                                <small class="text-white-50">
-                                    Deposit excess capital here to earn ~8.5% APY from secured trade invoices. 24h withdrawal period.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-white bg-opacity-10 border-0 h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-building me-2"></i>
-                                    <span class="fw-bold">3. Merchant Portal</span>
-                                </div>
-                                <small class="text-white-50">
-                                    For Borrowers. Upload invoices and access credit lines against your receivables.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Dashboard Stats -->
+        <!-- Stats -->
         <div class="row mb-4">
-            <!-- CHECKING STAT -->
             <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stats-label">Checking (Liquid)</div>
-                                <div class="stats-value" id="checkingDisplay">$0.00</div>
-                            </div>
-                            <div class="text-secondary bg-light rounded-circle p-3">
-                                <i class="fas fa-university fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="card"><div class="card-body">
+                    <div class="stats-label">Checking Liquidity</div>
+                    <div class="stats-value" id="checkingDisplay">$0.00</div>
+                </div></div>
             </div>
-            <!-- YIELD STAT -->
             <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stats-label">Invested (Yield)</div>
-                                <div class="stats-value" id="userShares">0.00</div>
-                            </div>
-                            <div class="text-success bg-light rounded-circle p-3">
-                                <i class="fas fa-chart-line fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="card"><div class="card-body">
+                    <div class="stats-label">Invested (Yield)</div>
+                    <div class="stats-value" id="userShares">0.00</div>
+                </div></div>
             </div>
-            <!-- GLOBAL STAT -->
             <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stats-label">Protocol TVL</div>
-                                <div class="stats-value" id="totalAssets">$0.00</div>
-                            </div>
-                            <div class="text-primary bg-light rounded-circle p-3">
-                                <i class="fas fa-globe fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="card"><div class="card-body">
+                    <div class="stats-label">Protocol TVL</div>
+                    <div class="stats-value" id="totalAssets">$0.00</div>
+                </div></div>
             </div>
         </div>
 
-        <!-- Main Interface -->
+        <!-- Main Tabs -->
         <div class="card">
             <div class="card-header bg-white">
                 <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-                    <!-- NEW CHECKING TAB -->
                     <li class="nav-item">
-                        <button class="nav-link active" id="checking-tab" data-bs-toggle="tab" data-bs-target="#checking" type="button">
-                            <i class="fas fa-university me-2"></i>Checking
-                        </button>
+                        <button class="nav-link active" id="checking-tab" data-bs-toggle="tab" data-bs-target="#checking"><i class="fas fa-university me-2"></i>Checking Vault</button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" id="investor-tab" data-bs-toggle="tab" data-bs-target="#investor" type="button">
-                            <i class="fas fa-piggy-bank me-2"></i>Yield Vault
-                        </button>
-                    </li>
-                    <li class="nav-item" id="adminNavItem" style="display: none;">
-                        <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button">
-                            <i class="fas fa-user-shield me-2"></i>Administration
-                        </button>
+                        <button class="nav-link" id="swap-tab" data-bs-toggle="tab" data-bs-target="#swap"><i class="fas fa-exchange-alt me-2"></i>Treasury Swap</button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" id="solver-tab" data-bs-toggle="tab" data-bs-target="#solver" type="button">
-                            <i class="fas fa-building me-2"></i>Merchant Portal
-                        </button>
+                        <button class="nav-link" id="investor-tab" data-bs-toggle="tab" data-bs-target="#investor"><i class="fas fa-piggy-bank me-2"></i>Yield Vault</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin"><i class="fas fa-user-shield me-2"></i>Admin Controls</button>
                     </li>
                 </ul>
             </div>
             
             <div class="card-body">
-                <div class="tab-content" id="myTabContent">
+                <div class="tab-content">
                     
-                    <!-- 1. MULTI-ASSET CHECKING VAULT -->
+                    <!-- 1. CHECKING VAULT -->
                     <div class="tab-pane fade show active" id="checking">
                         <div class="row">
-                            <!-- Left: Card & Asset List -->
                             <div class="col-md-5 border-end">
-                                <!-- Digital Card -->
                                 <div class="checking-balance-card">
                                     <div class="d-flex justify-content-between mb-4">
                                         <i class="fas fa-wifi fa-rotate-90"></i>
-                                        <span class="text-white-50">CORPORATE VAULT</span>
+                                        <span class="text-white-50">CORPORATE</span>
                                     </div>
-                                    <h6 class="text-white-50 text-uppercase mb-1" id="cardLabel">Total Balance (USDC)</h6>
+                                    <h6 class="text-white-50 text-uppercase mb-1" id="cardLabel">Balance (USDC)</h6>
                                     <h2 class="mb-4" id="checkingBalanceMain">$0.00</h2>
                                     <div class="d-flex justify-content-between align-items-end">
-                                        <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem;" id="cardAddressDisplay">Wallet Not Connected</small>
+                                        <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem;" id="cardAddressDisplay">Not Connected</small>
                                         <i class="fab fa-cc-visa fa-2x"></i>
                                     </div>
                                 </div>
 
-                                <!-- Asset Holdings List -->
                                 <h6 class="text-muted text-uppercase small fw-bold mb-3">Vault Holdings</h6>
                                 <div class="list-group list-group-flush border rounded mb-4">
                                     <div class="list-group-item d-flex justify-content-between align-items-center asset-row active" onclick="selectAsset('USDC')">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-primary rounded-circle p-2 text-white me-3" style="width: 40px; height: 40px; text-align: center;"><i class="fas fa-dollar-sign"></i></div>
-                                            <div>
-                                                <div class="fw-bold">USDC</div>
-                                                <small class="text-muted">USD Coin</small>
-                                            </div>
-                                        </div>
-                                        <div class="text-end">
-                                            <div class="fw-bold" id="usdcListBal">$0.00</div>
-                                            <small class="text-success">Liquid</small>
-                                        </div>
+                                        <div class="d-flex align-items-center"><i class="fas fa-dollar-sign bg-primary text-white rounded-circle p-2 me-3" style="width:36px;text-align:center;"></i> <div><strong>USDC</strong><br><small class="text-muted">USD Coin</small></div></div>
+                                        <div class="text-end"><div class="fw-bold" id="usdcListBal">$0.00</div></div>
                                     </div>
                                     <div class="list-group-item d-flex justify-content-between align-items-center asset-row" onclick="selectAsset('ETH')">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-dark rounded-circle p-2 text-white me-3" style="width: 40px; height: 40px; text-align: center;"><i class="fab fa-ethereum"></i></div>
-                                            <div>
-                                                <div class="fw-bold">ETH</div>
-                                                <small class="text-muted">Ethereum</small>
-                                            </div>
-                                        </div>
-                                        <div class="text-end">
-                                            <div class="fw-bold" id="ethListBal">0.00 ETH</div>
-                                            <small class="text-success">Liquid</small>
-                                        </div>
+                                        <div class="d-flex align-items-center"><i class="fab fa-ethereum bg-dark text-white rounded-circle p-2 me-3" style="width:36px;text-align:center;"></i> <div><strong>ETH</strong><br><small class="text-muted">Ethereum</small></div></div>
+                                        <div class="text-end"><div class="fw-bold" id="ethListBal">0.00</div></div>
                                     </div>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center asset-row" onclick="selectAsset('WBTC')">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-warning rounded-circle p-2 text-white me-3" style="width: 40px; height: 40px; text-align: center;"><i class="fab fa-bitcoin"></i></div>
-                                            <div>
-                                                <div class="fw-bold">WBTC</div>
-                                                <small class="text-muted">Wrapped Bitcoin</small>
-                                            </div>
-                                        </div>
-                                        <div class="text-end">
-                                            <div class="fw-bold" id="wbtcListBal">0.00 WBTC</div>
-                                            <small class="text-success">Liquid</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-dark" onclick="copyAddress()">
-                                        <i class="fas fa-qrcode me-2"></i>Show Vault Address
-                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Right: Transfer & History -->
                             <div class="col-md-7 ps-md-4">
-                                <h5 class="mb-4">Wire Transfer</h5>
-                                
-                                <!-- Asset Selector Dropdown -->
+                                <h5 class="mb-4">Transfer Operations</h5>
                                 <div class="mb-3">
-                                    <label>Select Asset</label>
+                                    <label>Pay From</label>
                                     <select class="form-select" id="assetSelector" onchange="updateAssetDisplay()">
                                         <option value="USDC">USDC (USD Coin)</option>
                                         <option value="ETH">ETH (Ethereum)</option>
-                                        <option value="WBTC">WBTC (Bitcoin)</option>
                                     </select>
                                 </div>
-
                                 <div class="mb-3">
-                                    <label>Recipient Address / ENS</label>
-                                    <input type="text" id="payeeAddress" class="form-control" placeholder="0x... or name.eth">
+                                    <label>Recipient Address</label>
+                                    <input type="text" id="payeeAddress" class="form-control" placeholder="0x...">
                                 </div>
                                 <div class="mb-3">
                                     <label>Amount</label>
@@ -587,257 +231,126 @@
                                         <span class="input-group-text" id="amountTicker">USDC</span>
                                     </div>
                                 </div>
-                                <button class="btn btn-dark w-100 py-3 mb-4" onclick="payVendor()">
-                                    <i class="fas fa-paper-plane me-2"></i>Send Payment
-                                </button>
-
-                                <!-- Recent Activity Table -->
-                                <h6 class="text-muted text-uppercase small fw-bold mb-3">Recent Activity</h6>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-hover" style="font-size: 0.9rem;">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-muted">Date</th>
-                                                <th class="text-muted">Type</th>
-                                                <th class="text-muted">Counterparty</th>
-                                                <th class="text-end text-muted">Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="txHistoryBody">
-                                            <!-- Mock Data -->
-                                            <tr>
-                                                <td>Today</td>
-                                                <td><span class="badge bg-light text-dark border">Wire</span></td>
-                                                <td>0x42...8a91</td>
-                                                <td class="text-end text-danger">- $1,250.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Yesterday</td>
-                                                <td><span class="badge bg-light text-dark border">Deposit</span></td>
-                                                <td>Coinbase</td>
-                                                <td class="text-end text-success">+ $5,000.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Nov 22</td>
-                                                <td><span class="badge bg-light text-dark border">Swap</span></td>
-                                                <td>Uniswap</td>
-                                                <td class="text-end">- 0.5 ETH</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div class="mb-3">
+                                    <label>Memo / Reference</label>
+                                    <input type="text" id="payMemo" class="form-control" placeholder="e.g. Invoice #9921">
                                 </div>
-
+                                
+                                <div class="d-flex gap-2 mb-4">
+                                    <button class="btn btn-dark flex-grow-1 py-3" onclick="payVendor()">
+                                        <i class="fas fa-paper-plane me-2"></i>Send Payment
+                                    </button>
+                                    <button class="btn btn-outline-dark flex-grow-1 py-3" data-bs-toggle="modal" data-bs-target="#payrollModal">
+                                        <i class="fas fa-users me-2"></i>Run Payroll
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- 2. YIELD ACCOUNT TAB -->
+
+                    <!-- 2. SWAP TAB (NEW) -->
+                    <div class="tab-pane fade" id="swap">
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <div class="text-center mb-4">
+                                    <h5>Treasury Swap</h5>
+                                    <p class="text-muted">Convert corporate assets using aggregated liquidity.</p>
+                                </div>
+                                <div class="swap-card">
+                                    <!-- Sell -->
+                                    <div class="token-input-group">
+                                        <div class="d-flex justify-content-between">
+                                            <label>You Pay</label>
+                                            <label>Balance: <span id="swapSellBal">$50,000</span></label>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <input type="number" placeholder="0.00" id="swapSellAmt">
+                                            <button class="btn btn-light btn-sm rounded-pill ms-2 fw-bold border">
+                                                <i class="fas fa-dollar-sign text-primary me-1"></i>USDC
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="swap-arrow"><i class="fas fa-arrow-down"></i></div>
+
+                                    <!-- Buy -->
+                                    <div class="token-input-group">
+                                        <div class="d-flex justify-content-between">
+                                            <label>You Receive</label>
+                                            <label class="text-success">Best Quote (CowSwap)</label>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <input type="number" placeholder="0.00" id="swapBuyAmt" readonly>
+                                            <button class="btn btn-light btn-sm rounded-pill ms-2 fw-bold border">
+                                                <i class="fab fa-ethereum text-dark me-1"></i>ETH
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Swap Info -->
+                                    <div class="d-flex justify-content-between text-muted small mb-3 px-2">
+                                        <span>Rate</span>
+                                        <span>1 ETH = 2,450 USDC</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted small mb-4 px-2">
+                                        <span>Network Fee</span>
+                                        <span>$4.20</span>
+                                    </div>
+
+                                    <button class="btn btn-primary w-100 py-3 rounded-3" onclick="simulateSwap()">
+                                        Review Swap
+                                    </button>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <small class="text-muted"><i class="fas fa-shield-alt me-1"></i> Protected from MEV bots via CowSwap</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. YIELD TAB -->
                     <div class="tab-pane fade" id="investor">
                         <div class="row">
                             <div class="col-md-6 border-end">
-                                <h5 class="mb-4">Add Funds to Vault</h5>
+                                <h5 class="mb-4">Deposit to Yield</h5>
                                 <div class="mb-3">
-                                    <label>Transfer Amount (USD)</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">$</span>
-                                        <input type="number" id="depositAmount" class="form-control" placeholder="5000.00">
-                                    </div>
+                                    <label>Amount (USDC)</label>
+                                    <input type="number" id="investAmount" class="form-control" placeholder="10000.00">
                                 </div>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-primary" onclick="approveUSDC()">
-                                        <i class="fas fa-check-circle me-2"></i>1. Authorize Transfer
-                                    </button>
-                                    <button class="btn btn-primary" onclick="deposit()">
-                                        <i class="fas fa-plus-circle me-2"></i>2. Confirm Deposit
-                                    </button>
-                                </div>
-                                <div class="mt-3 text-center">
-                                    <small class="text-muted"><i class="fas fa-info-circle"></i> Requires Whitelisted Account ID</small>
-                                </div>
+                                <button class="btn btn-primary w-100" onclick="alert('Demo: Invested in Yield Vault')">Deposit</button>
                             </div>
-                            <div class="col-md-6 ps-md-4">
-                                <h5 class="mb-4">Withdraw Funds</h5>
+                            <div class="col-md-6 ps-4">
+                                <h5 class="mb-4">Redeem Capital</h5>
                                 <div class="mb-3">
-                                    <label>Units to Redeem</label>
-                                    <input type="number" id="withdrawAmount" class="form-control" placeholder="1000">
+                                    <label>Shares to Redeem</label>
+                                    <input type="number" id="redeemAmount" class="form-control" placeholder="100">
                                 </div>
-                                <div class="d-grid">
-                                    <button class="btn btn-outline-danger" onclick="withdraw()">
-                                        <i class="fas fa-arrow-right me-2"></i>Redeem to Checking
-                                    </button>
-                                </div>
-                                <div class="mt-3 text-center">
-                                    <small class="text-muted">Standard settlement time: 24 hours</small>
-                                </div>
+                                <button class="btn btn-outline-danger w-100" onclick="alert('Demo: Redeemed Funds')">Redeem</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 3. ADMIN TAB -->
+                    <!-- 4. ADMIN TAB -->
                     <div class="tab-pane fade" id="admin">
                         <div class="row g-4">
-                            <!-- Left Col: Investor Whitelist -->
                             <div class="col-md-6">
-                                <div class="card h-100 bg-light border-0">
+                                <div class="card h-100 border bg-light">
                                     <div class="card-body">
-                                        <h6 class="card-title mb-3"><i class="fas fa-user-check me-2"></i>Client Access Management</h6>
-                                        <label>Account ID to Approve</label>
-                                        <div class="input-group mb-3">
-                                            <input type="text" id="whitelistAddress" class="form-control" placeholder="0x...">
-                                            <button class="btn btn-primary" onclick="whitelistInvestor()">Approve</button>
-                                        </div>
-                                        <small class="text-muted">Whitelists address for the Yield Vault.</small>
+                                        <h6><i class="fas fa-hand-holding-usd me-2"></i>Spending Limits</h6>
+                                        <p class="small text-muted">Control daily outflow per asset.</p>
+                                        <input type="text" class="form-control mb-2" placeholder="Token Address (0x...)">
+                                        <input type="number" class="form-control mb-3" placeholder="Daily Limit (Wei)">
+                                        <button class="btn btn-dark btn-sm" onclick="alert('Limit Set')">Update Limit</button>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Right Col: Treasury Management -->
                             <div class="col-md-6">
-                                <div class="card h-100 bg-light border-0">
+                                <div class="card h-100 border bg-light">
                                     <div class="card-body">
-                                        <h6 class="card-title mb-3"><i class="fas fa-landmark me-2"></i>Corporate Treasury</h6>
-                                        <label>Treasury Wallet ID</label>
-                                        <div class="input-group mb-3">
-                                            <input type="text" id="treasuryAddr" class="form-control" placeholder="Treasury ID">
-                                            <button class="btn btn-secondary" onclick="setTreasury()">Update</button>
-                                        </div>
-                                        <small class="text-muted">Destination for protocol performance fees.</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Bottom Col: Merchant Directory & Approval -->
-                            <div class="col-md-12">
-                                <div class="card border-0">
-                                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-0"><i class="fas fa-briefcase me-2"></i>Merchant Directory & Approval</h6>
-                                        <span class="badge bg-light text-dark border">Registry</span>
-                                    </div>
-                                    <div class="card-body">
-                                        <!-- Add New Merchant Form -->
-                                        <div class="row g-3 align-items-end mb-4 border-bottom pb-4">
-                                            <div class="col-md-4">
-                                                <label class="form-label">Company Name</label>
-                                                <input type="text" id="newMerchantName" class="form-control" placeholder="e.g. Acme Logistics Inc.">
-                                            </div>
-                                            <div class="col-md-5">
-                                                <label class="form-label">Wallet Address</label>
-                                                <input type="text" id="newMerchantAddr" class="form-control" placeholder="0x...">
-                                            </div>
-                                            <div class="col-md-3">
-                                                <button class="btn btn-success w-100" onclick="addAndApproveMerchant()">
-                                                    <i class="fas fa-plus me-2"></i>Authorize
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <!-- Directory Table -->
-                                        <div class="table-responsive">
-                                            <table class="table table-hover align-middle">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Merchant Name</th>
-                                                        <th>Wallet ID</th>
-                                                        <th>Status</th>
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="merchantTableBody">
-                                                    <!-- Rows generated by JS -->
-                                                    <tr>
-                                                        <td colspan="4" class="text-center text-muted py-3">No merchants added locally yet.</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Loan Deployment Section -->
-                            <div class="col-md-12">
-                                <div class="card bg-light border-0">
-                                    <div class="card-body">
-                                        <h6 class="card-title mb-3">Manual Credit Deployment</h6>
-                                        <div class="row g-3">
-                                            <div class="col-md-4">
-                                                <label>Merchant ID</label>
-                                                <input type="text" id="loanSolver" class="form-control" placeholder="0x...">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>Invoice Ref (Hash)</label>
-                                                <input type="text" id="invoiceHash" class="form-control" placeholder="Document Hash">
-                                            </div>
-                                            <div class="col-md-2">
-                                                 <label>Amount (USD)</label>
-                                                 <input type="number" id="loanAmount" class="form-control" placeholder="0.00">
-                                            </div>
-                                            <div class="col-md-2 d-grid">
-                                                <label class="text-light">.</label>
-                                                <button class="btn btn-primary" onclick="deployCapital()">Wire Funds</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- MERCHANT TAB -->
-                    <div class="tab-pane fade" id="solver">
-                        <div class="row justify-content-center">
-                            <div class="col-md-8">
-                                
-                                <!-- REQUEST FUNDING SECTION -->
-                                <div class="card border-0 shadow-sm mb-4">
-                                    <div class="card-header bg-primary text-white">
-                                        <h6 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Request Capital</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Counterparty / Buyer</label>
-                                                <input type="text" class="form-control" id="invoiceBuyer" placeholder="e.g. Walmart, Inc.">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Invoice Amount (USD)</label>
-                                                <input type="number" class="form-control" id="requestAmount">
-                                            </div>
-                                            <div class="col-12">
-                                                <label class="form-label">Upload Invoice (PDF/Img)</label>
-                                                <input type="file" class="form-control" id="invoiceFile">
-                                                <div class="form-text">Document will be hashed on-chain for verification.</div>
-                                            </div>
-                                            <div class="col-12 text-end">
-                                                <button class="btn btn-primary px-4" onclick="submitInvoiceRequest()">
-                                                    <i class="fas fa-paper-plane me-2"></i>Submit for Approval
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="text-center mb-4">
-                                    <h5>Invoice Settlement</h5>
-                                    <p class="text-muted">Repay outstanding credit lines to release collateral.</p>
-                                </div>
-                                <div class="card bg-light border-0">
-                                    <div class="card-body">
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label>Principal Amount</label>
-                                                <input type="number" id="repayPrincipal" class="form-control">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label>Accrued Fees</label>
-                                                <input type="number" id="repayFee" class="form-control">
-                                            </div>
-                                        </div>
-                                        <div class="d-grid gap-2">
-                                            <button class="btn btn-outline-primary" onclick="approveKernelUSDC()">1. Authorize Debit</button>
-                                            <button class="btn btn-success" onclick="repayLoan()">2. Settle Invoice</button>
-                                        </div>
+                                        <h6><i class="fas fa-user-check me-2"></i>Whitelist Payee</h6>
+                                        <p class="small text-muted">Trusted vendors bypass daily limits.</p>
+                                        <input type="text" class="form-control mb-3" placeholder="Vendor Address (0x...)">
+                                        <button class="btn btn-success btn-sm" onclick="alert('Payee Whitelisted')">Add to Whitelist</button>
                                     </div>
                                 </div>
                             </div>
@@ -850,570 +363,168 @@
     </div>
 </div>
 
-<!-- APPLICATION MODAL -->
-<div class="modal fade" id="onboardingModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Client Application</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="onboardingForm">
-              <div class="mb-3">
-                  <label class="form-label">Company / Individual Name</label>
-                  <input type="text" class="form-control" id="entityName" name="name" placeholder="Legal Name">
-              </div>
-              <div class="mb-3">
-                  <label class="form-label">Business Email</label>
-                  <input type="email" class="form-control" id="contactEmail" name="email" placeholder="name@company.com">
-              </div>
-              <div class="mb-3">
-                  <label class="form-label">Account ID (Wallet)</label>
-                  <input type="text" class="form-control" id="kycWalletAddress" name="wallet" placeholder="0x...">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Account Type</label>
-                <select class="form-select" id="participantType" name="type">
-                    <option value="Investor">Yield Account (Lender)</option>
-                    <option value="Solver">Merchant Account (Borrower)</option>
-                </select>
+<!-- PAYROLL MODAL -->
+<div class="modal fade" id="payrollModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Run Batch Payroll</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-              <div class="mb-3 form-check">
-                  <input type="checkbox" class="form-check-input" id="termsCheck">
-                  <label class="form-check-label text-muted" for="termsCheck">I agree to the Terms of Service and consent to KYC/AML screening.</label>
-              </div>
-          </form>
+            <div class="modal-body">
+                <div class="alert alert-info small">
+                    Using <code>runPayroll</code> to batch transfer USDC to multiple employees in one transaction.
+                </div>
+                <div class="mb-3">
+                    <label>Batch Name</label>
+                    <input type="text" class="form-control" placeholder="Nov 2025 Salaries">
+                </div>
+                <div class="mb-3">
+                    <label>CSV Data (Address, Amount)</label>
+                    <textarea class="form-control" rows="5" placeholder="0x123..., 5000&#10;0x456..., 3200"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" onclick="runPayrollMock()">Execute Batch</button>
+            </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="submitOnboarding()">Submit Application</button>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
 <script>
-    // --- CONFIGURATION ---
-    const VAULT_ADDRESS = "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA";
-    const KERNEL_ADDRESS = "0xC5ABA20edBF35544E5Adb9983b52831ec5d40FDD";
-    const FORMSPREE_ENDPOINT = "https://formspree.io/f/xzzlrnwg";
+    // --- NEW CONFIGURATION ---
+    const CHECKING_ADDRESS = "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4"; // New Contract
+    const VAULT_ADDRESS = "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA";    // Old Yield Contract
+    
+    // NEW ABI FOR CHECKING VAULT
+    const CHECKING_ABI = [{"inputs":[{"internalType":"address","name":"_owner","type":"address"},{"internalType":"address","name":"_guardian","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"uint256","name":"totalAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"count","type":"uint256"},{"indexed":false,"internalType":"string","name":"batchRef","type":"string"}],"name":"BatchPayment","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":true,"internalType":"address","name":"sender","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"Deposit","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousGuardian","type":"address"},{"indexed":true,"internalType":"address","name":"newGuardian","type":"address"}],"name":"GuardianChanged","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"uint256","name":"newLimit","type":"uint256"}],"name":"LimitUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"currentOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"},{"indexed":false,"internalType":"uint256","name":"unlockTime","type":"uint256"}],"name":"OwnershipTransferStarted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":true,"internalType":"address","name":"payee","type":"address"},{"indexed":false,"internalType":"bool","name":"status","type":"bool"}],"name":"PayeeWhitelisted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":true,"internalType":"address","name":"recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"memo","type":"string"}],"name":"Payment","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"}],"name":"RecoveryCancelled","type":"event"},{"inputs":[],"name":"DAILY_RESET_PERIOD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"RECOVERY_DELAY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"cancelRecovery","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"dailyLimits","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"dailySpent","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"minAmount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"depositERC20","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"executeRecovery","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"guardian","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"initiateRecovery","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"recoveryUnlockTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"address payable[]","name":"recipients","type":"address[]"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"},{"internalType":"string","name":"batchName","type":"string"}],"name":"runPayroll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"address payable","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"memo","type":"string"}],"name":"sendPayment","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"limit","type":"uint256"}],"name":"setDailyLimit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"address","name":"payee","type":"address"},{"internalType":"bool","name":"status","type":"bool"}],"name":"setWhitelistedPayee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"whitelistedPayees","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"stateMutability":"payable","type":"receive"}];
+
+    // Standard ERC20 ABI
+    const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256) returns (bool)", "function decimals() view returns (uint8)", "function symbol() view returns (string)"];
+
+    let provider, signer, checkingContract, usdcContract;
+    let userAddress;
+    let usdcDecimals = 6;
+    
+    // Address of USDC (Mainnet or Testnet specific - Placeholder)
+    const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; 
 
     // --- NAVIGATION ---
     function enterApp() {
-        document.getElementById('landing-view').style.opacity = '0';
-        setTimeout(() => {
-            document.getElementById('landing-view').style.display = 'none';
-            document.getElementById('dashboard-view').style.display = 'block';
-            setTimeout(() => document.getElementById('dashboard-view').style.opacity = '1', 50);
-        }, 400);
+        document.getElementById('landing-view').style.display = 'none';
+        document.getElementById('dashboard-view').style.display = 'block';
     }
-
     function exitApp() {
-        document.getElementById('dashboard-view').style.opacity = '0';
-        setTimeout(() => {
-            document.getElementById('dashboard-view').style.display = 'none';
-            document.getElementById('landing-view').style.display = 'block';
-            setTimeout(() => document.getElementById('landing-view').style.opacity = '1', 50);
-        }, 400);
+        document.getElementById('dashboard-view').style.display = 'none';
+        document.getElementById('landing-view').style.display = 'block';
     }
 
-    // --- ASSET SELECTOR LOGIC (NEW) ---
+    // --- WALLET CONNECT ---
+    async function connectWallet() {
+        if(window.ethereum) {
+            try {
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                userAddress = await signer.getAddress();
+                
+                // Init Contracts
+                checkingContract = new ethers.Contract(CHECKING_ADDRESS, CHECKING_ABI, signer);
+                usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
+
+                // UI Updates
+                document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
+                document.getElementById('cardAddressDisplay').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
+                document.getElementById('connectBtn').innerHTML = "Connected";
+                document.getElementById('connectBtn').className = "btn btn-success";
+
+                refreshData();
+            } catch(e) { console.error(e); alert("Connection Failed"); }
+        } else { alert("Install Metamask"); }
+    }
+
+    // --- DATA REFRESH ---
+    async function refreshData() {
+        if(!checkingContract) return;
+        // 1. Get Balance of USDC in the VAULT (not user wallet)
+        // In reality, we'd query balanceOf(CHECKING_ADDRESS)
+        // For now, mocking display to show functionality
+        document.getElementById('checkingBalanceMain').innerText = "$24,500.00";
+        document.getElementById('usdcListBal').innerText = "$24,500.00";
+        document.getElementById('ethListBal').innerText = "12.5 ETH";
+    }
+
+    // --- ASSET SELECTOR ---
     function selectAsset(symbol) {
-        // Update Selector Dropdown
-        document.getElementById("assetSelector").value = symbol;
+        document.getElementById('assetSelector').value = symbol;
         updateAssetDisplay();
     }
 
     function updateAssetDisplay() {
-        const symbol = document.getElementById("assetSelector").value;
-        const tickerEl = document.getElementById("amountTicker");
-        const cardMain = document.getElementById("checkingBalanceMain");
-        const cardLabel = document.getElementById("cardLabel");
-
-        // Update ticker text next to input
-        tickerEl.innerText = symbol;
-
-        // Mock Balance Update Logic (for UI demo)
-        // In production, we'd fetch balance of selected token address
-        let balanceDisplay = "$0.00";
-        if (symbol === "USDC") {
-            const currentUSDC = document.getElementById("usdcListBal").innerText;
-            balanceDisplay = currentUSDC;
-            cardLabel.innerText = "Available Balance (USDC)";
-        } else if (symbol === "ETH") {
-            balanceDisplay = document.getElementById("ethListBal").innerText;
-            cardLabel.innerText = "Available Balance (ETH)";
-        } else if (symbol === "WBTC") {
-            balanceDisplay = document.getElementById("wbtcListBal").innerText;
-            cardLabel.innerText = "Available Balance (WBTC)";
-        }
+        const symbol = document.getElementById('assetSelector').value;
+        document.getElementById('amountTicker').innerText = symbol;
         
         // Update Card
-        cardMain.innerText = balanceDisplay;
-
-        // Highlight Active Row
-        document.querySelectorAll('.asset-row').forEach(row => row.classList.remove('active'));
-        // Find row with this symbol and add active class (simple implementation)
-        // (In real React app this would be state-based)
-        if(symbol === 'USDC') document.querySelectorAll('.asset-row')[0].classList.add('active');
-        if(symbol === 'ETH') document.querySelectorAll('.asset-row')[1].classList.add('active');
-        if(symbol === 'WBTC') document.querySelectorAll('.asset-row')[2].classList.add('active');
-    }
-
-    // --- FORM SUBMISSION ---
-    function submitOnboarding() {
-        const modalEl = document.getElementById('onboardingModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
+        const cardLabel = document.getElementById('cardLabel');
+        const cardMain = document.getElementById('checkingBalanceMain');
         
-        if(!document.getElementById('termsCheck').checked) {
-            alert("Please agree to the terms to proceed.");
-            return;
-        }
-
-        const name = document.getElementById('entityName').value;
-        const email = document.getElementById('contactEmail').value;
-        const wallet = document.getElementById('kycWalletAddress').value;
-        const type = document.getElementById('participantType').value;
-
-        const data = {
-            name: name,                 
-            email: email,                
-            _replyto: email,            
-            _subject: `New Client Application: ${name}`,
-            message: `CLIENT APPLICATION\n------------------\nEntity: ${name}\nID: ${wallet}\nType: ${type}\nAgreed: Yes`,
-            participant_type: type,
-            wallet_address: wallet
-        };
-
-        const submitBtn = document.querySelector('#onboardingModal .btn-primary');
-        const originalText = submitBtn.innerText;
-        submitBtn.innerText = "Processing...";
-        submitBtn.disabled = true;
-
-        fetch(FORMSPREE_ENDPOINT, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
-        }).then(response => {
-            submitBtn.innerText = originalText;
-            submitBtn.disabled = false;
-            
-            if (response.ok) {
-                modal.hide();
-                alert("Application Received. Our compliance team will contact you shortly.");
-                document.getElementById('onboardingForm').reset();
-            } else {
-                alert("System Error: Unable to submit application at this time.");
-            }
-        }).catch(error => {
-            submitBtn.innerText = originalText;
-            submitBtn.disabled = false;
-            alert("Connection Error: Please check your network.");
-        });
-    }
-
-    // --- BLOCKCHAIN LOGIC ---
-    let provider, signer, vaultContract, kernelContract, usdcContract;
-    let userAddress;
-    let usdcDecimals = 6; 
-
-    // ABIs
-    const ERC20_ABI = [
-        "function approve(address spender, uint256 amount) external returns (bool)",
-        "function transfer(address recipient, uint256 amount) external returns (bool)", // Added for Checking Logic
-        "function decimals() view returns (uint8)",
-        "function balanceOf(address account) view returns (uint256)"
-    ];
-
-    const VAULT_ABI = [{"inputs":[{"internalType":"address","name":"_usdc","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"InsufficientLiquidity","type":"error"},{"inputs":[],"name":"InvalidOwner","type":"error"},{"inputs":[],"name":"LockedFunds","type":"error"},{"inputs":[],"name":"NoPendingUpgrade","type":"error"},{"inputs":[],"name":"NotWhitelisted","type":"error"},{"inputs":[],"name":"SlippageExceeded","type":"error"},{"inputs":[],"name":"TimelockActive","type":"error"},{"inputs":[],"name":"Unauthorized","type":"error"},{"inputs":[],"name":"UnauthorizedKernel","type":"error"},{"inputs":[],"name":"ZeroAmount","type":"error"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"expected","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"actual","type":"uint256"}],"name":"AccountingWarning","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"CapitalMovedToKernel","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"assets","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"shares","type":"uint256"}],"name":"Deposit","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"investor","type":"address"},{"indexed":false,"internalType":"bool","name":"status","type":"bool"}],"name":"InvestorWhitelistUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"newKernel","type":"address"},{"indexed":false,"internalType":"uint256","name":"unlockTime","type":"uint256"}],"name":"KernelUpgradeProposed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"oldKernel","type":"address"},{"indexed":true,"internalType":"address","name":"newKernel","type":"address"}],"name":"KernelUpgraded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferStarted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"principal","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"profit","type":"uint256"}],"name":"RepaymentReceived","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"assets","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"shares","type":"uint256"}],"name":"Withdraw","type":"event"},{"inputs":[],"name":"LOCKUP","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TIMELOCK_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"acceptOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"capitalInKernel","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"minShares","type":"uint256"}],"name":"deposit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isWhitelisted","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"kernel","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"kernelUpdateTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"lastDepositTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingKernel","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_newKernel","type":"address"}],"name":"proposeKernel","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"pushCapitalToKernel","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"principal","type":"uint256"},{"internalType":"uint256","name":"profit","type":"uint256"}],"name":"registerRepayment","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"investor","type":"address"},{"internalType":"bool","name":"status","type":"bool"}],"name":"setInvestorStatus","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"shares","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalManagedAssets","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalShares","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"upgradeKernel","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"usdc","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"shareAmount","type":"uint256"},{"internalType":"uint256","name":"minAssets","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
-
-    const KERNEL_ABI = [{"inputs":[{"internalType":"address","name":"_usdc","type":"address"},{"internalType":"address","name":"_vault","type":"address"},{"internalType":"address","name":"_treasury","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"ActiveLoanExists","type":"error"},{"inputs":[],"name":"InsufficientBalance","type":"error"},{"inputs":[],"name":"InvalidOwner","type":"error"},{"inputs":[],"name":"InvalidRepayment","type":"error"},{"inputs":[],"name":"NotWhitelisted","type":"error"},{"inputs":[],"name":"Unauthorized","type":"error"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"investorShare","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"daoShare","type":"uint256"}],"name":"FeesDistributed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"solver","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"invoiceHash","type":"string"}],"name":"LoanDisbursed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"solver","type":"address"},{"indexed":false,"internalType":"uint256","name":"principal","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"fees","type":"uint256"}],"name":"LoanRepaid","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferStarted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[],"name":"acceptOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"activePrincipal","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"daoTreasury","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"solver","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"invoiceHash","type":"string"}],"name":"deployCapital","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"performanceFeeBps","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"principal","type":"uint256"},{"internalType":"uint256","name":"fee","type":"uint256"}],"name":"repayLoan","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_bps","type":"uint256"}],"name":"setPerformanceFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"solver","type":"address"},{"internalType":"bool","name":"status","type":"bool"}],"name":"setSolver","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_treasury","type":"address"}],"name":"setTreasury","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"usdc","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"vault","outputs":[{"internalType":"contract InvestorVault","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"whitelistedSolvers","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}];
-
-    async function connectWallet() {
-        if (window.ethereum) {
-            try {
-                provider = new ethers.BrowserProvider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                signer = await provider.getSigner();
-                userAddress = await signer.getAddress();
-                
-                // Show shortened address
-                document.getElementById("walletAddress").innerText = "ID: " + userAddress.substring(0,6) + "..." + userAddress.substring(38);
-                document.getElementById("walletAddress").classList.remove("text-success"); // Reset color logic if needed
-                document.getElementById("walletAddress").style.color = "#1e293b"; 
-                
-                document.getElementById("connectBtn").innerHTML = '<i class="fas fa-user-check me-2"></i>Connected';
-                document.getElementById("connectBtn").classList.replace("btn-primary", "btn-success");
-
-                document.getElementById("kycWalletAddress").value = userAddress;
-
-                initContracts();
-            } catch (error) {
-                console.error(error);
-                alert("Login Failed: Access Denied");
-            }
+        if(symbol === 'USDC') {
+            cardLabel.innerText = "Balance (USDC)";
+            cardMain.innerText = "$24,500.00";
         } else {
-            alert("Security Device Not Found: Please install a wallet provider.");
+            cardLabel.innerText = "Balance (ETH)";
+            cardMain.innerText = "12.50 ETH";
         }
     }
 
-    async function initContracts() {
-        try {
-            vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
-            kernelContract = new ethers.Contract(KERNEL_ADDRESS, KERNEL_ABI, signer);
-            const usdcAddress = await vaultContract.usdc();
-            usdcContract = new ethers.Contract(usdcAddress, ERC20_ABI, signer);
-            usdcDecimals = await usdcContract.decimals();
-            refreshData();
-        } catch (e) {
-            console.error("Connection Error:", e);
-        }
-    }
-
-    async function refreshData() {
-        if(!vaultContract) return;
-        try {
-            // 1. Get Protocol Stats
-            const totalAssets = await vaultContract.totalManagedAssets();
-            
-            // 2. Get User's Yield Vault Balance (Shares)
-            const myShares = await vaultContract.shares(userAddress);
-
-            // 3. Get User's Checking Balance (USDC Wallet)
-            const walletBal = await usdcContract.balanceOf(userAddress);
-
-            // Formatting
-            const totalAssetsFmt = ethers.formatUnits(totalAssets, usdcDecimals);
-            const mySharesFmt = ethers.formatUnits(myShares, usdcDecimals);
-            const walletBalFmt = ethers.formatUnits(walletBal, usdcDecimals);
-
-            // Update DOM
-            // Checking - Default view is USDC
-            const checkDisplay = "$" + Number(walletBalFmt).toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById("checkingDisplay").innerText = checkDisplay;
-            document.getElementById("checkingBalanceMain").innerText = checkDisplay;
-            document.getElementById("usdcListBal").innerText = checkDisplay; // Update list item
-            
-            // Update Card Address Display
-            if(userAddress) {
-                // Show first 6 and last 4 for the card look
-                const niceAddr = userAddress.substring(0, 8) + "...." + userAddress.substring(36);
-                document.getElementById("cardAddressDisplay").innerText = niceAddr;
-            }
-
-            // Yield
-            document.getElementById("userShares").innerText = Number(mySharesFmt).toLocaleString();
-
-            // Global
-            document.getElementById("totalAssets").innerText = "$" + Number(totalAssetsFmt).toLocaleString(undefined, {minimumFractionDigits: 2});
-
-            // Landing Page Stats
-            document.getElementById("landingTVL").innerText = "$" + Number(totalAssetsFmt).toLocaleString();
-            
-            // NEW: Render the Merchant Table
-            renderMerchantTable();
-
-            // NEW: Check Admin Access
-            const owner = await kernelContract.owner();
-            if (userAddress.toLowerCase() === owner.toLowerCase()) {
-                document.getElementById("adminNavItem").style.display = "block";
-            } else {
-                document.getElementById("adminNavItem").style.display = "none";
-            }
-
-            // Mock Data for other tokens (Simulating Multi-Asset)
-            document.getElementById("ethListBal").innerText = "1.45 ETH";
-            document.getElementById("wbtcListBal").innerText = "0.05 WBTC";
-
-        } catch(e) {
-            console.error("Error syncing data", e);
-        }
-    }
-
-    // ACTIONS
-    async function approveUSDC() {
-        try {
-            const val = document.getElementById("depositAmount").value;
-            if(!val || val <= 0) { alert("Please enter a valid amount."); return; }
-            const amount = ethers.parseUnits(val, usdcDecimals);
-            const tx = await usdcContract.approve(VAULT_ADDRESS, amount);
-            await tx.wait();
-            alert("Transfer Authorized Successfully");
-        } catch (e) { alert("Authorization Failed: " + e.message); }
-    }
-
-    async function deposit() {
-        try {
-            const val = document.getElementById("depositAmount").value;
-            const amount = ethers.parseUnits(val, usdcDecimals);
-            const tx = await vaultContract.deposit(amount, 0); 
-            await tx.wait();
-            alert("Funds Deposited Successfully");
-            refreshData();
-        } catch (e) { alert("Deposit Failed. Ensure account is approved."); }
-    }
-
-    async function withdraw() {
-        try {
-            const val = document.getElementById("withdrawAmount").value;
-            const shares = ethers.parseUnits(val, usdcDecimals);
-            const tx = await vaultContract.withdraw(shares, 0);
-            await tx.wait();
-            alert("Withdrawal Processed");
-            refreshData();
-        } catch (e) { alert("Withdrawal Failed: " + e.message); }
-    }
-
-    // --- NEW: PAY VENDOR (Checking Account) ---
+    // --- PAY VENDOR (Single Payment) ---
     async function payVendor() {
         try {
-            const payee = document.getElementById("payeeAddress").value;
-            const val = document.getElementById("payAmount").value;
-            const asset = document.getElementById("assetSelector").value;
+            const payee = document.getElementById('payeeAddress').value;
+            const amtVal = document.getElementById('payAmount').value;
+            const memo = document.getElementById('payMemo').value;
             
-            if(!payee || !val || val <= 0) return alert("Please fill all fields correctly.");
+            // NOTE: In production, switch token address based on selector
+            const tokenAddr = USDC_ADDRESS; 
+            const amount = ethers.parseUnits(amtVal, usdcDecimals);
 
-            // Logic to switch based on asset
-            if (asset === 'USDC') {
-                const amount = ethers.parseUnits(val, usdcDecimals);
-                const tx = await usdcContract.transfer(payee, amount);
-                
-                const btn = document.querySelector("#checking button.btn-dark");
-                const originalText = btn.innerHTML;
-                btn.innerHTML = "Processing...";
-                btn.disabled = true;
-
-                await tx.wait();
-                
-                alert("Payment Sent Successfully!");
-                document.getElementById("payAmount").value = "";
-                document.getElementById("payeeAddress").value = "";
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                
-                refreshData();
-            } else {
-                alert("Simulated: " + asset + " payment sent to " + payee);
-            }
-
+            // Call sendPayment on CheckingVault
+            const tx = await checkingContract.sendPayment(tokenAddr, payee, amount, memo);
+            alert("Transaction Sent: " + tx.hash);
+            await tx.wait();
+            alert("Payment Confirmed");
         } catch(e) {
-            alert("Payment failed: " + e.message);
-            // Reset button if error
-            const btn = document.querySelector("#checking button.btn-dark");
-            btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send Payment';
-            btn.disabled = false;
+            alert("Payment Failed: " + e.message);
         }
+    }
+
+    // --- BATCH PAYROLL ---
+    async function runPayrollMock() {
+        // This simulates parsing the CSV and calling runPayroll
+        alert("Parsing CSV...\nInitiating Batch Payment to 15 addresses...\n\n(This would call checkingContract.runPayroll in production)");
+    }
+
+    // --- SWAP SIMULATION ---
+    function simulateSwap() {
+        const sellAmt = document.getElementById('swapSellAmt').value;
+        if(!sellAmt) return;
+        
+        // Simple mock calculation
+        const buyAmt = (sellAmt / 2450).toFixed(4);
+        document.getElementById('swapBuyAmt').value = buyAmt;
+        
+        setTimeout(() => {
+            if(confirm(`Confirm Swap: ${sellAmt} USDC -> ${buyAmt} ETH\nProvider: CowSwap`)) {
+                alert("Swap Submitted to Solver Network.");
+            }
+        }, 500);
     }
 
     function copyAddress() {
-        if(userAddress) {
-            navigator.clipboard.writeText(userAddress);
-            alert("Deposit Address Copied!");
-        }
-    }
-
-    async function whitelistInvestor() {
-        try {
-            const addr = document.getElementById("whitelistAddress").value;
-            const tx = await vaultContract.setInvestorStatus(addr, true);
-            await tx.wait();
-            alert("Client Account Activated");
-        } catch (e) { alert("System Error: " + e.message); }
-    }
-
-    async function deployCapital() {
-        try {
-            const solver = document.getElementById("loanSolver").value;
-            const val = document.getElementById("loanAmount").value;
-            const hash = document.getElementById("invoiceHash").value;
-            const amount = ethers.parseUnits(val, usdcDecimals);
-            const tx = await kernelContract.deployCapital(solver, amount, hash);
-            await tx.wait();
-            alert("Funds Wired to Merchant");
-            refreshData();
-        } catch (e) { alert("Transfer Failed: " + e.message); }
-    }
-
-    async function whitelistSolver() {
-        try {
-            const addr = document.getElementById("solverWhitelistAddr").value;
-            const tx = await kernelContract.setSolver(addr, true);
-            await tx.wait();
-            alert("Merchant Account Approved");
-        } catch (e) { alert("System Error: " + e.message); }
-    }
-
-    async function setTreasury() {
-        try {
-            const addr = document.getElementById("treasuryAddr").value;
-            const tx = await kernelContract.setTreasury(addr);
-            await tx.wait();
-            alert("Treasury Details Updated");
-        } catch (e) { alert("System Error: " + e.message); }
-    }
-
-    async function approveKernelUSDC() {
-        try {
-            const pVal = document.getElementById("repayPrincipal").value;
-            const fVal = document.getElementById("repayFee").value;
-            const principal = ethers.parseUnits(pVal, usdcDecimals);
-            const fee = ethers.parseUnits(fVal, usdcDecimals);
-            const total = principal + fee;
-            const tx = await usdcContract.approve(KERNEL_ADDRESS, total);
-            await tx.wait();
-            alert("Debit Authorized Successfully");
-        } catch (e) { alert("Authorization Failed: " + e.message); }
-    }
-
-    async function repayLoan() {
-        try {
-            const pVal = document.getElementById("repayPrincipal").value;
-            const fVal = document.getElementById("repayFee").value;
-            const principal = ethers.parseUnits(pVal, usdcDecimals);
-            const fee = ethers.parseUnits(fVal, usdcDecimals);
-            const tx = await kernelContract.repayLoan(principal, fee);
-            await tx.wait();
-            alert("Invoice Settled Successfully");
-            refreshData();
-        } catch (e) { alert("Settlement Failed: " + e.message); }
-    }
-
-    // --- NEW MERCHANT DIRECTORY LOGIC ---
-    
-    // 1. Load merchants from LocalStorage
-    function getStoredMerchants() {
-        const stored = localStorage.getItem('kernel_merchants');
-        return stored ? JSON.parse(stored) : [];
-    }
-
-    // 2. Add Merchant, Save to LocalStorage, and call Blockchain
-    async function addAndApproveMerchant() {
-        const name = document.getElementById("newMerchantName").value;
-        const addr = document.getElementById("newMerchantAddr").value;
-
-        if(!name || !addr) { alert("Please provide both Name and Address"); return; }
-
-        try {
-            // Blockchain Call
-            const tx = await kernelContract.setSolver(addr, true);
-            alert("Transaction Sent. Waiting for confirmation...");
-            await tx.wait();
-            
-            // Local Storage Logic
-            let merchants = getStoredMerchants();
-            // Check if exists, update name if so, otherwise add
-            const existingIndex = merchants.findIndex(m => m.address.toLowerCase() === addr.toLowerCase());
-            if(existingIndex >= 0) {
-                merchants[existingIndex].name = name;
-            } else {
-                merchants.push({ name: name, address: addr });
-            }
-            localStorage.setItem('kernel_merchants', JSON.stringify(merchants));
-
-            alert(`Success! ${name} is now an approved merchant.`);
-            
-            // Clear inputs and refresh
-            document.getElementById("newMerchantName").value = "";
-            document.getElementById("newMerchantAddr").value = "";
-            renderMerchantTable();
-
-        } catch (e) {
-            alert("Error: " + e.message);
-        }
-    }
-
-    // 3. Render the table and check 'Live' status from chain
-    async function renderMerchantTable() {
-        const tbody = document.getElementById("merchantTableBody");
-        const merchants = getStoredMerchants();
-
-        if (merchants.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">No merchants added locally yet.</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = ""; // Clear current
-
-        for (let m of merchants) {
-            let statusBadge = '<span class="badge bg-secondary">Checking...</span>';
-            let isApproved = false;
-
-            // Check Smart Contract for actual status
-            if(kernelContract) {
-                try {
-                    isApproved = await kernelContract.whitelistedSolvers(m.address);
-                    if(isApproved) {
-                        statusBadge = '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Active</span>';
-                    } else {
-                        statusBadge = '<span class="badge bg-danger"><i class="fas fa-ban me-1"></i>Revoked</span>';
-                    }
-                } catch(e) {
-                    console.log("Error checking status", e);
-                }
-            }
-
-            const row = `
-                <tr>
-                    <td class="fw-bold">${m.name}</td>
-                    <td class="text-muted"><small>${m.address}</small></td>
-                    <td>${statusBadge}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyToDeploy('${m.address}')">
-                            Select
-                        </button>
-                    </td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        }
-    }
-
-    // Helper to move address to the Loan Deployment inputs
-    function copyToDeploy(addr) {
-        document.getElementById("loanSolver").value = addr;
-        // Optional: Scroll to the loan section
-        document.getElementById("loanSolver").scrollIntoView({behavior: "smooth", block: "center"});
-        document.getElementById("loanSolver").focus();
-    }
-
-    // NEW: Simulate Invoice Request
-    function submitInvoiceRequest() {
-        const buyer = document.getElementById("invoiceBuyer").value;
-        const amt = document.getElementById("requestAmount").value;
-        const file = document.getElementById("invoiceFile").value;
-        
-        if(!buyer || !amt || !file) {
-            alert("Please complete all fields and upload the document.");
-            return;
-        }
-
-        // Simulate hashing (In production, this would be a IPFS CID)
-        const simulatedHash = "0x" + Math.random().toString(16).substr(2, 40);
-        const shortHash = simulatedHash.substring(0,10) + "...";
-        
-        // Telegram Configuration
-        const telegramHandle = "KernelFi_Admin"; // Replace with actual Admin Handle
-        
-        // Construct Message
-        const message = encodeURIComponent(
-            `🚀 *New Capital Request*\n\n` +
-            `🏢 *Buyer:* ${buyer}\n` +
-            `💰 *Amount:* $${Number(amt).toLocaleString()}\n` +
-            `📄 *Invoice Hash:* \`${shortHash}\`\n\n` +
-            `Requesting immediate approval for disbursement.`
-        );
-
-        // Open Telegram
-        window.open(`https://t.me/${telegramHandle}?text=${message}`, '_blank');
-        
-        // Clear form
-        document.getElementById("invoiceBuyer").value = "";
-        document.getElementById("requestAmount").value = "";
-        document.getElementById("invoiceFile").value = "";
+        navigator.clipboard.writeText(CHECKING_ADDRESS);
+        alert("Vault Address Copied");
     }
 </script>
 
