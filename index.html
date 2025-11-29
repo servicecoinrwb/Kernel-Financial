@@ -320,7 +320,7 @@
                                         <span>$0.00 (Gasless)</span>
                                     </div>
 
-                                    <button class="btn btn-primary w-100 py-3 rounded-3" onclick="simulateSwap()">
+                                    <button class="btn btn-primary w-100 py-3 rounded-3" onclick="signSwapOrder()">
                                         Sign Order
                                     </button>
                                 </div>
@@ -345,7 +345,13 @@
                                     <label>Amount (USDC)</label>
                                     <input type="number" id="investAmount" class="form-control" placeholder="10000.00">
                                 </div>
-                                <button class="btn btn-primary w-100" onclick="alert('Demo: Invested in Yield Vault')">Deposit</button>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-primary" onclick="approveYieldDeposit()">1. Approve USDC</button>
+                                    <button class="btn btn-primary" onclick="investInYield()">2. Deposit Funds</button>
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <small class="text-muted"><i class="fas fa-lock"></i> Funds locked for 24h</small>
+                                </div>
                             </div>
                             <div class="col-md-6 ps-4">
                                 <h5 class="mb-4">Redeem Capital</h5>
@@ -353,7 +359,10 @@
                                     <label>Shares to Redeem</label>
                                     <input type="number" id="redeemAmount" class="form-control" placeholder="100">
                                 </div>
-                                <button class="btn btn-outline-danger w-100" onclick="alert('Demo: Redeemed Funds')">Redeem</button>
+                                <button class="btn btn-outline-danger w-100" onclick="redeemFromYield()">Redeem to Wallet</button>
+                                <div class="mt-3 text-center">
+                                    <small class="text-muted">Settlement: Instant if liquidity available</small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -677,7 +686,9 @@
         "function setInvestorStatus(address investor, bool status) external",
         "function shares(address account) view returns (uint256)", 
         "function isWhitelisted(address account) view returns (bool)", // Check investor status
-        "function usdc() view returns (address)" 
+        "function usdc() view returns (address)",
+        "function deposit(uint256 amount, uint256 minShares) external",
+        "function withdraw(uint256 shareAmount, uint256 minAssets) external"
     ];
     
     const KERNEL_ABI_HUMAN = [
@@ -1075,6 +1086,57 @@
         } catch (e) { alert("Settlement Failed: " + e.message); }
     }
 
+    // --- YIELD VAULT: APPROVE DEPOSIT ---
+    async function approveYieldDeposit() {
+        try {
+            const amtVal = document.getElementById('investAmount').value;
+            if(!amtVal) return alert("Enter amount");
+            
+            // Defaulting to USDC for Yield Vault as per contract design
+            const usdcAsset = trackedAssets.find(t => t.symbol === 'USDC');
+            const amount = ethers.parseUnits(amtVal, usdcAsset.decimals);
+            
+            const tokenCtx = new ethers.Contract(usdcAsset.address, ERC20_ABI, signer);
+            const tx = await tokenCtx.approve(VAULT_ADDRESS, amount);
+            await tx.wait();
+            alert("Approved for Yield Vault");
+        } catch(e) { alert("Approval Failed: " + e.message); }
+    }
+
+    // --- YIELD VAULT: DEPOSIT ---
+    async function investInYield() {
+        try {
+            const amtVal = document.getElementById('investAmount').value;
+            if(!amtVal) return alert("Enter amount");
+            
+            const usdcAsset = trackedAssets.find(t => t.symbol === 'USDC');
+            const amount = ethers.parseUnits(amtVal, usdcAsset.decimals);
+            
+            // deposit(uint256 amount, uint256 minShares)
+            const tx = await yieldVaultContract.deposit(amount, 0);
+            await tx.wait();
+            alert("Deposited into Yield Vault");
+            refreshData();
+        } catch(e) { alert("Invest Failed: " + e.message); }
+    }
+
+    // --- YIELD VAULT: REDEEM ---
+    async function redeemFromYield() {
+        try {
+            const amtVal = document.getElementById('redeemAmount').value;
+            if(!amtVal) return alert("Enter shares amount");
+            
+            const usdcAsset = trackedAssets.find(t => t.symbol === 'USDC');
+            const shares = ethers.parseUnits(amtVal, usdcAsset.decimals); // Assuming shares same decimals as underlying
+            
+            // withdraw(uint256 shareAmount, uint256 minAssets)
+            const tx = await yieldVaultContract.withdraw(shares, 0);
+            await tx.wait();
+            alert("Redeemed from Yield Vault");
+            refreshData();
+        } catch(e) { alert("Redemption Failed: " + e.message); }
+    }
+
     // --- ADMIN FUNCTIONS ---
     async function setDailyLimit() {
         try {
@@ -1117,7 +1179,7 @@
     }
 
     // --- SWAP SIMULATION ---
-    function simulateSwap() {
+    function signSwapOrder() {
         const sellAmt = document.getElementById('swapSellAmt').value;
         if(!sellAmt) return;
         const buyAmt = (sellAmt / 2450).toFixed(4);
