@@ -592,6 +592,36 @@
                     <div class="tab-pane fade" id="solver">
                         <div class="row justify-content-center">
                             <div class="col-md-8">
+                                
+                                <!-- REQUEST FUNDING SECTION -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Request Capital</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Counterparty / Buyer</label>
+                                                <input type="text" class="form-control" placeholder="e.g. Walmart, Inc.">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Invoice Amount (USD)</label>
+                                                <input type="number" class="form-control" id="requestAmount">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Upload Invoice (PDF/Img)</label>
+                                                <input type="file" class="form-control" id="invoiceFile">
+                                                <div class="form-text">Document will be hashed on-chain for verification.</div>
+                                            </div>
+                                            <div class="col-12 text-end">
+                                                <button class="btn btn-primary px-4" onclick="submitInvoiceRequest()">
+                                                    <i class="fas fa-paper-plane me-2"></i>Submit for Approval
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="text-center mb-4">
                                     <h5>Invoice Settlement</h5>
                                     <p class="text-muted">Repay outstanding credit lines to release collateral.</p>
@@ -1028,6 +1058,26 @@
         // Optional: Scroll to the loan section
         document.getElementById("loanSolver").scrollIntoView({behavior: "smooth", block: "center"});
         document.getElementById("loanSolver").focus();
+    }
+
+    // NEW: Simulate Invoice Request
+    function submitInvoiceRequest() {
+        const amt = document.getElementById("requestAmount").value;
+        const file = document.getElementById("invoiceFile").value;
+        
+        if(!amt || !file) {
+            alert("Please provide the invoice amount and upload the document.");
+            return;
+        }
+
+        // Simulate hashing
+        const simulatedHash = "0x" + Math.random().toString(16).substr(2, 40);
+        
+        alert(`Request Submitted Successfully!\n\nReference ID: ${simulatedHash}\n\nYour application is being reviewed by the credit committee. Funds will be wired upon approval.`);
+        
+        // Clear form
+        document.getElementById("requestAmount").value = "";
+        document.getElementById("invoiceFile").value = "";
     }
 </script>
 
