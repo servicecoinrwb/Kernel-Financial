@@ -602,7 +602,7 @@
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">Counterparty / Buyer</label>
-                                                <input type="text" class="form-control" placeholder="e.g. Walmart, Inc.">
+                                                <input type="text" class="form-control" id="invoiceBuyer" placeholder="e.g. Walmart, Inc.">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Invoice Amount (USD)</label>
@@ -1070,20 +1070,36 @@
 
     // NEW: Simulate Invoice Request
     function submitInvoiceRequest() {
+        const buyer = document.getElementById("invoiceBuyer").value;
         const amt = document.getElementById("requestAmount").value;
         const file = document.getElementById("invoiceFile").value;
         
-        if(!amt || !file) {
-            alert("Please provide the invoice amount and upload the document.");
+        if(!buyer || !amt || !file) {
+            alert("Please complete all fields and upload the document.");
             return;
         }
 
-        // Simulate hashing
+        // Simulate hashing (In production, this would be a IPFS CID)
         const simulatedHash = "0x" + Math.random().toString(16).substr(2, 40);
+        const shortHash = simulatedHash.substring(0,10) + "...";
         
-        alert(`Request Submitted Successfully!\n\nReference ID: ${simulatedHash}\n\nYour application is being reviewed by the credit committee. Funds will be wired upon approval.`);
+        // Telegram Configuration
+        const telegramHandle = "KernelFi_Admin"; // Replace with actual Admin Handle
+        
+        // Construct Message
+        const message = encodeURIComponent(
+            `🚀 *New Capital Request*\n\n` +
+            `🏢 *Buyer:* ${buyer}\n` +
+            `💰 *Amount:* $${Number(amt).toLocaleString()}\n` +
+            `📄 *Invoice Hash:* \`${shortHash}\`\n\n` +
+            `Requesting immediate approval for disbursement.`
+        );
+
+        // Open Telegram
+        window.open(`https://t.me/${telegramHandle}?text=${message}`, '_blank');
         
         // Clear form
+        document.getElementById("invoiceBuyer").value = "";
         document.getElementById("requestAmount").value = "";
         document.getElementById("invoiceFile").value = "";
     }
