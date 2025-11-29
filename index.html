@@ -132,6 +132,20 @@
             background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%); 
             text-align: center;
         }
+
+        /* Partner Logos */
+        .partner-logo {
+            max-height: 45px;
+            opacity: 0.6;
+            filter: grayscale(100%);
+            transition: all 0.3s ease;
+        }
+        .partner-logo:hover {
+            opacity: 1;
+            filter: grayscale(0%);
+            transform: scale(1.05);
+        }
+        a.partner-link { text-decoration: none; }
     </style>
 </head>
 <body>
@@ -170,7 +184,7 @@
 
     <!-- Stats Ticker -->
     <div class="container mb-5">
-        <div class="row g-4">
+        <div class="row g-4 mb-5">
             <div class="col-md-4">
                 <div class="card text-center border-0 bg-white">
                     <div class="card-body">
@@ -196,6 +210,25 @@
                 </div>
             </div>
         </div>
+
+        <!-- Trusted Partners Section -->
+        <div class="row justify-content-center align-items-center mb-5">
+            <div class="col-12 text-center mb-4">
+                <small class="text-uppercase text-muted fw-bold" style="letter-spacing: 1px;">Trusted by Industry Leaders</small>
+            </div>
+            <div class="col-auto mx-4">
+                <a href="https://mechanicaltemp.com/" target="_blank" class="partner-link">
+                    <img src="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" alt="Mechanical Temp" class="partner-logo">
+                </a>
+            </div>
+            <div class="col-auto mx-4">
+                <a href="https://www.service.money/" target="_blank" class="partner-link d-flex align-items-center">
+                    <img src="https://pbs.twimg.com/profile_images/1978592945293930496/hsTismCj_400x400.jpg" alt="ServiceApps" class="partner-logo rounded-circle me-2">
+                    <span class="fw-bold text-dark partner-logo" style="filter: none; font-size: 1.25rem;">ServiceApps</span>
+                </a>
+            </div>
+        </div>
+
         <div class="text-center">
             <small class="text-muted"><i class="fas fa-lock me-1"></i> Data encrypted & verified via blockchain consensus.</small>
         </div>
