@@ -100,6 +100,20 @@
         .asset-row { cursor: pointer; transition: background-color 0.2s; }
         .asset-row:hover { background-color: #f8fafc; }
         .asset-row.active { background-color: #f0f4ff; border-left: 3px solid var(--brand-primary); }
+        
+        /* Partner Logos */
+        .partner-logo {
+            max-height: 45px;
+            opacity: 0.7;
+            filter: grayscale(100%);
+            transition: all 0.3s ease;
+        }
+        .partner-logo:hover {
+            opacity: 1;
+            filter: grayscale(0%);
+            transform: scale(1.05);
+        }
+        a.partner-link { text-decoration: none; }
     </style>
 </head>
 <body>
@@ -118,6 +132,106 @@
             <button class="btn btn-primary btn-lg px-5" onclick="enterApp()">Access Vault</button>
         </div>
     </section>
+    
+    <!-- Stats Ticker -->
+    <div class="container mb-5">
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card text-center border-0 bg-white">
+                    <div class="card-body">
+                        <div class="stats-label">Total Assets Under Management</div>
+                        <div class="stats-value" id="landingTVL">$0.00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-0 bg-white">
+                    <div class="card-body">
+                        <div class="stats-label">Current APY</div>
+                        <div class="stats-value text-success">8.5%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-0 bg-white">
+                    <div class="card-body">
+                        <div class="stats-label">Total Units Issued</div>
+                        <div class="stats-value" id="landingTotalShares">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trusted Partners Section (Restored & Prominent) -->
+        <div class="row justify-content-center align-items-center mb-5 py-4 bg-light rounded-3 border-0">
+            <div class="col-12 text-center mb-4">
+                <small class="text-uppercase text-muted fw-bold" style="letter-spacing: 1px;">Trusted by Industry Leaders</small>
+            </div>
+            <div class="col-auto mx-4">
+                <a href="https://mechanicaltemp.com/" target="_blank" class="partner-link">
+                    <img src="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" alt="Mechanical Temp" class="partner-logo">
+                </a>
+            </div>
+            <div class="col-auto mx-4">
+                <a href="https://www.service.money/" target="_blank" class="partner-link d-flex align-items-center">
+                    <img src="https://pbs.twimg.com/profile_images/1978592945293930496/hsTismCj_400x400.jpg" alt="ServiceApps" class="partner-logo rounded-circle me-2">
+                    <span class="fw-bold text-dark partner-logo" style="filter: none; font-size: 1.25rem;">ServiceApps</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <small class="text-muted"><i class="fas fa-lock me-1"></i> Data encrypted & verified via blockchain consensus.</small>
+        </div>
+    </div>
+
+    <!-- Features Grid -->
+    <section id="onboarding" class="py-5 bg-white">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h3>Our Platforms</h3>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="mb-3 text-primary"><i class="fas fa-chart-line fa-2x"></i></div>
+                            <h5>Institutional Yield</h5>
+                            <p class="text-muted">Deposit capital to fund verified trade invoices. Earn stable returns (~8.5% APY) derived from real economic activity.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="mb-3 text-primary"><i class="fas fa-university fa-2x"></i></div>
+                            <h5>Multi-Asset Checking</h5>
+                            <p class="text-muted">A secure smart-contract vault for day-to-day operations. Supports USDC, ETH, and WBTC with automated payroll.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="mb-3 text-primary"><i class="fas fa-industry fa-2x"></i></div>
+                            <h5>Merchant Liquidity</h5>
+                            <p class="text-muted">Access instant working capital against verified invoices. Streamlined on-chain approval for global suppliers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <button class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#onboardingModal">Apply for Access</button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-4 mt-auto border-top bg-white">
+        <div class="container text-center">
+            <p class="text-muted mb-0">&copy; 2025 Kernel Financial LLC. All rights reserved.</p>
+            <small class="text-muted">Kernel Financial is a technology provider. Banking services provided by partner institutions.</small>
+        </div>
+    </footer>
 </div>
 
 <div id="dashboard-view" style="display: none;">
