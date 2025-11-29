@@ -341,7 +341,11 @@
 
                     <!-- 4. ADMIN TAB -->
                     <div class="tab-pane fade" id="admin">
-                        <div class="row g-4">
+                        <!-- ROW 1: Checking Vault Admin -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-12">
+                                <h5 class="mb-3 text-muted border-bottom pb-2">Checking Vault Settings</h5>
+                            </div>
                             <div class="col-md-6">
                                 <div class="card h-100 border bg-light">
                                     <div class="card-body">
@@ -356,11 +360,38 @@
                             <div class="col-md-6">
                                 <div class="card h-100 border bg-light">
                                     <div class="card-body">
-                                        <h6><i class="fas fa-user-check me-2"></i>Whitelist Payee</h6>
+                                        <h6><i class="fas fa-file-invoice me-2"></i>Whitelist Payee</h6>
                                         <p class="small text-muted">Trusted vendors bypass daily limits.</p>
                                         <input type="text" class="form-control mb-2" id="wlToken" placeholder="Asset (0x...)">
                                         <input type="text" class="form-control mb-3" id="wlPayee" placeholder="Vendor Address (0x...)">
                                         <button class="btn btn-success btn-sm" onclick="whitelistPayee()">Add to Whitelist</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ROW 2: Protocol Access Management -->
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <h5 class="mb-3 text-muted border-bottom pb-2">Protocol Access Management</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border bg-white shadow-sm">
+                                    <div class="card-body">
+                                        <h6><i class="fas fa-user-plus me-2 text-primary"></i>Client Access (Yield)</h6>
+                                        <p class="small text-muted">Whitelist wallet addresses for the Yield Vault (KYC).</p>
+                                        <input type="text" class="form-control mb-3" id="investorAddress" placeholder="Investor Wallet (0x...)">
+                                        <button class="btn btn-primary btn-sm" onclick="whitelistInvestor()">Add Wallet Address</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border bg-white shadow-sm">
+                                    <div class="card-body">
+                                        <h6><i class="fas fa-building me-2 text-success"></i>Merchant Registry</h6>
+                                        <p class="small text-muted">Approve companies for the Merchant Portal.</p>
+                                        <input type="text" class="form-control mb-3" id="merchantAddress" placeholder="Company Wallet (0x...)">
+                                        <button class="btn btn-success btn-sm" onclick="whitelistMerchant()">Whitelist Company</button>
                                     </div>
                                 </div>
                             </div>
@@ -439,7 +470,10 @@
 
 <script>
     // --- NEW CONFIGURATION ---
-    const CHECKING_ADDRESS = "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4"; // Your Contract
+    const CHECKING_ADDRESS = "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4"; // Checking Vault
+    const VAULT_ADDRESS = "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA";    // Yield Vault
+    const KERNEL_ADDRESS = "0xC5ABA20edBF35544E5Adb9983b52831ec5d40FDD";    // Kernel/Merchant Contract
+    
     // Addresses for Demo (Mainnet) - UPDATE THESE FOR YOUR NETWORK
     const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; 
     const ETH_ADDRESS = "0x0000000000000000000000000000000000000000"; // Represents Native ETH
@@ -452,13 +486,19 @@
         "function setDailyLimit(address token, uint256 limit) external",
         "function setWhitelistedPayee(address token, address payee, bool status) external"
     ];
+    
+    // Partial ABIs for Protocol Admin features
+    const YIELD_ABI = ["function setInvestorStatus(address investor, bool status) external"];
+    const KERNEL_ABI_HUMAN = ["function setSolver(address solver, bool status) external"];
+
     const ERC20_ABI = [
         "function balanceOf(address) view returns (uint256)", 
         "function approve(address,uint256) returns (bool)", 
         "function decimals() view returns (uint8)"
     ];
 
-    let provider, signer, checkingContract, usdcContract;
+    let provider, signer; 
+    let checkingContract, yieldVaultContract, kernelContract, usdcContract;
     let userAddress;
     let usdcDecimals = 6;
     
@@ -482,6 +522,8 @@
                 
                 // Init Contracts
                 checkingContract = new ethers.Contract(CHECKING_ADDRESS, CHECKING_ABI, signer);
+                yieldVaultContract = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, signer);
+                kernelContract = new ethers.Contract(KERNEL_ADDRESS, KERNEL_ABI_HUMAN, signer);
                 usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
 
                 // UI Updates
@@ -501,8 +543,6 @@
         
         try {
             // 1. Get Real USDC Balance of the Vault
-            // Note: We need a contract instance for USDC to check the balance of the VAULT address
-            // usdcContract is already defined globally and init in connectWallet
             const usdcBalRaw = await usdcContract.balanceOf(CHECKING_ADDRESS);
             const usdcBal = ethers.formatUnits(usdcBalRaw, 6); // USDC has 6 decimals
             const usdcString = "$" + Number(usdcBal).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -513,18 +553,16 @@
             const ethString = Number(ethBal).toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4}) + " ETH";
 
             // 3. Update UI
-            document.getElementById('checkingBalanceMain').innerText = usdcString; // Default view
+            document.getElementById('checkingBalanceMain').innerText = usdcString; 
             document.getElementById('checkingDisplay').innerText = usdcString;
             document.getElementById('usdcListBal').innerText = usdcString;
             document.getElementById('ethListBal').innerText = ethString;
-            document.getElementById('swapSellBal').innerText = usdcString; // Default swap sell balance
+            document.getElementById('swapSellBal').innerText = usdcString; 
             
-            // Also update the card display based on current selection
             updateAssetDisplay();
 
         } catch (e) {
             console.error("Error fetching balances:", e);
-            // Fallback or alert if fetch fails
         }
     }
 
@@ -543,11 +581,9 @@
         
         if(symbol === 'USDC') {
             cardLabel.innerText = "Balance (USDC)";
-            // Grab the real value we just fetched into the list
             cardMain.innerText = document.getElementById('usdcListBal').innerText; 
         } else {
             cardLabel.innerText = "Balance (ETH)";
-            // Grab the real value we just fetched into the list
             cardMain.innerText = document.getElementById('ethListBal').innerText;
         }
     }
@@ -563,7 +599,7 @@
             if(!payee || !amtVal) return alert("Fill all fields");
 
             const tokenAddr = (asset === 'USDC') ? USDC_ADDRESS : ETH_ADDRESS;
-            const amount = ethers.parseUnits(amtVal, usdcDecimals); // Assuming 6 decimals for simplicity
+            const amount = ethers.parseUnits(amtVal, usdcDecimals); 
 
             const tx = await checkingContract.sendPayment(tokenAddr, payee, amount, memo);
             alert("Transaction Sent: " + tx.hash);
@@ -579,7 +615,6 @@
         try {
             const amtVal = document.getElementById('fundAmount').value;
             const amount = ethers.parseUnits(amtVal, usdcDecimals);
-            // Approve Vault to spend User's USDC
             const tx = await usdcContract.approve(CHECKING_ADDRESS, amount);
             await tx.wait();
             alert("Approved! Now click Deposit.");
@@ -592,10 +627,7 @@
             const memo = document.getElementById('fundMemo').value;
             const amount = ethers.parseUnits(amtVal, usdcDecimals);
             
-            // deadline = current time + 1 hour
             const deadline = Math.floor(Date.now() / 1000) + 3600;
-            
-            // minAmount = amount (0 slippage for stablecoin demo)
             const tx = await checkingContract.depositERC20(USDC_ADDRESS, amount, amount, memo, deadline);
             await tx.wait();
             alert("Funds Deposited to Vault");
@@ -628,7 +660,7 @@
         } catch(e) { alert("Payroll Failed: " + e.message); }
     }
 
-    // --- ADMIN CONTROLS ---
+    // --- ADMIN: CHECKING CONTROLS ---
     async function setDailyLimit() {
         try {
             const token = document.getElementById('limitToken').value;
@@ -652,15 +684,33 @@
         } catch(e) { alert("Error: " + e.message); }
     }
 
+    // --- ADMIN: PROTOCOL ACCESS ---
+    async function whitelistInvestor() {
+        try {
+            const addr = document.getElementById('investorAddress').value;
+            // Calls setInvestorStatus on Yield Vault
+            const tx = await yieldVaultContract.setInvestorStatus(addr, true);
+            await tx.wait();
+            alert("Investor Wallet Whitelisted");
+        } catch(e) { alert("Access Control Error: " + e.message); }
+    }
+
+    async function whitelistMerchant() {
+        try {
+            const addr = document.getElementById('merchantAddress').value;
+            // Calls setSolver on Kernel Contract
+            const tx = await kernelContract.setSolver(addr, true);
+            await tx.wait();
+            alert("Company Whitelisted");
+        } catch(e) { alert("Access Control Error: " + e.message); }
+    }
+
     // --- SWAP SIMULATION ---
     function simulateSwap() {
         const sellAmt = document.getElementById('swapSellAmt').value;
         if(!sellAmt) return;
-        
-        // Mock Quote
         const buyAmt = (sellAmt / 2450).toFixed(4);
         document.getElementById('swapBuyAmt').value = buyAmt;
-        
         setTimeout(() => {
             if(confirm(`Confirm Treasury Swap?\n\nSell: ${sellAmt} USDC\nBuy: ${buyAmt} ETH\n\nRoute: CowSwap (Gasless)`)) {
                 alert("Swap Order Signed. Waiting for Solver execution...");
