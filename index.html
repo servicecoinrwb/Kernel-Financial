@@ -124,7 +124,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-white border-bottom">
         <div class="container">
             <a class="navbar-brand" href="#"><i class="fas fa-layer-group me-2 text-primary"></i>Kernel Financial</a>
-            <button class="btn btn-primary" onclick="enterApp()">Client Login</button>
+            <button class="btn btn-primary" onclick="showLoginModal()">Client Login</button>
         </div>
     </nav>
     <section class="hero-section" style="padding-top: 120px; text-align: center; background: linear-gradient(180deg, #f8fafc 0%, #fff 100%); padding-bottom: 80px;">
@@ -132,8 +132,7 @@
             <h1 class="display-4 fw-bold mb-4">Enterprise Treasury OS</h1>
             <p class="lead text-muted mb-5">Banking-grade checking limits, automated payroll, and yield optimization.<br>All on-chain. All non-custodial.</p>
             <div class="d-flex justify-content-center gap-3">
-                <button class="btn btn-primary btn-lg px-5" onclick="enterApp()">Access Vault</button>
-                <!-- RESTORED BUTTON -->
+                <button class="btn btn-primary btn-lg px-5" onclick="showLoginModal()">Access Vault</button>
                 <button class="btn btn-outline-primary btn-lg px-5" data-bs-toggle="modal" data-bs-target="#onboardingModal">Open Account</button>
             </div>
         </div>
@@ -146,7 +145,6 @@
                 <div class="card text-center border-0 bg-white">
                     <div class="card-body">
                         <div class="stats-label">Total Assets Under Management</div>
-                        <!-- Live data hook -->
                         <div class="stats-value" id="landingTVL">$0.00</div>
                     </div>
                 </div>
@@ -247,11 +245,11 @@
             <a class="navbar-brand" href="#" onclick="exitApp()"><i class="fas fa-layer-group me-2 text-primary"></i>Kernel Financial</a>
             <div class="d-flex align-items-center">
                 <div class="me-3 text-end d-none d-md-block">
-                    <small class="d-block text-muted">Connected Wallet</small>
+                    <small class="d-block text-muted">Connected as</small>
                     <span id="walletAddress" class="fw-bold text-success">Not Connected</span>
                 </div>
-                <button id="connectBtn" class="btn btn-dark" onclick="connectWallet()">
-                    <i class="fas fa-wallet me-2"></i>Connect
+                <button id="connectBtn" class="btn btn-dark" onclick="showLoginModal()">
+                    <i class="fas fa-wallet me-2"></i>Switch User
                 </button>
             </div>
         </div>
@@ -677,6 +675,35 @@
     </div>
 </div>
 
+<!-- LOGIN MODAL -->
+<div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Sign In</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-grid gap-3">
+                    <button class="btn btn-lg btn-outline-dark" onclick="connectWallet()">
+                        <i class="fas fa-wallet me-2"></i> Metamask
+                    </button>
+                    <div class="text-center text-muted small">-- OR --</div>
+                    <div class="input-group">
+                        <input type="email" id="web3authEmail" class="form-control" placeholder="name@company.com">
+                        <button class="btn btn-primary" onclick="loginWithEmail()">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <small class="text-muted" style="font-size: 0.75rem;">Secured by Web3Auth MPC</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- PAYROLL MODAL -->
 <div class="modal fade" id="payrollModal" tabindex="-1">
     <div class="modal-dialog">
@@ -828,13 +855,24 @@
         { symbol: "ETH", address: ETH_ADDRESS, decimals: 18, isEth: true }
     ];
 
-    // Load local storage assets
-    if(localStorage.getItem('kernelAssets')) {
-        const stored = JSON.parse(localStorage.getItem('kernelAssets'));
-        // Merge ensuring no duplicates
-        stored.forEach(s => {
-            if(!trackedAssets.find(t => t.symbol === s.symbol)) trackedAssets.push(s);
-        });
+    // --- LOAD ASSETS FOR SPECIFIC USER ---
+    function loadUserAssets(userAddr) {
+        const key = 'kernelAssets_' + userAddr.toLowerCase();
+        const stored = localStorage.getItem(key);
+        if(stored) {
+            const parsed = JSON.parse(stored);
+            // Merge
+            parsed.forEach(s => {
+                if(!trackedAssets.find(t => t.symbol === s.symbol)) trackedAssets.push(s);
+            });
+        }
+    }
+    
+    // --- SAVE ASSETS FOR SPECIFIC USER ---
+    function saveUserAssets(userAddr) {
+        const key = 'kernelAssets_' + userAddr.toLowerCase();
+        // Filter out defaults to avoid bloating storage if needed, or just save all
+        localStorage.setItem(key, JSON.stringify(trackedAssets));
     }
 
     // --- ABI DEFINITIONS ---
@@ -917,6 +955,11 @@
     }
 
     // --- NAVIGATION ---
+    function showLoginModal() {
+        const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+        modal.show();
+    }
+    
     function enterApp() {
         document.getElementById('landing-view').style.display = 'none';
         document.getElementById('dashboard-view').style.display = 'block';
@@ -928,43 +971,88 @@
         document.getElementById('landing-view').style.display = 'block';
     }
 
-    // --- WALLET CONNECT ---
+    // --- WALLET CONNECT (METAMASK) ---
     async function connectWallet() {
         if(window.ethereum) {
             try {
                 provider = new ethers.BrowserProvider(window.ethereum);
                 signer = await provider.getSigner();
                 userAddress = await signer.getAddress();
-                
-                // Init Core Contracts
-                checkingContract = new ethers.Contract(CHECKING_ADDRESS, CHECKING_ABI, signer);
-                yieldVaultContract = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, signer);
-                kernelContract = new ethers.Contract(KERNEL_ADDRESS, KERNEL_ABI_HUMAN, signer);
-
-                // Try to fetch real USDC address from Vault to ensure alignment
-                try {
-                    const realUsdc = await yieldVaultContract.usdc();
-                    trackedAssets[0].address = realUsdc; // Update USDC logic
-                } catch(e) {}
-
-                // UI Updates
-                document.getElementById('walletAddress').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
-                document.getElementById('cardAddressDisplay').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
-                document.getElementById('withdrawDestAddr').innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38); // Sync withdraw modal destination
-                document.getElementById('connectBtn').innerHTML = "Connected";
-                document.getElementById('connectBtn').className = "btn btn-success";
-                
-                // Pre-fill modal inputs
-                document.getElementById('kycWalletAddress').value = userAddress;
-
-                refreshData();
+                completeLogin(userAddress);
+                bootstrap.Modal.getInstance(document.getElementById('loginModal'))?.hide();
             } catch(e) { console.error(e); alert("Connection Failed: " + e.message); }
         } else { alert("Install Metamask"); }
     }
 
+    // --- LOGIN WITH EMAIL (WEB3AUTH SIMULATION) ---
+    async function loginWithEmail() {
+        const email = document.getElementById('web3authEmail').value;
+        if(!email) return alert("Please enter email");
+
+        // SIMULATION: In a real app, this calls Web3Auth SDK
+        // Here we generate a deterministic wallet from the email to simulate the unique address behavior
+        const mockPrivateKey = ethers.id(email); // Hash email to get a 'private key'
+        const mockWallet = new ethers.Wallet(mockPrivateKey);
+        
+        // We can't use this wallet to sign real transactions without a provider, 
+        // so we treat this as a "View Only" or "Simulation" mode for the demo, 
+        // OR we just use the address to key the data.
+        userAddress = mockWallet.address;
+        
+        alert(`Web3Auth Success!\nEmail: ${email}\nGenerated Wallet: ${userAddress.substring(0,6)}...`);
+        
+        // Note: Since we don't have a real provider for this generated wallet in this static HTML demo,
+        // we will fall back to read-only provider for data, but write actions won't work.
+        // In production, Web3Auth returns a valid EIP-1193 provider here.
+        if(window.ethereum) {
+             provider = new ethers.BrowserProvider(window.ethereum); // Use injected provider for reads
+             // signer = ... (Web3Auth provider)
+        }
+        
+        completeLogin(userAddress);
+        bootstrap.Modal.getInstance(document.getElementById('loginModal'))?.hide();
+    }
+
+    async function completeLogin(address) {
+        // 1. Load User Specific Assets
+        loadUserAssets(address);
+        
+        // 2. Init Core Contracts
+        if(provider) {
+            checkingContract = new ethers.Contract(CHECKING_ADDRESS, CHECKING_ABI, provider); // Read only if no signer
+            yieldVaultContract = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, provider);
+            kernelContract = new ethers.Contract(KERNEL_ADDRESS, KERNEL_ABI_HUMAN, provider);
+            // If we have a signer (Metamask), upgrade contracts to writable
+            if(signer) {
+                checkingContract = checkingContract.connect(signer);
+                yieldVaultContract = yieldVaultContract.connect(signer);
+                kernelContract = kernelContract.connect(signer);
+            }
+        }
+
+        // 3. Fetch real USDC address
+        try {
+            const realUsdc = await yieldVaultContract.usdc();
+            trackedAssets[0].address = realUsdc; 
+        } catch(e) {}
+
+        // 4. UI Updates
+        document.getElementById('walletAddress').innerText = address.substring(0,6) + "..." + address.substring(38);
+        document.getElementById('cardAddressDisplay').innerText = address.substring(0,6) + "..." + address.substring(38);
+        document.getElementById('withdrawDestAddr').innerText = address.substring(0,6) + "..." + address.substring(38);
+        document.getElementById('connectBtn').innerHTML = "Connected";
+        document.getElementById('connectBtn').className = "btn btn-success";
+        
+        // Pre-fill modal inputs
+        document.getElementById('kycWalletAddress').value = address;
+
+        enterApp();
+        refreshData();
+    }
+
     // --- DATA REFRESH ---
     async function refreshData() {
-        if(!signer) return;
+        if(!provider) return;
         
         // 1. Update Asset Balances (Loop through tracked assets)
         for(let asset of trackedAssets) {
@@ -977,7 +1065,7 @@
                     const raw = await provider.getBalance(userAddress);
                     walletBal = ethers.formatEther(raw);
                 } else {
-                    const tokenCtx = new ethers.Contract(asset.address, ERC20_ABI, signer);
+                    const tokenCtx = new ethers.Contract(asset.address, ERC20_ABI, provider);
                     const raw = await tokenCtx.balanceOf(userAddress);
                     walletBal = ethers.formatUnits(raw, asset.decimals);
                 }
@@ -988,7 +1076,7 @@
                     const raw = await provider.getBalance(CHECKING_ADDRESS);
                     vaultBal = ethers.formatEther(raw);
                 } else {
-                    const tokenCtx = new ethers.Contract(asset.address, ERC20_ABI, signer);
+                    const tokenCtx = new ethers.Contract(asset.address, ERC20_ABI, provider);
                     const raw = await tokenCtx.balanceOf(CHECKING_ADDRESS);
                     vaultBal = ethers.formatUnits(raw, asset.decimals);
                 }
@@ -1087,8 +1175,8 @@
         const newAsset = { symbol: sym.toUpperCase(), address: addr, decimals: dec, isEth: false, walletBalance: "0.00", vaultBalance: "0.00" };
         trackedAssets.push(newAsset);
         
-        // Persist
-        localStorage.setItem('kernelAssets', JSON.stringify(trackedAssets));
+        // Persist specific to user
+        saveUserAssets(userAddress);
         
         // UI Refresh
         bootstrap.Modal.getInstance(document.getElementById('addTokenModal')).hide();
@@ -1125,6 +1213,7 @@
 
     // --- BANKING: SEND PAYMENT ---
     async function payVendor() {
+        if(!signer) return alert("Write actions require Metamask connection (not simulation)");
         try {
             const payee = document.getElementById('payeeAddress').value;
             const amtVal = document.getElementById('payAmount').value;
@@ -1147,6 +1236,7 @@
 
     // --- BANKING: DEPOSIT ---
     async function approveDeposit() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const symbol = document.getElementById('depositAssetSelector').value;
             const asset = trackedAssets.find(t => t.symbol === symbol);
@@ -1162,6 +1252,7 @@
     }
 
     async function executeDeposit() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const symbol = document.getElementById('depositAssetSelector').value;
             const asset = trackedAssets.find(t => t.symbol === symbol);
@@ -1189,6 +1280,7 @@
 
     // --- BANKING: WITHDRAW ---
     async function executeWithdrawal() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const symbol = document.getElementById('withdrawAssetSelector').value;
             const asset = trackedAssets.find(t => t.symbol === symbol);
@@ -1211,6 +1303,7 @@
 
     // --- BANKING: PAYROLL ---
     async function runPayroll() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             // Simplified for Demo: Always uses Active Asset
             const asset = activeAsset;
@@ -1262,6 +1355,7 @@
     }
 
     async function approveKernelUSDC() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const pVal = document.getElementById("repayPrincipal").value;
             const fVal = document.getElementById("repayFee").value;
@@ -1279,6 +1373,7 @@
     }
 
     async function repayLoan() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const pVal = document.getElementById("repayPrincipal").value;
             const fVal = document.getElementById("repayFee").value;
@@ -1295,6 +1390,7 @@
 
     // --- YIELD VAULT: APPROVE DEPOSIT ---
     async function approveYieldDeposit() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const amtVal = document.getElementById('investAmount').value;
             if(!amtVal) return alert("Enter amount");
@@ -1312,6 +1408,7 @@
 
     // --- YIELD VAULT: DEPOSIT ---
     async function investInYield() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const amtVal = document.getElementById('investAmount').value;
             if(!amtVal) return alert("Enter amount");
@@ -1329,6 +1426,7 @@
 
     // --- YIELD VAULT: REDEEM ---
     async function redeemFromYield() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const amtVal = document.getElementById('redeemAmount').value;
             if(!amtVal) return alert("Enter shares amount");
@@ -1346,6 +1444,7 @@
 
     // --- ADMIN FUNCTIONS ---
     async function setDailyLimit() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const token = document.getElementById('limitToken').value;
             const limit = document.getElementById('limitAmount').value;
@@ -1358,6 +1457,7 @@
     }
 
     async function whitelistPayee() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const token = document.getElementById('wlToken').value;
             const payee = document.getElementById('wlPayee').value;
@@ -1368,6 +1468,7 @@
     }
 
     async function whitelistInvestor() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const addr = document.getElementById('investorAddress').value;
             const tx = await yieldVaultContract.setInvestorStatus(addr, true);
@@ -1377,6 +1478,7 @@
     }
 
     async function whitelistMerchant() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const addr = document.getElementById('merchantAddress').value;
             const tx = await kernelContract.setSolver(addr, true);
