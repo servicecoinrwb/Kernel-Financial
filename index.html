@@ -82,6 +82,7 @@
 
         .btn-success { background-color: #10b981; border: none; border-radius: 8px; font-weight: 500; }
         .btn-danger { background-color: #ef4444; border: none; border-radius: 8px; font-weight: 500; }
+        .btn-dark { background-color: var(--brand-dark); border: none; border-radius: 8px; font-weight: 600; }
 
         /* Inputs */
         .form-control { 
@@ -146,6 +147,16 @@
             transform: scale(1.05);
         }
         a.partner-link { text-decoration: none; }
+
+        /* NEW: Checking Card Style */
+        .checking-balance-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -253,18 +264,18 @@
                 <div class="col-md-4">
                     <div class="card h-100">
                         <div class="card-body">
-                            <div class="mb-3 text-primary"><i class="fas fa-industry fa-2x"></i></div>
-                            <h5>Supply Chain Finance</h5>
-                            <p class="text-muted">Upload verified invoices and receive up to 90% funding within 24 hours using our streamlined approval engine.</p>
+                            <div class="mb-3 text-primary"><i class="fas fa-university fa-2x"></i></div>
+                            <h5>Checking & Payments</h5>
+                            <p class="text-muted">Direct digital dollar payments. Wire funds instantly to vendors or employees with full on-chain transparency.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card h-100">
                         <div class="card-body">
-                            <div class="mb-3 text-primary"><i class="fas fa-shield-alt fa-2x"></i></div>
-                            <h5>Institutional Security</h5>
-                            <p class="text-muted">All participants undergo strict KYC/AML checks. Funds are held in audited smart vaults with multi-signature governance.</p>
+                            <div class="mb-3 text-primary"><i class="fas fa-industry fa-2x"></i></div>
+                            <h5>Supply Chain Finance</h5>
+                            <p class="text-muted">Upload verified invoices and receive up to 90% funding within 24 hours using our streamlined approval engine.</p>
                         </div>
                     </div>
                 </div>
@@ -310,8 +321,7 @@
                     <div>
                         <h4 class="fw-bold mb-2">Welcome to your Workspace</h4>
                         <p class="mb-4 text-white-50" style="max-width: 600px;">
-                            This portal provides direct access to Kernel's on-chain liquidity pools. 
-                            Follow the guide below to manage your institutional assets securely.
+                            Manage your operating capital and high-yield investments in one secure portal.
                         </p>
                     </div>
                     <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('welcomePanel').style.display='none'" aria-label="Close"></button>
@@ -322,11 +332,11 @@
                         <div class="card bg-white bg-opacity-10 border-0 h-100">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-piggy-bank me-2"></i>
-                                    <span class="fw-bold">1. Yield Account</span>
+                                    <i class="fas fa-university me-2"></i>
+                                    <span class="fw-bold">1. Checking Account</span>
                                 </div>
                                 <small class="text-white-50">
-                                    For Lenders. Deposit USDC stablecoins into the vault to earn yield from real-world trade invoices. Interest accrues automatically.
+                                    Your liquid operating balance. Use this for day-to-day vendor payments and payroll. Instant settlement.
                                 </small>
                             </div>
                         </div>
@@ -335,11 +345,11 @@
                         <div class="card bg-white bg-opacity-10 border-0 h-100">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-user-shield me-2"></i>
-                                    <span class="fw-bold">2. Administration</span>
+                                    <i class="fas fa-piggy-bank me-2"></i>
+                                    <span class="fw-bold">2. Yield Vault</span>
                                 </div>
                                 <small class="text-white-50">
-                                    For Managers. Whitelist new client wallets (KYC), approve merchant partners, and manage the protocol treasury address.
+                                    Deposit excess capital here to earn ~8.5% APY from secured trade invoices. 24h withdrawal period.
                                 </small>
                             </div>
                         </div>
@@ -352,7 +362,7 @@
                                     <span class="fw-bold">3. Merchant Portal</span>
                                 </div>
                                 <small class="text-white-50">
-                                    For Borrowers. View outstanding credit lines and repay loans (Principal + Fees) to settle invoices and unlock collateral.
+                                    For Borrowers. Upload invoices and access credit lines against your receivables.
                                 </small>
                             </div>
                         </div>
@@ -363,45 +373,48 @@
 
         <!-- Dashboard Stats -->
         <div class="row mb-4">
+            <!-- CHECKING STAT -->
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="stats-label">Total Portfolio Balance</div>
-                                <div class="stats-value" id="totalAssets">$0.00</div>
+                                <div class="stats-label">Checking (Liquid)</div>
+                                <div class="stats-value" id="checkingDisplay">$0.00</div>
                             </div>
-                            <div class="text-primary bg-light rounded-circle p-3">
-                                <i class="fas fa-wallet fa-2x"></i>
+                            <div class="text-secondary bg-light rounded-circle p-3">
+                                <i class="fas fa-university fa-2x"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- YIELD STAT -->
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="stats-label">Active Units Held</div>
+                                <div class="stats-label">Invested (Yield)</div>
                                 <div class="stats-value" id="userShares">0.00</div>
                             </div>
                             <div class="text-success bg-light rounded-circle p-3">
-                                <i class="fas fa-chart-pie fa-2x"></i>
+                                <i class="fas fa-chart-line fa-2x"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- GLOBAL STAT -->
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="stats-label">Total Units Issued</div>
-                                <div class="stats-value" id="totalShares">0.00</div>
+                                <div class="stats-label">Protocol TVL</div>
+                                <div class="stats-value" id="totalAssets">$0.00</div>
                             </div>
-                            <div class="text-info bg-light rounded-circle p-3">
+                            <div class="text-primary bg-light rounded-circle p-3">
                                 <i class="fas fa-globe fa-2x"></i>
                             </div>
                         </div>
@@ -414,9 +427,15 @@
         <div class="card">
             <div class="card-header bg-white">
                 <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                    <!-- NEW CHECKING TAB -->
                     <li class="nav-item">
-                        <button class="nav-link active" id="investor-tab" data-bs-toggle="tab" data-bs-target="#investor" type="button">
-                            <i class="fas fa-piggy-bank me-2"></i>Yield Account
+                        <button class="nav-link active" id="checking-tab" data-bs-toggle="tab" data-bs-target="#checking" type="button">
+                            <i class="fas fa-university me-2"></i>Checking
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="investor-tab" data-bs-toggle="tab" data-bs-target="#investor" type="button">
+                            <i class="fas fa-piggy-bank me-2"></i>Yield Vault
                         </button>
                     </li>
                     <li class="nav-item" id="adminNavItem" style="display: none;">
@@ -435,11 +454,60 @@
             <div class="card-body">
                 <div class="tab-content" id="myTabContent">
                     
-                    <!-- YIELD ACCOUNT TAB -->
-                    <div class="tab-pane fade show active" id="investor">
+                    <!-- 1. CHECKING ACCOUNT TAB (NEW) -->
+                    <div class="tab-pane fade show active" id="checking">
+                        <div class="row">
+                            <div class="col-md-5 border-end">
+                                <!-- Digital Card Design -->
+                                <div class="checking-balance-card">
+                                    <div class="d-flex justify-content-between mb-4">
+                                        <i class="fas fa-wifi fa-rotate-90"></i>
+                                        <span class="text-white-50">CORPORATE</span>
+                                    </div>
+                                    <h6 class="text-white-50 text-uppercase mb-1">Available Balance (USDC)</h6>
+                                    <h2 class="mb-4" id="checkingBalanceMain">$0.00</h2>
+                                    <div class="d-flex justify-content-between align-items-end">
+                                        <small class="text-white-50">**** **** **** 4242</small>
+                                        <i class="fab fa-cc-visa fa-2x"></i>
+                                    </div>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-dark" onclick="copyAddress()">
+                                        <i class="fas fa-qrcode me-2"></i>Show Deposit Address
+                                    </button>
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <small class="text-muted"><i class="fas fa-circle text-success me-1" style="font-size:8px;"></i> Operating Liquidity</small>
+                                </div>
+                            </div>
+                            <div class="col-md-7 ps-md-4">
+                                <h5 class="mb-4">Wire Transfer (ERC20)</h5>
+                                <div class="mb-3">
+                                    <label>Recipient Address</label>
+                                    <input type="text" id="payeeAddress" class="form-control" placeholder="0x...">
+                                </div>
+                                <div class="mb-3">
+                                    <label>Amount (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" id="payAmount" class="form-control" placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div class="alert alert-light border small text-muted">
+                                    <i class="fas fa-info-circle me-2"></i> Transferred funds are moved instantly from your wallet. No approval required.
+                                </div>
+                                <button class="btn btn-dark w-100 py-3" onclick="payVendor()">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Payment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. YIELD ACCOUNT TAB -->
+                    <div class="tab-pane fade" id="investor">
                         <div class="row">
                             <div class="col-md-6 border-end">
-                                <h5 class="mb-4">Add Funds</h5>
+                                <h5 class="mb-4">Add Funds to Vault</h5>
                                 <div class="mb-3">
                                     <label>Transfer Amount (USD)</label>
                                     <div class="input-group">
@@ -467,7 +535,7 @@
                                 </div>
                                 <div class="d-grid">
                                     <button class="btn btn-outline-danger" onclick="withdraw()">
-                                        <i class="fas fa-arrow-right me-2"></i>Redeem to Bank Account
+                                        <i class="fas fa-arrow-right me-2"></i>Redeem to Checking
                                     </button>
                                 </div>
                                 <div class="mt-3 text-center">
@@ -477,7 +545,7 @@
                         </div>
                     </div>
 
-                    <!-- ADMIN TAB -->
+                    <!-- 3. ADMIN TAB -->
                     <div class="tab-pane fade" id="admin">
                         <div class="row g-4">
                             <!-- Left Col: Investor Whitelist -->
@@ -742,7 +810,7 @@
 
         const data = {
             name: name,                 
-            email: email,               
+            email: email,                
             _replyto: email,            
             _subject: `New Client Application: ${name}`,
             message: `CLIENT APPLICATION\n------------------\nEntity: ${name}\nID: ${wallet}\nType: ${type}\nAgreed: Yes`,
@@ -785,6 +853,7 @@
     // ABIs
     const ERC20_ABI = [
         "function approve(address spender, uint256 amount) external returns (bool)",
+        "function transfer(address recipient, uint256 amount) external returns (bool)", // Added for Checking Logic
         "function decimals() view returns (uint8)",
         "function balanceOf(address account) view returns (uint256)"
     ];
@@ -837,22 +906,34 @@
     async function refreshData() {
         if(!vaultContract) return;
         try {
+            // 1. Get Protocol Stats
             const totalAssets = await vaultContract.totalManagedAssets();
-            const totShares = await vaultContract.totalShares();
+            
+            // 2. Get User's Yield Vault Balance (Shares)
             const myShares = await vaultContract.shares(userAddress);
 
-            const totalAssetsFmt = ethers.formatUnits(totalAssets, usdcDecimals);
-            const totalSharesFmt = ethers.formatUnits(totShares, usdcDecimals);
-            const mySharesFmt = ethers.formatUnits(myShares, usdcDecimals);
+            // 3. Get User's Checking Balance (USDC Wallet)
+            const walletBal = await usdcContract.balanceOf(userAddress);
 
-            // Dashboard Stats
-            document.getElementById("totalAssets").innerText = "$" + Number(totalAssetsFmt).toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById("totalShares").innerText = Number(totalSharesFmt).toLocaleString(); 
+            // Formatting
+            const totalAssetsFmt = ethers.formatUnits(totalAssets, usdcDecimals);
+            const mySharesFmt = ethers.formatUnits(myShares, usdcDecimals);
+            const walletBalFmt = ethers.formatUnits(walletBal, usdcDecimals);
+
+            // Update DOM
+            // Checking
+            const checkDisplay = "$" + Number(walletBalFmt).toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById("checkingDisplay").innerText = checkDisplay;
+            document.getElementById("checkingBalanceMain").innerText = checkDisplay;
+            
+            // Yield
             document.getElementById("userShares").innerText = Number(mySharesFmt).toLocaleString();
+
+            // Global
+            document.getElementById("totalAssets").innerText = "$" + Number(totalAssetsFmt).toLocaleString(undefined, {minimumFractionDigits: 2});
 
             // Landing Page Stats
             document.getElementById("landingTVL").innerText = "$" + Number(totalAssetsFmt).toLocaleString();
-            document.getElementById("landingTotalShares").innerText = Number(totalSharesFmt).toLocaleString();
             
             // NEW: Render the Merchant Table
             renderMerchantTable();
@@ -902,6 +983,50 @@
             alert("Withdrawal Processed");
             refreshData();
         } catch (e) { alert("Withdrawal Failed: " + e.message); }
+    }
+
+    // --- NEW: PAY VENDOR (Checking Account) ---
+    async function payVendor() {
+        try {
+            const payee = document.getElementById("payeeAddress").value;
+            const val = document.getElementById("payAmount").value;
+            
+            if(!payee || !val || val <= 0) return alert("Please fill all fields correctly.");
+
+            const amount = ethers.parseUnits(val, usdcDecimals);
+            
+            // Checking payments are direct ERC20 transfers
+            const tx = await usdcContract.transfer(payee, amount);
+            
+            // UI Feedback
+            const btn = document.querySelector("#checking button.btn-dark");
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Processing...";
+            btn.disabled = true;
+
+            await tx.wait();
+            
+            alert("Payment Sent Successfully!");
+            document.getElementById("payAmount").value = "";
+            document.getElementById("payeeAddress").value = "";
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            
+            refreshData();
+        } catch(e) {
+            alert("Payment failed: " + e.message);
+            // Reset button if error
+            const btn = document.querySelector("#checking button.btn-dark");
+            btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send Payment';
+            btn.disabled = false;
+        }
+    }
+
+    function copyAddress() {
+        if(userAddress) {
+            navigator.clipboard.writeText(userAddress);
+            alert("Deposit Address Copied!");
+        }
     }
 
     async function whitelistInvestor() {
