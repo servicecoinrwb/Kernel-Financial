@@ -348,7 +348,8 @@
                 <p class="text-slate-500">Restricted access. Manage Kernel whitelist.</p>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-xl mx-auto">
+            <!-- Manage Solvers (Existing) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-xl mx-auto mb-8">
                 <h3 class="text-xl font-bold text-slate-900 mb-6">Manage Solvers</h3>
                 
                 <label class="block text-sm font-medium text-slate-700 mb-2">Solver Wallet Address</label>
@@ -359,6 +360,24 @@
                         <i data-lucide="check" class="w-4 h-4"></i> Whitelist
                     </button>
                     <button onclick="setSolverStatus(false)" class="bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="ban" class="w-4 h-4"></i> Revoke
+                    </button>
+                </div>
+            </div>
+
+            <!-- Manage Investors (New) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-xl mx-auto">
+                <h3 class="text-xl font-bold text-slate-900 mb-6">Manage Investors</h3>
+                <p class="text-sm text-slate-500 mb-4">Whitelist user Checking Accounts to allow deposits into the Vault.</p>
+                
+                <label class="block text-sm font-medium text-slate-700 mb-2">Account Address</label>
+                <input type="text" id="input-admin-investor" placeholder="0x..." class="w-full border border-slate-200 rounded-lg px-4 py-3 mb-6 focus:ring-2 focus:ring-blue-500 outline-none">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="setInvestorStatus(true)" class="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="check" class="w-4 h-4"></i> Whitelist
+                    </button>
+                    <button onclick="setInvestorStatus(false)" class="bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
                         <i data-lucide="ban" class="w-4 h-4"></i> Revoke
                     </button>
                 </div>
@@ -464,12 +483,13 @@
             "function approve(address spender, uint256 amount) returns (bool)"
         ];
 
-        // ADDED: isWhitelisted for checks
+        // ADDED: isWhitelisted for checks AND setInvestorStatus for admin
         const VAULT_ABI = [
             "function totalManagedAssets() view returns (uint256)",
             "function totalShares() view returns (uint256)",
             "function capitalInKernel() view returns (uint256)",
-            "function isWhitelisted(address) view returns (bool)"
+            "function isWhitelisted(address) view returns (bool)",
+            "function setInvestorStatus(address investor, bool status)"
         ];
 
         // ADDED: Methods for Repay Loan and Admin Whitelist
@@ -483,7 +503,7 @@
         // --- STATE ---
         let provider, signer, userAddress;
         let factoryContract, accountContract, usdcContract;
-        let vaultContract, kernelContract, kernelContractSigner;
+        let vaultContract, vaultContractSigner, kernelContract, kernelContractSigner;
         let accountAddress = ethers.constants.AddressZero;
         let vaultAddress = ethers.constants.AddressZero;
         let kernelAddress = ethers.constants.AddressZero;
@@ -545,6 +565,7 @@
                 kernelAddress = await factoryContract.KERNEL();
 
                 vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
+                vaultContractSigner = new ethers.Contract(vaultAddress, VAULT_ABI, signer); // Write capability for Admin
                 kernelContract = new ethers.Contract(kernelAddress, KERNEL_ABI, provider); // Read-only
                 kernelContractSigner = new ethers.Contract(kernelAddress, KERNEL_ABI, signer); // Write
 
@@ -777,10 +798,25 @@
             if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
 
             try {
-                showToast(status ? "Whitelisting..." : "Revoking...");
+                showToast(status ? "Whitelisting Solver..." : "Revoking Solver...");
                 const tx = await kernelContractSigner.setSolver(addr, status);
                 await tx.wait();
                 showToast("Solver Status Updated!", "success");
+            } catch(err) {
+                console.error(err);
+                showToast("Admin Action Failed", "error");
+            }
+        }
+
+        async function setInvestorStatus(status) {
+            const addr = document.getElementById('input-admin-investor').value;
+            if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
+
+            try {
+                showToast(status ? "Whitelisting Investor..." : "Revoking Investor...");
+                const tx = await vaultContractSigner.setInvestorStatus(addr, status);
+                await tx.wait();
+                showToast("Investor Status Updated!", "success");
             } catch(err) {
                 console.error(err);
                 showToast("Admin Action Failed", "error");
