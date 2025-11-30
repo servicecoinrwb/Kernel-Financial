@@ -9,7 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts: Inter for that clean Fintech look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <!-- Web3Auth SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.5.1/dist/modal.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/ethereum-provider@9.5.1/dist/ethereumProvider.umd.min.js"></script>
+
     <style>
         /* BANKING THEME OVERRIDES */
         :root {
@@ -316,8 +319,9 @@
                                     <h6 class="text-white-50 text-uppercase mb-1" id="cardLabel">Balance (USDC)</h6>
                                     <h2 class="mb-4" id="checkingBalanceMain">$0.00</h2>
                                     <div class="d-flex justify-content-between align-items-end">
-                                        <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem;" id="cardAddressDisplay">Not Connected</small>
-                                        <i class="fab fa-cc-visa fa-2x"></i>
+                                        <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem; cursor: pointer;" id="cardAddressDisplay" onclick="copyUserAddress()" title="Click to Copy">Not Connected</small>
+                                        <i class="far fa-copy text-white-50 ms-2" style="cursor: pointer;" onclick="copyUserAddress()"></i>
+                                        <i class="fab fa-cc-visa fa-2x ms-auto"></i>
                                     </div>
                                 </div>
                                 
@@ -353,8 +357,11 @@
                                     <!-- Populated by JS -->
                                 </div>
 
-                                <!-- Actions -->
+                                <!-- Actions: Receive, Fund & Withdraw -->
                                 <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiveModal">
+                                        <i class="fas fa-arrow-down me-2"></i>Receive / Fund Wallet
+                                    </button>
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-outline-dark flex-grow-1" data-bs-toggle="modal" data-bs-target="#depositModal">
                                             <i class="fas fa-plus me-2"></i>Deposit to Vault
@@ -647,15 +654,9 @@
                     <div class="mb-2">
                          <label class="small text-muted mb-1">Email (Google Login)</label>
                          <div class="input-group">
-                            <input type="email" id="web3authEmail" class="form-control" placeholder="name@company.com">
-                            <button class="btn btn-primary" onclick="loginWithEmail()">
-                                <i class="fas fa-arrow-right"></i>
+                            <button class="btn btn-primary w-100" onclick="loginWithEmail()">
+                                <i class="fas fa-google me-2"></i> Continue with Google
                             </button>
-                         </div>
-                         <!-- NEW: Live Address Preview -->
-                         <div class="mt-2 p-2 bg-light border rounded d-none" id="emailAddressPreview">
-                             <small class="d-block text-muted" style="font-size: 0.7rem;">Google Wallet Address:</small>
-                             <small class="font-monospace fw-bold" id="previewAddrString">0x...</small>
                          </div>
                     </div>
                 </div>
@@ -848,6 +849,9 @@
         { symbol: "ETH", address: ETH_ADDRESS, decimals: 18, isEth: true }
     ];
 
+    // Web3Auth Client ID
+    const WEB3AUTH_CLIENT_ID = "BM5XyP5tYq5TtEKAbtbtPf8aQkPwytH3X0LiUOFsgBfqB4HnkY39qbZXR_KeLvJMFjiGOF-GJQyE9tUBjuFgS_I";
+
     // --- LOAD ASSETS FOR SPECIFIC USER ---
     function loadUserAssets(userAddr) {
         const key = 'kernelAssets_' + userAddr.toLowerCase();
@@ -910,6 +914,7 @@
     let provider, signer; 
     let checkingContract, yieldVaultContract, kernelContract;
     let userAddress;
+    let web3auth;
     
     // State
     let currentView = 'wallet'; // 'wallet' or 'vault'
@@ -919,21 +924,25 @@
     window.onload = async function() {
         fetchLandingStats();
         
-        // Listen for Email Input Changes to show address preview
-        const emailInput = document.getElementById('web3authEmail');
-        if(emailInput) {
-            emailInput.addEventListener('input', (e) => {
-                const val = e.target.value;
-                const previewBox = document.getElementById('emailAddressPreview');
-                if(val.includes('@')) {
-                     const mockPrivateKey = ethers.id(val);
-                     const mockWallet = new ethers.Wallet(mockPrivateKey);
-                     document.getElementById('previewAddrString').innerText = mockWallet.address;
-                     previewBox.classList.remove('d-none');
-                } else {
-                     previewBox.classList.add('d-none');
-                }
-            });
+        // Init Web3Auth
+        web3auth = new window.Modal.Web3Auth({
+            clientId: WEB3AUTH_CLIENT_ID,
+            web3AuthNetwork: "sapphire_mainnet",
+            chainConfig: {
+                chainNamespace: "eip155",
+                chainId: "0x1", // Mainnet
+                rpcTarget: "https://eth.llamarpc.com",
+            },
+        });
+        await web3auth.initModal();
+        
+        // If already logged in via Web3Auth
+        if(web3auth.connected) {
+            const web3authProvider = web3auth.provider;
+            provider = new ethers.BrowserProvider(web3authProvider);
+            signer = await provider.getSigner();
+            userAddress = await signer.getAddress();
+            completeLogin(userAddress, "Authenticated User");
         }
     };
 
@@ -1003,28 +1012,27 @@
         } else { alert("Install Metamask"); }
     }
 
-    // --- LOGIN WITH EMAIL (WEB3AUTH SIMULATION) ---
+    // --- LOGIN WITH EMAIL (WEB3AUTH REAL) ---
     async function loginWithEmail() {
-        const email = document.getElementById('web3authEmail').value;
-        if(!email) return alert("Please enter email");
-
-        const mockPrivateKey = ethers.id(email); // Hash email to get a 'private key'
-        const mockWallet = new ethers.Wallet(mockPrivateKey);
-        userAddress = mockWallet.address;
-        
-        // FIX: Initialize provider if missing (read-only fallback)
-        if(!provider) {
-            provider = new ethers.JsonRpcProvider("https://eth.llamarpc.com");
+        try {
+            // This pops the Web3Auth Modal (Google, Email, etc.)
+            const web3authProvider = await web3auth.connect();
+            
+            // Create Ethers provider from Web3Auth provider
+            provider = new ethers.BrowserProvider(web3authProvider);
+            signer = await provider.getSigner(); // This signer CAN write transactions
+            userAddress = await signer.getAddress();
+            
+            // Get user info
+            const user = await web3auth.getUserInfo();
+            
+            completeLogin(userAddress, user.email);
+            bootstrap.Modal.getInstance(document.getElementById('loginModal'))?.hide();
+            
+        } catch (error) {
+            console.error(error);
+            alert("Login Failed: " + error.message);
         }
-        
-        // FIX: Assign signer so write functions work
-        signer = mockWallet.connect(provider);
-        
-        console.log(`Simulated Login for: ${email}`);
-        console.log(`Address: ${userAddress}`);
-        
-        completeLogin(userAddress, email); // Pass email to completeLogin
-        bootstrap.Modal.getInstance(document.getElementById('loginModal'))?.hide();
     }
 
     async function completeLogin(address, email = null) {
@@ -1241,7 +1249,7 @@
 
     // --- BANKING: SEND PAYMENT ---
     async function payVendor() {
-        // NOTE: Removed "Write actions require Metamask" alert to allow testing with Mock Signer
+        if(!signer) return alert("Write actions require Metamask connection (not simulation)");
         try {
             const payee = document.getElementById('payeeAddress').value;
             const amtVal = document.getElementById('payAmount').value;
