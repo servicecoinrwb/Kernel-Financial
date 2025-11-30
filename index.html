@@ -925,15 +925,29 @@
         fetchLandingStats();
         
         // Init Web3Auth
+        // --- WEB3AUTH V9 INIT FIX ---
+        const chainConfig = {
+            chainNamespace: "eip155",
+            chainId: "0x1", // Mainnet
+            rpcTarget: "https://eth.llamarpc.com",
+            displayName: "Ethereum Mainnet",
+            blockExplorerUrl: "https://etherscan.io",
+            ticker: "ETH",
+            tickerName: "Ethereum",
+        };
+
+        // Initialize the Ethereum provider
+        const privateKeyProvider = new window.EthereumProvider.EthereumPrivateKeyProvider({
+            config: { chainConfig }
+        });
+
+        // Initialize Web3Auth with the provider
         web3auth = new window.Modal.Web3Auth({
             clientId: WEB3AUTH_CLIENT_ID,
             web3AuthNetwork: "sapphire_mainnet",
-            chainConfig: {
-                chainNamespace: "eip155",
-                chainId: "0x1", // Mainnet
-                rpcTarget: "https://eth.llamarpc.com",
-            },
+            privateKeyProvider: privateKeyProvider,
         });
+
         await web3auth.initModal();
         
         // If already logged in via Web3Auth
@@ -942,7 +956,9 @@
             provider = new ethers.BrowserProvider(web3authProvider);
             signer = await provider.getSigner();
             userAddress = await signer.getAddress();
-            completeLogin(userAddress, "Authenticated User");
+            
+            const user = await web3auth.getUserInfo();
+            completeLogin(userAddress, user.email);
         }
     };
 
