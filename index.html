@@ -341,11 +341,50 @@
             </div>
         </div>
 
-        <!-- View: Admin (Whitelist) -->
+        <!-- View: Admin (Whitelist & Operations) -->
         <div id="view-admin" class="hidden">
             <div class="mb-8">
                 <h2 class="text-3xl font-bold text-slate-900">Admin Console</h2>
-                <p class="text-slate-500">Restricted access. Manage Kernel whitelist.</p>
+                <p class="text-slate-500">Restricted access. Manage Kernel liquidity and permissions.</p>
+            </div>
+
+            <!-- Lending Operations (New) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-xl mx-auto mb-8">
+                <h3 class="text-xl font-bold text-slate-900 mb-6">Lending Operations</h3>
+                
+                <!-- Fund Kernel -->
+                <div class="mb-8 pb-8 border-b border-slate-100">
+                    <h4 class="font-semibold text-slate-800 mb-2">1. Fund Kernel</h4>
+                    <p class="text-xs text-slate-500 mb-4">Move idle assets from InvestorVault to Kernel so they can be deployed.</p>
+                    <div class="flex gap-2">
+                        <input type="number" id="input-push-amount" placeholder="Amount (USDC)" class="flex-1 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button onclick="executePushCapital()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Push</button>
+                    </div>
+                </div>
+
+                <!-- Issue Loan -->
+                <div>
+                    <h4 class="font-semibold text-slate-800 mb-2">2. Issue Loan (Deploy Capital)</h4>
+                    <p class="text-xs text-slate-500 mb-4">Disburse funds from Kernel to Solver.</p>
+                    
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Solver Address</label>
+                    <input type="text" id="input-loan-solver" placeholder="0x..." class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Amount</label>
+                            <input type="number" id="input-loan-amount" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Invoice Ref</label>
+                            <input type="text" id="input-loan-ref" placeholder="INV-001" class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                    
+                    <button onclick="executeDeployCapital()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i> Deploy Funds
+                    </button>
+                </div>
             </div>
 
             <!-- Manage Solvers (Existing) -->
@@ -483,21 +522,23 @@
             "function approve(address spender, uint256 amount) returns (bool)"
         ];
 
-        // ADDED: isWhitelisted for checks AND setInvestorStatus for admin
+        // ADDED: isWhitelisted for checks AND setInvestorStatus for admin AND pushCapitalToKernel
         const VAULT_ABI = [
             "function totalManagedAssets() view returns (uint256)",
             "function totalShares() view returns (uint256)",
             "function capitalInKernel() view returns (uint256)",
             "function isWhitelisted(address) view returns (bool)",
-            "function setInvestorStatus(address investor, bool status)"
+            "function setInvestorStatus(address investor, bool status)",
+            "function pushCapitalToKernel(uint256 amount)"
         ];
 
-        // ADDED: Methods for Repay Loan and Admin Whitelist
+        // ADDED: Methods for Repay Loan, Admin Whitelist, and Deploy Capital
         const KERNEL_ABI = [
             "function whitelistedSolvers(address) view returns (bool)",
             "function activePrincipal(address) view returns (uint256)",
             "function repayLoan(uint256 principal, uint256 fee)",
-            "function setSolver(address solver, bool status)"
+            "function setSolver(address solver, bool status)",
+            "function deployCapital(address solver, uint256 amount, string invoiceHash)"
         ];
 
         // --- STATE ---
@@ -820,6 +861,52 @@
             } catch(err) {
                 console.error(err);
                 showToast("Admin Action Failed", "error");
+            }
+        }
+
+        async function executePushCapital() {
+            const amount = document.getElementById('input-push-amount').value;
+            if (!amount) return;
+
+            try {
+                showToast("Pushing Capital to Kernel...");
+                const wei = ethers.utils.parseUnits(amount, 6);
+                const tx = await vaultContractSigner.pushCapitalToKernel(wei);
+                await tx.wait();
+                showToast("Capital Pushed Successfully!", "success");
+                // Clear input
+                document.getElementById('input-push-amount').value = "";
+                loadEcosystemData(); // refresh TVL stats
+            } catch(err) {
+                console.error(err);
+                showToast("Push Failed", "error");
+            }
+        }
+
+        async function executeDeployCapital() {
+            const solver = document.getElementById('input-loan-solver').value;
+            const amount = document.getElementById('input-loan-amount').value;
+            const ref = document.getElementById('input-loan-ref').value || "LOAN-" + Date.now();
+
+            if(!ethers.utils.isAddress(solver)) return showToast("Invalid Solver Address", "error");
+            if(!amount) return;
+
+            try {
+                showToast("Deploying Capital...");
+                const wei = ethers.utils.parseUnits(amount, 6);
+                
+                // Admin (Owner) calls this on Kernel
+                const tx = await kernelContractSigner.deployCapital(solver, wei, ref);
+                await tx.wait();
+                
+                showToast("Capital Deployed Successfully!", "success");
+                // Clear inputs
+                document.getElementById('input-loan-amount').value = "";
+                document.getElementById('input-loan-ref').value = "";
+                loadEcosystemData(); // refresh stats
+            } catch(err) {
+                console.error(err);
+                showToast("Deployment Failed (Check allowance/balance)", "error");
             }
         }
 
