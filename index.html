@@ -52,19 +52,25 @@
 
     <!-- Navigation -->
     <nav class="w-full px-6 py-4 flex justify-between items-center glass-panel sticky top-0 z-50">
-        <div class="flex items-center gap-8">
-            <div class="flex items-center gap-2 mr-4">
+        <div class="flex items-center gap-4 md:gap-8">
+            <div class="flex items-center gap-2 mr-2">
                 <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">N</div>
-                <span class="text-xl font-bold tracking-tight text-slate-900">NeoBank</span>
+                <span class="text-xl font-bold tracking-tight text-slate-900 hidden md:block">NeoBank</span>
             </div>
             
-            <!-- Tab Switcher (Visible only when logged in) -->
-            <div id="nav-tabs" class="hidden flex gap-2">
-                <button onclick="switchView('dashboard')" id="tab-dashboard" class="nav-active px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2">
+            <!-- Tab Switcher -->
+            <div id="nav-tabs" class="hidden flex gap-1 md:gap-2 overflow-x-auto">
+                <button onclick="switchView('dashboard')" id="tab-dashboard" class="nav-active px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="layout-dashboard" class="w-4 h-4"></i> My Account
                 </button>
-                <button onclick="switchView('ecosystem')" id="tab-ecosystem" class="nav-inactive px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2">
+                <button onclick="switchView('ecosystem')" id="tab-ecosystem" class="nav-inactive px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="network" class="w-4 h-4"></i> Ecosystem
+                </button>
+                <button onclick="switchView('solver')" id="tab-solver" class="nav-inactive px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="briefcase" class="w-4 h-4"></i> Solver
+                </button>
+                <button onclick="switchView('admin')" id="tab-admin" class="nav-inactive px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="shield" class="w-4 h-4"></i> Admin
                 </button>
             </div>
         </div>
@@ -72,7 +78,8 @@
         <div id="wallet-section">
             <button id="connect-btn" onclick="connectWallet()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-lg shadow-blue-900/20 flex items-center gap-2">
                 <i data-lucide="wallet" class="w-4 h-4"></i>
-                <span>Connect Wallet</span>
+                <span class="hidden md:inline">Connect Wallet</span>
+                <span class="md:hidden">Connect</span>
             </button>
             <div id="wallet-info" class="hidden flex items-center gap-4">
                 <span id="user-address" class="text-sm font-medium text-slate-600 bg-white px-3 py-1.5 rounded-full border border-slate-200"></span>
@@ -115,7 +122,6 @@
 
         <!-- View: Dashboard (My Account) -->
         <div id="view-dashboard" class="hidden">
-            
             <!-- Header Info -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
@@ -198,7 +204,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <!-- View: Ecosystem (Vault & Kernel) -->
@@ -282,40 +287,110 @@
             </div>
         </div>
 
+        <!-- View: Solver (Loan Repayment) -->
+        <div id="view-solver" class="hidden">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900">Solver Portal</h2>
+                <p class="text-slate-500">Manage your outstanding loans and repayments to the Kernel.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- My Loan Stats -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6">My Debt Position</h3>
+                    <div class="mb-6">
+                        <p class="text-sm font-medium text-slate-500 mb-1">Active Principal</p>
+                        <h3 class="text-4xl font-bold text-slate-900">$<span id="my-principal">0.00</span></h3>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 flex items-start gap-3">
+                        <i data-lucide="alert-circle" class="w-5 h-5 text-orange-600 mt-0.5"></i>
+                        <div>
+                            <p class="text-sm font-bold text-orange-800">Interest Policy</p>
+                            <p class="text-xs text-orange-700 mt-1">A 10% fee is automatically calculated and added to your repayment amount.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Repay Form -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6">Repay Loan</h3>
+                    
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Principal to Repay</label>
+                    <input type="number" id="input-repay-principal" placeholder="0.00" oninput="calculateRepayment()" class="w-full border border-slate-200 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+                    
+                    <div class="space-y-2 mb-6 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Principal</span>
+                            <span class="font-medium">$<span id="calc-principal">0.00</span></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Interest Fee (10%)</span>
+                            <span class="font-medium text-orange-600">+$<span id="calc-fee">0.00</span></span>
+                        </div>
+                        <div class="pt-2 border-t border-slate-100 flex justify-between font-bold text-slate-900">
+                            <span>Total Cost</span>
+                            <span>$<span id="calc-total">0.00</span></span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="approveUSDCForKernel()" class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-3 rounded-lg font-medium transition-colors">1. Approve</button>
+                        <button onclick="executeRepay()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg font-medium transition-colors">2. Repay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Admin (Whitelist) -->
+        <div id="view-admin" class="hidden">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900">Admin Console</h2>
+                <p class="text-slate-500">Restricted access. Manage Kernel whitelist.</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-xl mx-auto">
+                <h3 class="text-xl font-bold text-slate-900 mb-6">Manage Solvers</h3>
+                
+                <label class="block text-sm font-medium text-slate-700 mb-2">Solver Wallet Address</label>
+                <input type="text" id="input-admin-solver" placeholder="0x..." class="w-full border border-slate-200 rounded-lg px-4 py-3 mb-6 focus:ring-2 focus:ring-blue-500 outline-none">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="setSolverStatus(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="check" class="w-4 h-4"></i> Whitelist
+                    </button>
+                    <button onclick="setSolverStatus(false)" class="bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="ban" class="w-4 h-4"></i> Revoke
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <!-- Modals (unchanged) -->
-    <!-- Top Up Modal (EOA -> Checking) -->
+    <!-- Modals (TopUp, Transfer, Savings, Limit, Toast) - SAME AS BEFORE -->
+    <!-- Top Up Modal -->
     <div id="modal-topup" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
             <button onclick="toggleModal('modal-topup')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             <h3 class="text-xl font-bold mb-4">Top Up Account</h3>
-            <p class="text-sm text-slate-500 mb-4">Send USDC from your personal wallet to your NeoBank Checking Account.</p>
-            
             <label class="block text-sm font-medium text-slate-700 mb-2">Amount (USDC)</label>
             <input type="number" id="input-topup" placeholder="1000" class="w-full border border-slate-200 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
-            
             <button onclick="executeTopUp()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">Send Funds</button>
         </div>
     </div>
 
-    <!-- Transfer Modal (Checking -> External) -->
+    <!-- Transfer Modal -->
     <div id="modal-transfer" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
             <button onclick="toggleModal('modal-transfer')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             <h3 class="text-xl font-bold mb-4">Send Payment</h3>
-            
             <label class="block text-sm font-medium text-slate-700 mb-2">Recipient Address</label>
             <input type="text" id="input-transfer-to" placeholder="0x..." class="w-full border border-slate-200 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
-            
             <label class="block text-sm font-medium text-slate-700 mb-2">Amount (USDC)</label>
             <div class="relative mb-4">
                 <input type="number" id="input-transfer-amount" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none pr-16">
-                <button onclick="fillMax('input-transfer-amount', 'checking')" class="absolute right-2 top-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold px-2 py-1.5 rounded transition-colors">
-                    MAX
-                </button>
+                <button onclick="fillMax('input-transfer-amount', 'checking')" class="absolute right-2 top-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold px-2 py-1.5 rounded transition-colors">MAX</button>
             </div>
-            
             <button onclick="executeTransfer()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg font-medium transition-colors">Confirm Transfer</button>
         </div>
     </div>
@@ -326,16 +401,12 @@
             <button onclick="toggleModal('modal-savings')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             <h3 id="savings-title" class="text-xl font-bold mb-2">Invest in Vault</h3>
             <p id="savings-desc" class="text-sm text-slate-500 mb-4">Move funds to the Investor Kernel to earn yield.</p>
-            
             <label class="block text-sm font-medium text-slate-700 mb-2">Amount</label>
             <div class="relative mb-2">
                 <input type="number" id="input-savings-amount" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none pr-16">
-                <button onclick="fillMax('input-savings-amount', 'savings-dynamic')" class="absolute right-2 top-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold px-2 py-1.5 rounded transition-colors">
-                    MAX
-                </button>
+                <button onclick="fillMax('input-savings-amount', 'savings-dynamic')" class="absolute right-2 top-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold px-2 py-1.5 rounded transition-colors">MAX</button>
             </div>
             <p class="text-xs text-slate-400 mb-4 text-right">Slippage protection enabled (1%)</p>
-
             <button id="savings-btn" onclick="executeSavingsAction()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-medium transition-colors">Confirm</button>
         </div>
     </div>
@@ -346,15 +417,13 @@
             <button onclick="toggleModal('modal-limit')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             <h3 class="text-xl font-bold mb-4">Set Daily Spending Limit</h3>
             <p class="text-sm text-slate-500 mb-4">Protect your funds by capping daily outflows. Set to 0 to disable.</p>
-            
             <label class="block text-sm font-medium text-slate-700 mb-2">Daily Limit (USDC)</label>
             <input type="number" id="input-limit" placeholder="1000" class="w-full border border-slate-200 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
-            
             <button onclick="executeSetLimit()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors">Update Limit</button>
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <!-- Toast -->
     <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-[70] flex items-center gap-3">
         <i id="toast-icon" data-lucide="info" class="w-5 h-5 text-blue-400"></i>
         <span id="toast-msg">Notification</span>
@@ -383,12 +452,9 @@
             "function spentToday() view returns (uint256)",
             "function setDailyLimit(uint256 _limit)",
             "function usdc() view returns (address)",
-            
-            // Events for Activity Feed
             "event PaymentSent(address indexed to, uint256 amount)",
             "event DepositedToSavings(uint256 amount, uint256 sharesMinted)",
-            "event WithdrawnFromSavings(uint256 sharesBurned, uint256 assetsReceived)",
-            "event FundsRecovered(address indexed token, uint256 amount)"
+            "event WithdrawnFromSavings(uint256 sharesBurned, uint256 assetsReceived)"
         ];
 
         const ERC20_ABI = [
@@ -404,21 +470,22 @@
             "function capitalInKernel() view returns (uint256)"
         ];
 
+        // ADDED: Methods for Repay Loan and Admin Whitelist
         const KERNEL_ABI = [
             "function whitelistedSolvers(address) view returns (bool)",
-            "function activePrincipal(address) view returns (uint256)"
+            "function activePrincipal(address) view returns (uint256)",
+            "function repayLoan(uint256 principal, uint256 fee)",
+            "function setSolver(address solver, bool status)"
         ];
 
         // --- STATE ---
         let provider, signer, userAddress;
         let factoryContract, accountContract, usdcContract;
-        let vaultContract, kernelContract;
+        let vaultContract, kernelContract, kernelContractSigner;
         let accountAddress = ethers.constants.AddressZero;
         let vaultAddress = ethers.constants.AddressZero;
         let kernelAddress = ethers.constants.AddressZero;
-        let currentSavingsAction = 'deposit'; // or 'withdraw'
-        
-        // Stored balances for MAX button logic (stored as formatted strings/numbers)
+        let currentSavingsAction = 'deposit'; 
         let currentCheckingBal = "0";
         let currentSavingsBal = "0";
 
@@ -427,44 +494,36 @@
 
         // --- NAVIGATION ---
         function switchView(viewName) {
-            const dash = document.getElementById('view-dashboard');
-            const eco = document.getElementById('view-ecosystem');
-            const tabDash = document.getElementById('tab-dashboard');
-            const tabEco = document.getElementById('tab-ecosystem');
-
-            if (viewName === 'dashboard') {
-                dash.classList.remove('hidden');
-                eco.classList.add('hidden');
+            const views = ['dashboard', 'ecosystem', 'solver', 'admin'];
+            
+            views.forEach(v => {
+                const el = document.getElementById('view-' + v);
+                const tab = document.getElementById('tab-' + v);
                 
-                tabDash.classList.add('nav-active');
-                tabDash.classList.remove('nav-inactive');
-                tabEco.classList.add('nav-inactive');
-                tabEco.classList.remove('nav-active');
-            } else {
-                dash.classList.add('hidden');
-                eco.classList.remove('hidden');
-                
-                tabDash.classList.remove('nav-active');
-                tabDash.classList.add('nav-inactive');
-                tabEco.classList.remove('nav-inactive');
-                tabEco.classList.add('nav-active');
+                if (v === viewName) {
+                    el.classList.remove('hidden');
+                    tab.classList.add('nav-active');
+                    tab.classList.remove('nav-inactive');
+                } else {
+                    el.classList.add('hidden');
+                    tab.classList.remove('nav-active');
+                    tab.classList.add('nav-inactive');
+                }
+            });
 
-                // Load Eco Data when switching to tab
-                loadEcosystemData();
-            }
+            if(viewName === 'ecosystem') loadEcosystemData();
+            if(viewName === 'solver') loadSolverData();
         }
 
         // --- WALLET CONNECTION ---
         async function connectWallet() {
             if (!window.ethereum) return showToast("Metamask not found!", "error");
-            
             try {
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
                 
-                // UI Update
                 document.getElementById('connect-btn').classList.add('hidden');
                 document.getElementById('wallet-info').classList.remove('hidden');
                 document.getElementById('user-address').innerText = `${userAddress.substring(0,6)}...${userAddress.substring(38)}`;
@@ -478,25 +537,22 @@
 
         async function initContracts() {
             factoryContract = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, signer);
-            
             try {
-                // 1. Fetch Protocol Addresses
+                // Fetch Global Addrs
                 vaultAddress = await factoryContract.INVESTOR_VAULT();
                 kernelAddress = await factoryContract.KERNEL();
 
-                // Init Read-only contracts for ecosystem view
                 vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
-                kernelContract = new ethers.Contract(kernelAddress, KERNEL_ABI, provider);
+                kernelContract = new ethers.Contract(kernelAddress, KERNEL_ABI, provider); // Read-only
+                kernelContractSigner = new ethers.Contract(kernelAddress, KERNEL_ABI, signer); // Write
 
-                // 2. Check for existing account
+                // Check for User Account
                 const acct = await factoryContract.getAccount(userAddress);
                 if (acct !== ethers.constants.AddressZero) {
-                    // Account Exists
                     accountAddress = acct;
                     loadDashboard();
-                    document.getElementById('nav-tabs').classList.remove('hidden'); // Show tabs
+                    document.getElementById('nav-tabs').classList.remove('hidden');
                 } else {
-                    // No Account -> Show Create
                     document.getElementById('view-landing').classList.add('hidden');
                     document.getElementById('view-create').classList.remove('hidden');
                 }
@@ -506,18 +562,15 @@
             }
         }
 
-        // --- ACCOUNT CREATION ---
+        // --- CREATE ACCOUNT ---
         async function createAccount() {
             try {
                 setBtnLoading('create-btn', true);
                 const tx = await factoryContract.createAccount();
                 showToast("Deploying Account... Please wait.");
                 await tx.wait();
-                
-                // Re-fetch
                 const acct = await factoryContract.getAccount(userAddress);
                 accountAddress = acct;
-                
                 setBtnLoading('create-btn', false);
                 document.getElementById('view-create').classList.add('hidden');
                 document.getElementById('nav-tabs').classList.remove('hidden');
@@ -530,51 +583,37 @@
             }
         }
 
-        // --- DASHBOARD LOGIC ---
+        // --- DASHBOARD ---
         async function loadDashboard() {
             document.getElementById('view-landing').classList.add('hidden');
             document.getElementById('view-create').classList.add('hidden');
-            
-            // Ensure we start on dashboard tab
             switchView('dashboard');
-            
             document.getElementById('contract-address').innerText = `${accountAddress.substring(0,6)}...${accountAddress.substring(38)}`;
             
             accountContract = new ethers.Contract(accountAddress, ACCOUNT_ABI, signer);
-            
-            // Get USDC Address from account (or factory) to init ERC20 contract for TopUp
             const usdcAddr = await accountContract.usdc();
             usdcContract = new ethers.Contract(usdcAddr, ERC20_ABI, signer);
 
             refreshData();
-            loadActivityFeed(); // Initial load of history
+            loadActivityFeed();
         }
 
         async function refreshData() {
             if (!accountContract) return;
-
             try {
-                // Fetch Balances
                 const checkingBalBN = await accountContract.getCheckingBalance();
                 const savingsBalBN = await accountContract.getSavingsBalance();
-                
-                // Fetch Limits
                 const limitBN = await accountContract.dailyLimit();
                 const spentBN = await accountContract.spentToday();
 
-                // Format (Assuming USDC is 6 decimals, Shares usually 18 or 6. We'll assume 6 for USDC)
-                // Note: In prod, fetch decimals() from token.
                 const checkingFmt = ethers.utils.formatUnits(checkingBalBN, 6);
-                const savingsFmt = ethers.utils.formatUnits(savingsBalBN, 6); // Shares often 18 decimals in vaults but we force 6 here
-                
-                // Update Globals for Max Button
+                const savingsFmt = ethers.utils.formatUnits(savingsBalBN, 6); 
                 currentCheckingBal = checkingFmt;
                 currentSavingsBal = savingsFmt;
 
                 const limitFmt = ethers.utils.formatUnits(limitBN, 6);
                 const spentFmt = ethers.utils.formatUnits(spentBN, 6);
 
-                // Update UI
                 document.getElementById('bal-checking').innerText = formatMoney(checkingFmt);
                 document.getElementById('bal-savings').innerText = formatMoney(savingsFmt);
                 
@@ -584,169 +623,171 @@
                 } else {
                     document.getElementById('limit-daily').innerText = formatMoney(limitFmt);
                     document.getElementById('limit-spent').innerText = formatMoney(spentFmt);
-                    
                     const pct = Math.min((parseFloat(spentFmt) / parseFloat(limitFmt)) * 100, 100);
                     document.getElementById('limit-bar').style.width = `${pct}%`;
-                    
                     if(pct > 90) document.getElementById('limit-bar').classList.add('bg-red-500');
                     else document.getElementById('limit-bar').classList.remove('bg-red-500');
                 }
-                
-                // Reload activity in case something happened
                 loadActivityFeed();
-
-            } catch (err) {
-                console.error("Refresh failed", err);
-            }
+            } catch (err) { console.error("Refresh failed", err); }
         }
 
         async function loadActivityFeed() {
             const listEl = document.getElementById('activity-list');
             const loader = document.getElementById('activity-loading');
-            
-            // Show loader if list is empty (first load)
             if(listEl.children.length <= 1) loader.classList.remove('hidden');
 
             try {
                 const paymentFilter = accountContract.filters.PaymentSent();
-                const paymentEvents = await accountContract.queryFilter(paymentFilter);
-                
                 const depositFilter = accountContract.filters.DepositedToSavings();
-                const depositEvents = await accountContract.queryFilter(depositFilter);
-                
                 const withdrawFilter = accountContract.filters.WithdrawnFromSavings();
-                const withdrawEvents = await accountContract.queryFilter(withdrawFilter);
+
+                const [pEvts, dEvts, wEvts] = await Promise.all([
+                    accountContract.queryFilter(paymentFilter),
+                    accountContract.queryFilter(depositFilter),
+                    accountContract.queryFilter(withdrawFilter)
+                ]);
 
                 const allEvents = [
-                    ...paymentEvents.map(e => ({
-                        type: 'payment',
-                        block: e.blockNumber,
-                        hash: e.transactionHash,
-                        amount: ethers.utils.formatUnits(e.args.amount, 6),
-                        to: e.args.to
-                    })),
-                    ...depositEvents.map(e => ({
-                        type: 'deposit',
-                        block: e.blockNumber,
-                        hash: e.transactionHash,
-                        amount: ethers.utils.formatUnits(e.args.amount, 6)
-                    })),
-                    ...withdrawEvents.map(e => ({
-                        type: 'withdraw',
-                        block: e.blockNumber,
-                        hash: e.transactionHash,
-                        amount: ethers.utils.formatUnits(e.args.assetsReceived, 6)
-                    }))
+                    ...pEvts.map(e => ({ type: 'payment', block: e.blockNumber, hash: e.transactionHash, amount: ethers.utils.formatUnits(e.args.amount, 6), to: e.args.to })),
+                    ...dEvts.map(e => ({ type: 'deposit', block: e.blockNumber, hash: e.transactionHash, amount: ethers.utils.formatUnits(e.args.amount, 6) })),
+                    ...wEvts.map(e => ({ type: 'withdraw', block: e.blockNumber, hash: e.transactionHash, amount: ethers.utils.formatUnits(e.args.assetsReceived, 6) }))
                 ];
 
                 allEvents.sort((a, b) => b.block - a.block);
 
                 if (allEvents.length === 0) {
-                     listEl.innerHTML = `
-                        <div class="flex items-center justify-center text-slate-400 py-8 flex-col gap-2 opacity-50">
-                            <i data-lucide="activity" class="w-8 h-8"></i>
-                            <p>No transactions yet</p>
-                        </div>`;
+                     listEl.innerHTML = `<div class="flex items-center justify-center text-slate-400 py-8 flex-col gap-2 opacity-50"><i data-lucide="activity" class="w-8 h-8"></i><p>No transactions yet</p></div>`;
                 } else {
                     listEl.innerHTML = allEvents.map(evt => {
                         let icon, title, desc, colorClass;
+                        if (evt.type === 'payment') { icon='arrow-up-right'; colorClass='bg-slate-100 text-slate-600'; title='Transfer Sent'; desc=`To: ${evt.to.substring(0,6)}...`; }
+                        else if (evt.type === 'deposit') { icon='piggy-bank'; colorClass='bg-emerald-100 text-emerald-600'; title='Invested in Vault'; desc='Moved to Savings'; }
+                        else { icon='arrow-down-left'; colorClass='bg-blue-100 text-blue-600'; title='Withdrawn from Vault'; desc='Moved to Checking'; }
                         
-                        if (evt.type === 'payment') {
-                            icon = 'arrow-up-right';
-                            colorClass = 'bg-slate-100 text-slate-600';
-                            title = 'Transfer Sent';
-                            desc = `To: ${evt.to.substring(0,6)}...`;
-                        } else if (evt.type === 'deposit') {
-                            icon = 'piggy-bank';
-                            colorClass = 'bg-emerald-100 text-emerald-600';
-                            title = 'Invested in Vault';
-                            desc = 'Moved to Savings';
-                        } else {
-                            icon = 'arrow-down-left';
-                            colorClass = 'bg-blue-100 text-blue-600';
-                            title = 'Withdrawn from Vault';
-                            desc = 'Moved to Checking';
-                        }
-
-                        return `
-                        <div class="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center">
-                                    <i data-lucide="${icon}" class="w-5 h-5"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-slate-800">${title}</p>
-                                    <p class="text-xs text-slate-500">${desc}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold text-slate-900">${evt.type === 'payment' || evt.type === 'deposit' ? '-' : '+'}$${formatMoney(evt.amount)}</p>
-                                <a href="https://etherscan.io/tx/${evt.hash}" target="_blank" class="text-xs text-blue-500 hover:underline">View Tx</a>
-                            </div>
-                        </div>
-                        `;
+                        return `<div class="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
+                            <div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center"><i data-lucide="${icon}" class="w-5 h-5"></i></div>
+                            <div><p class="font-semibold text-slate-800">${title}</p><p class="text-xs text-slate-500">${desc}</p></div></div>
+                            <div class="text-right"><p class="font-bold text-slate-900">${evt.type==='withdraw'?'+':'-'}$${formatMoney(evt.amount)}</p><a href="https://etherscan.io/tx/${evt.hash}" target="_blank" class="text-xs text-blue-500 hover:underline">View Tx</a></div></div>`;
                     }).join('');
-                    
                     lucide.createIcons();
                 }
-
-            } catch (err) {
-                console.error("Error loading activity", err);
-            } finally {
-                loader.classList.add('hidden');
-            }
+            } catch (err) { console.error("Error loading activity", err); } finally { loader.classList.add('hidden'); }
         }
 
-        // --- ECOSYSTEM LOGIC ---
+        // --- ECOSYSTEM ---
         async function loadEcosystemData() {
-            if(!vaultContract || !kernelContract) return;
-
+            if(!vaultContract) return;
             try {
-                // Fetch raw data
                 const totalAssets = await vaultContract.totalManagedAssets();
                 const totalShares = await vaultContract.totalShares();
                 const capitalInKernel = await vaultContract.capitalInKernel();
 
-                // Calculations
-                // 1. Share Price = Assets / Shares
-                // Note: Solidity math is integer. We do floating point here for display.
-                // Assets = 6 decimals (USDC), Shares = 18 decimals
                 const assetsFmt = parseFloat(ethers.utils.formatUnits(totalAssets, 6));
                 const sharesFmt = parseFloat(ethers.utils.formatUnits(totalShares, 6));
-                
                 let price = 1.0;
-                if(sharesFmt > 0) {
-                    price = assetsFmt / sharesFmt;
-                }
+                if(sharesFmt > 0) price = assetsFmt / sharesFmt;
 
-                // 2. Utilization
                 const kernelFmt = parseFloat(ethers.utils.formatUnits(capitalInKernel, 6));
                 let util = 0;
-                if(assetsFmt > 0) {
-                    util = (kernelFmt / assetsFmt) * 100;
-                }
+                if(assetsFmt > 0) util = (kernelFmt / assetsFmt) * 100;
 
-                // Display
                 document.getElementById('eco-tvl').innerText = formatMoney(assetsFmt);
                 document.getElementById('eco-deployed').innerText = formatMoney(kernelFmt);
-                
                 document.getElementById('eco-share-price').innerText = "$" + price.toFixed(4);
                 document.getElementById('eco-share-ratio').innerText = price.toFixed(4);
-
                 document.getElementById('eco-util-bar').style.width = `${util}%`;
                 document.getElementById('eco-util-pct').innerText = `${util.toFixed(1)}%`;
+            } catch(err) { console.error("Eco data failed", err); }
+        }
 
+        // --- SOLVER LOGIC ---
+        async function loadSolverData() {
+            if(!kernelContract || !userAddress) return;
+            try {
+                const principal = await kernelContract.activePrincipal(userAddress);
+                const prinFmt = ethers.utils.formatUnits(principal, 6);
+                document.getElementById('my-principal').innerText = formatMoney(prinFmt);
+            } catch(err) { console.error("Solver data failed", err); }
+        }
+
+        function calculateRepayment() {
+            const input = document.getElementById('input-repay-principal').value;
+            const amount = parseFloat(input || 0);
+            
+            // 10% Interest Calculation
+            const fee = amount * 0.10;
+            const total = amount + fee;
+
+            document.getElementById('calc-principal').innerText = formatMoney(amount);
+            document.getElementById('calc-fee').innerText = formatMoney(fee);
+            document.getElementById('calc-total').innerText = formatMoney(total);
+        }
+
+        async function approveUSDCForKernel() {
+            // Solvers pay from their EOA, not the Checking Account contract
+            const amount = document.getElementById('input-repay-principal').value;
+            if(!amount) return;
+            
+            // Approval must cover Principal + 10% Fee
+            const total = parseFloat(amount) * 1.10;
+            const totalWei = ethers.utils.parseUnits(total.toFixed(6), 6);
+
+            try {
+                showToast("Approving USDC...");
+                const tx = await usdcContract.approve(kernelAddress, totalWei);
+                await tx.wait();
+                showToast("Approved! You can now repay.", "success");
             } catch(err) {
-                console.error("Eco data fetch failed", err);
+                console.error(err);
+                showToast("Approval failed", "error");
+            }
+        }
+
+        async function executeRepay() {
+            const amount = document.getElementById('input-repay-principal').value;
+            if(!amount) return;
+
+            const principalWei = ethers.utils.parseUnits(amount, 6);
+            
+            // Calculate Fee Wei (10%)
+            // We use JS math here for demo, but ideal to use BigNumber math
+            const feeWei = principalWei.div(10); 
+
+            try {
+                showToast("Repaying Loan...");
+                // EOA calls Kernel directly
+                const tx = await kernelContractSigner.repayLoan(principalWei, feeWei);
+                await tx.wait();
+                showToast("Loan Repaid Successfully!", "success");
+                loadSolverData(); // Refresh UI
+                document.getElementById('input-repay-principal').value = "";
+                calculateRepayment();
+            } catch(err) {
+                console.error(err);
+                showToast("Repayment failed", "error");
+            }
+        }
+
+        // --- ADMIN LOGIC ---
+        async function setSolverStatus(status) {
+            const addr = document.getElementById('input-admin-solver').value;
+            if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
+
+            try {
+                showToast(status ? "Whitelisting..." : "Revoking...");
+                const tx = await kernelContractSigner.setSolver(addr, status);
+                await tx.wait();
+                showToast("Solver Status Updated!", "success");
+            } catch(err) {
+                console.error(err);
+                showToast("Admin Action Failed", "error");
             }
         }
 
         async function checkSolver() {
             const addr = document.getElementById('input-solver-addr').value;
-            if(!ethers.utils.isAddress(addr)) {
-                showToast("Invalid Address", "error");
-                return;
-            }
+            if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
 
             try {
                 const isWhitelisted = await kernelContract.whitelistedSolvers(addr);
@@ -764,55 +805,37 @@
                     statusText.innerText = "Whitelisted";
                     statusText.classList.remove('text-red-600');
                     statusText.classList.add('text-green-600');
-                    
                     statusIcon.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>`;
                     statusIcon.className = "w-8 h-8 rounded-full bg-green-100 flex items-center justify-center";
                 } else {
                     statusText.innerText = "Not Whitelisted";
                     statusText.classList.add('text-red-600');
                     statusText.classList.remove('text-green-600');
-
                     statusIcon.innerHTML = `<i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>`;
                     statusIcon.className = "w-8 h-8 rounded-full bg-red-100 flex items-center justify-center";
                 }
 
                 const prinFmt = ethers.utils.formatUnits(principal, 6);
                 prinText.innerText = `$${formatMoney(prinFmt)}`;
-                
                 lucide.createIcons();
-
-            } catch(err) {
-                console.error(err);
-                showToast("Check failed", "error");
-            }
+            } catch(err) { console.error(err); showToast("Check failed", "error"); }
         }
 
-        // --- ACTIONS ---
-
-        // Helper for Max Buttons
+        // --- SHARED ACTIONS (TOPUP/TRANSFER/ETC) ---
+        // (Existing functions kept as is)
         function fillMax(inputId, type) {
             const input = document.getElementById(inputId);
             if (!input) return;
-
-            if (type === 'checking') {
-                input.value = currentCheckingBal;
-            } else if (type === 'savings-dynamic') {
-                // Depends on if we are depositing or withdrawing
-                if (currentSavingsAction === 'deposit') {
-                    // Deposit: Max amount is checking balance
-                    input.value = currentCheckingBal;
-                } else {
-                    // Withdraw: Max amount is savings balance (shares)
-                    input.value = currentSavingsBal;
-                }
+            if (type === 'checking') input.value = currentCheckingBal;
+            else if (type === 'savings-dynamic') {
+                if (currentSavingsAction === 'deposit') input.value = currentCheckingBal;
+                else input.value = currentSavingsBal;
             }
         }
 
-        // 1. Top Up (EOA -> Checking)
         async function executeTopUp() {
             const amount = document.getElementById('input-topup').value;
             if (!amount) return;
-            
             try {
                 const wei = ethers.utils.parseUnits(amount, 6);
                 const tx = await usdcContract.transfer(accountAddress, wei);
@@ -821,22 +844,15 @@
                 await tx.wait();
                 showToast("Funds deposited!", "success");
                 refreshData();
-            } catch (err) {
-                console.error(err);
-                showToast("Transfer failed", "error");
-            }
+            } catch (err) { console.error(err); showToast("Transfer failed", "error"); }
         }
 
-        // 2. Transfer (Checking -> External)
-        function openTransferModal() {
-            toggleModal('modal-transfer');
-        }
+        function openTransferModal() { toggleModal('modal-transfer'); }
 
         async function executeTransfer() {
             const to = document.getElementById('input-transfer-to').value;
             const amount = document.getElementById('input-transfer-amount').value;
             if (!to || !amount) return;
-
             try {
                 const wei = ethers.utils.parseUnits(amount, 6);
                 const tx = await accountContract.pay(to, wei);
@@ -845,33 +861,22 @@
                 await tx.wait();
                 showToast("Payment sent!", "success");
                 refreshData();
-            } catch (err) {
-                console.error(err);
-                showToast("Payment failed (Check limits?)", "error");
-            }
+            } catch (err) { console.error(err); showToast("Payment failed", "error"); }
         }
 
-        // 3. Savings (Deposit/Withdraw)
         function openSavingsModal(type) {
             currentSavingsAction = type;
             const btn = document.getElementById('savings-btn');
             const title = document.getElementById('savings-title');
             const desc = document.getElementById('savings-desc');
-            const input = document.getElementById('input-savings-amount');
-            input.value = ""; // clear previous input
+            document.getElementById('input-savings-amount').value = "";
             
             if (type === 'deposit') {
-                title.innerText = "Invest in Vault";
-                desc.innerText = "Move USDC from Checking to Savings.";
-                btn.innerText = "Confirm Deposit";
-                btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
-                btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                title.innerText = "Invest in Vault"; desc.innerText = "Move USDC from Checking to Savings.";
+                btn.innerText = "Confirm Deposit"; btn.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-medium transition-colors";
             } else {
-                title.innerText = "Withdraw Funds";
-                desc.innerText = "Burn shares to redeem USDC to Checking.";
-                btn.innerText = "Confirm Withdraw";
-                btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
-                btn.classList.add('bg-red-600', 'hover:bg-red-700');
+                title.innerText = "Withdraw Funds"; desc.innerText = "Burn shares to redeem USDC to Checking.";
+                btn.innerText = "Confirm Withdraw"; btn.className = "w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium transition-colors";
             }
             toggleModal('modal-savings');
         }
@@ -879,45 +884,26 @@
         async function executeSavingsAction() {
             const amount = document.getElementById('input-savings-amount').value;
             if (!amount) return;
-
             try {
                 let tx;
                 toggleModal('modal-savings');
                 showToast("Interacting with Vault...");
-
                 if (currentSavingsAction === 'deposit') {
                     const wei = ethers.utils.parseUnits(amount, 6);
-                    // Slippage: 1% (Very basic calculation)
-                    // In production, query the vault for expected shares first.
-                    // Here we set minShares to 0 for demo or a rough estimate to prevent total loss.
-                    // For safety in this demo, we'll set it low to ensure it passes, 
-                    // assuming the frontend would normally fetch a quote.
                     tx = await accountContract.depositToSavings(wei, 0); 
                 } else {
-                    // Withdraw
-                    // Note: User enters USDC amount they want, but contract takes SHARES.
-                    // Real UI needs to know share price. 
-                    // For simplicity in this demo, we will assume user inputs SHARES amount 
-                    // or implement a basic conversion if we had the price.
-                    // Let's treat input as SHARES for withdrawal for now.
                     const sharesWei = ethers.utils.parseUnits(amount, 6);
                     tx = await accountContract.withdrawFromSavings(sharesWei, 0);
                 }
-
                 await tx.wait();
                 showToast("Vault Transaction Confirmed!", "success");
                 refreshData();
-            } catch (err) {
-                console.error(err);
-                showToast("Vault Action Failed", "error");
-            }
+            } catch (err) { console.error(err); showToast("Vault Action Failed", "error"); }
         }
 
-        // 4. Set Limits
         async function executeSetLimit() {
             const amount = document.getElementById('input-limit').value;
             if (amount === '') return;
-
             try {
                 const wei = ethers.utils.parseUnits(amount, 6);
                 const tx = await accountContract.setDailyLimit(wei);
@@ -926,67 +912,44 @@
                 await tx.wait();
                 showToast("Daily Limit Updated!", "success");
                 refreshData();
-            } catch (err) {
-                console.error(err);
-                showToast("Update failed", "error");
-            }
+            } catch (err) { console.error(err); showToast("Update failed", "error"); }
         }
 
         // --- UTILS ---
         function toggleModal(id) {
             const el = document.getElementById(id);
-            if (el.classList.contains('hidden')) {
-                el.classList.remove('hidden');
-            } else {
-                el.classList.add('hidden');
-            }
+            if (el.classList.contains('hidden')) el.classList.remove('hidden');
+            else el.classList.add('hidden');
         }
 
         function formatMoney(amount) {
-            return parseFloat(amount).toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
+            return parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function setBtnLoading(id, isLoading) {
             const btn = document.getElementById(id);
             const txt = document.getElementById(id + '-text');
             const spin = document.getElementById(id + '-spinner');
-            
-            if (isLoading) {
-                btn.disabled = true;
-                txt.classList.add('hidden');
-                spin.classList.remove('hidden');
-            } else {
-                btn.disabled = false;
-                txt.classList.remove('hidden');
-                spin.classList.add('hidden');
-            }
+            if (isLoading) { btn.disabled = true; txt.classList.add('hidden'); spin.classList.remove('hidden'); }
+            else { btn.disabled = false; txt.classList.remove('hidden'); spin.classList.add('hidden'); }
         }
 
         function showToast(msg, type = 'info') {
             const el = document.getElementById('toast');
             const msgEl = document.getElementById('toast-msg');
             const icon = document.getElementById('toast-icon');
-            
             msgEl.innerText = msg;
-            
-            if (type === 'error') icon.style.color = '#ef4444'; // red
-            else if (type === 'success') icon.style.color = '#10b981'; // green
-            else icon.style.color = '#60a5fa'; // blue
-
+            if (type === 'error') icon.style.color = '#ef4444'; 
+            else if (type === 'success') icon.style.color = '#10b981'; 
+            else icon.style.color = '#60a5fa'; 
             el.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                el.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            setTimeout(() => { el.classList.add('translate-y-20', 'opacity-0'); }, 3000);
         }
 
         function copyAddress() {
             navigator.clipboard.writeText(accountAddress);
             showToast("Address copied to clipboard", "success");
         }
-
     </script>
 </body>
 </html>
