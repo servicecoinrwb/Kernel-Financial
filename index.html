@@ -18,10 +18,10 @@
     <!-- Ethers.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     
-    <!-- Web3Auth (CDN Version) -->
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@6.1.1/dist/modal.umd.min.js"></script>
+    <!-- Web3Auth (CDN Version) - Dependencies FIRST -->
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/base@6.1.1/dist/base.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/ethereum-provider@6.1.1/dist/ethereumProvider.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@6.1.1/dist/modal.umd.min.js"></script>
 
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -47,7 +47,7 @@
             CHECKING: "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4",
             KERNEL: "0xC5ABA20edBF35544E5Adb9983b52831ec5d40FDD",
             INVESTOR_VAULT: "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA",
-            USDC: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" // Mainnet USDC
+            USDC: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" // Arbitrum USDC
         };
 
         const ABIS = {
@@ -103,12 +103,48 @@
                 if (window.ethereum) {
                     try {
                         const browserProvider = new ethers.BrowserProvider(window.ethereum);
+                        
+                        // --- FORCE NETWORK SWITCH TO ARBITRUM ---
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: '0xa4b1' }], // Chain ID for Arbitrum One (42161)
+                            });
+                        } catch (switchError) {
+                            // This error code indicates that the chain has not been added to MetaMask/Rabby.
+                            if (switchError.code === 4902) {
+                                try {
+                                    await window.ethereum.request({
+                                        method: 'wallet_addEthereumChain',
+                                        params: [
+                                            {
+                                                chainId: '0xa4b1',
+                                                chainName: 'Arbitrum One',
+                                                rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+                                                nativeCurrency: {
+                                                    name: 'Ether',
+                                                    symbol: 'ETH',
+                                                    decimals: 18
+                                                },
+                                                blockExplorerUrls: ['https://arbiscan.io']
+                                            },
+                                        ],
+                                    });
+                                } catch (addError) {
+                                    throw addError;
+                                }
+                            } else {
+                                throw switchError;
+                            }
+                        }
+
                         await browserProvider.send("eth_requestAccounts", []);
                         const newSigner = await browserProvider.getSigner();
                         setProvider(browserProvider);
                         setSigner(newSigner);
                         setAddress(await newSigner.getAddress());
                     } catch (err) {
+                        console.error(err);
                         alert("Connection failed: " + err.message);
                     }
                 } else {
@@ -118,10 +154,22 @@
 
             const connectWeb3Auth = async () => {
                 try {
-                    if(window.modal && window.modal.Web3Auth) {
-                         const web3auth = new window.modal.Web3Auth({
+                    // Check for UMD global namespace. Usually window.modal.Web3Auth or window.Web3Auth
+                    const Web3AuthClass = (window.modal && window.modal.Web3Auth) || window.Web3Auth;
+
+                    if(Web3AuthClass) {
+                         const web3auth = new Web3AuthClass({
                             clientId: CLIENT_ID,
-                            chainConfig: { chainNamespace: "eip155", chainId: "0x1" }
+                            // Updated to Arbitrum One (Chain ID 42161 => 0xa4b1)
+                            chainConfig: { 
+                                chainNamespace: "eip155", 
+                                chainId: "0xa4b1",
+                                rpcTarget: "https://arb1.arbitrum.io/rpc",
+                                displayName: "Arbitrum One",
+                                blockExplorer: "https://arbiscan.io",
+                                ticker: "ETH",
+                                tickerName: "Ethereum"
+                            }
                         });
                         await web3auth.initModal();
                         const web3authProvider = await web3auth.connect();
@@ -131,7 +179,8 @@
                         setSigner(newSigner);
                         setAddress(await newSigner.getAddress());
                     } else {
-                        alert("Web3Auth library loading. Please try again or use Rabby.");
+                        console.error("Window globals:", window);
+                        alert("Web3Auth library loading. Please try again or use Rabby. (Check Console for debug info)");
                     }
                 } catch (error) {
                     console.error(error);
