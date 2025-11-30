@@ -360,6 +360,47 @@
                 <p class="text-slate-500">Restricted access. Manage Kernel liquidity and permissions.</p>
             </div>
 
+            <!-- System Upgrades (New - Kernel Governance) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-xl mx-auto mb-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <i data-lucide="cpu" class="w-24 h-24 text-slate-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">System Upgrades (Kernel)</h3>
+                <p class="text-sm text-slate-500 mb-6">Propose and execute Kernel upgrades. Enforced by 24h Timelock.</p>
+
+                <!-- Current Status -->
+                <div class="bg-slate-50 rounded-lg p-4 mb-6 text-sm space-y-2 border border-slate-200">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Current Kernel:</span>
+                        <span class="font-mono text-slate-700 truncate w-48 text-right" id="adm-curr-kernel">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Pending Upgrade:</span>
+                        <span class="font-mono text-blue-600 truncate w-48 text-right" id="adm-pending-kernel">None</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Unlock Time:</span>
+                        <span class="font-medium text-orange-600" id="adm-unlock-time">--</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Step 1: Propose -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">New Kernel Address</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="input-new-kernel" placeholder="0x..." class="flex-1 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            <button onclick="executeProposeKernel()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">1. Propose</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Execute -->
+                    <button id="btn-upgrade-kernel" onclick="executeUpgradeKernel()" class="w-full bg-slate-200 text-slate-400 cursor-not-allowed py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2" disabled>
+                        <i data-lucide="zap" class="w-4 h-4"></i> 2. Execute Upgrade (Wait for Timelock)
+                    </button>
+                </div>
+            </div>
+
             <!-- Lending Operations (New) -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-xl mx-auto mb-8">
                 <h3 class="text-xl font-bold text-slate-900 mb-6">Lending Operations</h3>
@@ -534,14 +575,20 @@
             "function approve(address spender, uint256 amount) returns (bool)"
         ];
 
-        // ADDED: isWhitelisted for checks AND setInvestorStatus for admin AND pushCapitalToKernel
+        // ADDED: Propose/Upgrade Kernel logic
         const VAULT_ABI = [
             "function totalManagedAssets() view returns (uint256)",
             "function totalShares() view returns (uint256)",
             "function capitalInKernel() view returns (uint256)",
             "function isWhitelisted(address) view returns (bool)",
             "function setInvestorStatus(address investor, bool status)",
-            "function pushCapitalToKernel(uint256 amount)"
+            "function pushCapitalToKernel(uint256 amount)",
+            "function owner() view returns (address)",
+            "function proposeKernel(address _newKernel)",
+            "function upgradeKernel()",
+            "function pendingKernel() view returns (address)",
+            "function kernelUpdateTime() view returns (uint256)",
+            "function kernel() view returns (address)"
         ];
 
         // ADDED: Methods for Repay Loan, Admin Whitelist, and Deploy Capital
@@ -550,7 +597,8 @@
             "function activePrincipal(address) view returns (uint256)",
             "function repayLoan(uint256 principal, uint256 fee)",
             "function setSolver(address solver, bool status)",
-            "function deployCapital(address solver, uint256 amount, string invoiceHash)"
+            "function deployCapital(address solver, uint256 amount, string invoiceHash)",
+            "function owner() view returns (address)"
         ];
 
         // --- STATE ---
@@ -588,6 +636,7 @@
 
             if(viewName === 'ecosystem') loadEcosystemData();
             if(viewName === 'solver') loadSolverData();
+            if(viewName === 'admin') loadAdminData();
         }
 
         // --- WALLET CONNECTION ---
@@ -768,8 +817,15 @@
                 let util = 0;
                 if(assetsFmt > 0) util = (kernelFmt / assetsFmt) * 100;
 
+                // Calculate Idle Liquidity (Vault Balance)
+                // We use USDC balance of Vault Address for accuracy
+                const vaultBal = await usdcContract.balanceOf(vaultAddress);
+                const idleFmt = parseFloat(ethers.utils.formatUnits(vaultBal, 6));
+
                 document.getElementById('eco-tvl').innerText = formatMoney(assetsFmt);
                 document.getElementById('eco-deployed').innerText = formatMoney(kernelFmt);
+                document.getElementById('eco-idle').innerText = formatMoney(idleFmt);
+                
                 document.getElementById('eco-share-price').innerText = "$" + price.toFixed(4);
                 document.getElementById('eco-share-ratio').innerText = price.toFixed(4);
                 document.getElementById('eco-util-bar').style.width = `${util}%`;
@@ -852,6 +908,70 @@
         }
 
         // --- ADMIN LOGIC ---
+        async function loadAdminData() {
+            if(!vaultContract) return;
+            try {
+                // Get Kernel Status for Upgrades
+                const currentKernel = await vaultContract.kernel();
+                const pendingKernel = await vaultContract.pendingKernel();
+                const unlockTime = await vaultContract.kernelUpdateTime();
+
+                document.getElementById('adm-curr-kernel').innerText = `${currentKernel.substring(0,6)}...${currentKernel.substring(38)}`;
+                
+                if(pendingKernel !== ethers.constants.AddressZero) {
+                    document.getElementById('adm-pending-kernel').innerText = `${pendingKernel.substring(0,6)}...${pendingKernel.substring(38)}`;
+                    
+                    const now = Math.floor(Date.now() / 1000);
+                    if(now >= unlockTime) {
+                        document.getElementById('adm-unlock-time').innerText = "Ready to Execute";
+                        document.getElementById('adm-unlock-time').className = "font-medium text-green-600";
+                        // Enable Button
+                        const btn = document.getElementById('btn-upgrade-kernel');
+                        btn.disabled = false;
+                        btn.className = "w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2";
+                        btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4"></i> 2. Execute Upgrade`;
+                    } else {
+                        const timeLeft = unlockTime - now;
+                        const hours = Math.ceil(timeLeft / 3600);
+                        document.getElementById('adm-unlock-time').innerText = `Locked (${hours}h remaining)`;
+                    }
+                } else {
+                    document.getElementById('adm-pending-kernel').innerText = "None";
+                    document.getElementById('adm-unlock-time').innerText = "--";
+                }
+                
+            } catch(err) { console.error("Admin data failed", err); }
+        }
+
+        async function executeProposeKernel() {
+            const newKernel = document.getElementById('input-new-kernel').value;
+            if(!ethers.utils.isAddress(newKernel)) return showToast("Invalid Address", "error");
+
+            try {
+                showToast("Proposing Kernel Update...");
+                const tx = await vaultContractSigner.proposeKernel(newKernel);
+                await tx.wait();
+                showToast("Proposal Submitted! (24h Lock)", "success");
+                loadAdminData();
+            } catch(err) {
+                console.error(err);
+                showToast("Proposal Failed", "error");
+            }
+        }
+
+        async function executeUpgradeKernel() {
+            try {
+                showToast("Executing Upgrade...");
+                const tx = await vaultContractSigner.upgradeKernel();
+                await tx.wait();
+                showToast("Kernel Upgraded Successfully!", "success");
+                loadAdminData();
+            } catch(err) {
+                console.error(err);
+                showToast("Execution Failed (Check Timelock)", "error");
+            }
+        }
+
         async function setSolverStatus(status) {
             const addr = document.getElementById('input-admin-solver').value;
             if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
@@ -886,16 +1006,22 @@
             const amount = document.getElementById('input-push-amount').value;
             if (!amount) return;
 
+            // Permission Check
             try {
-                // Pre-flight check for Idle Funds
-                const totalAssets = await vaultContract.totalManagedAssets();
-                const capitalInKernel = await vaultContract.capitalInKernel();
-                const idle = totalAssets.sub(capitalInKernel);
+                const owner = await vaultContract.owner();
+                if(owner.toLowerCase() !== userAddress.toLowerCase()) {
+                    return showToast("Admin Access Required", "error");
+                }
+            } catch(e) { console.error("Owner check failed", e); }
+
+            try {
+                // Balance Check
+                const vaultBal = await usdcContract.balanceOf(vaultAddress);
                 const pushWei = ethers.utils.parseUnits(amount, 6);
 
-                if (pushWei.gt(idle)) {
-                    const idleFmt = ethers.utils.formatUnits(idle, 6);
-                    showToast(`Insufficient Idle Funds (Max: $${formatMoney(idleFmt)})`, "error");
+                if (pushWei.gt(vaultBal)) {
+                    const balFmt = ethers.utils.formatUnits(vaultBal, 6);
+                    showToast(`Insufficient Idle Funds (Max: $${formatMoney(balFmt)})`, "error");
                     return;
                 }
 
@@ -923,8 +1049,16 @@
             if(!ethers.utils.isAddress(solver)) return showToast("Invalid Solver Address", "error");
             if(!amount) return;
 
+            // Permission Check
             try {
-                // Pre-flight check: Kernel must have enough USDC to deploy
+                const owner = await kernelContract.owner();
+                if(owner.toLowerCase() !== userAddress.toLowerCase()) {
+                    return showToast("Admin Access Required", "error");
+                }
+            } catch(e) { console.error("Owner check failed", e); }
+
+            try {
+                // Liquidity Check
                 const kernelBal = await usdcContract.balanceOf(kernelAddress);
                 const loanWei = ethers.utils.parseUnits(amount, 6);
 
@@ -936,7 +1070,6 @@
 
                 showToast("Deploying Capital...");
                 
-                // Admin (Owner) calls this on Kernel
                 const overrides = { gasLimit: 2500000 };
                 const tx = await kernelContractSigner.deployCapital(solver, loanWei, ref, overrides);
                 await tx.wait();
@@ -948,7 +1081,7 @@
                 loadEcosystemData(); // refresh stats
             } catch(err) {
                 console.error(err);
-                showToast("Deployment Failed (Check allowance/balance)", "error");
+                showToast("Deployment Failed", "error");
             }
         }
 
