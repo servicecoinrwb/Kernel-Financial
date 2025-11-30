@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeoBank | Future of Personal Finance</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (Updated script to suppress warning) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Ethers.js -->
@@ -464,10 +464,12 @@
             "function approve(address spender, uint256 amount) returns (bool)"
         ];
 
+        // ADDED: isWhitelisted for checks
         const VAULT_ABI = [
             "function totalManagedAssets() view returns (uint256)",
             "function totalShares() view returns (uint256)",
-            "function capitalInKernel() view returns (uint256)"
+            "function capitalInKernel() view returns (uint256)",
+            "function isWhitelisted(address) view returns (bool)"
         ];
 
         // ADDED: Methods for Repay Loan and Admin Whitelist
@@ -859,8 +861,9 @@
                 return;
             }
             try {
+                // Add Gas Limit
                 const wei = ethers.utils.parseUnits(amount, 6);
-                const tx = await accountContract.pay(to, wei);
+                const tx = await accountContract.pay(to, wei, { gasLimit: 250000 });
                 toggleModal('modal-transfer');
                 showToast("Processing payment...");
                 await tx.wait();
@@ -907,12 +910,22 @@
                 let tx;
                 toggleModal('modal-savings');
                 showToast("Interacting with Vault...");
-                if (currentSavingsAction === 'deposit') {
+                
+                // Add Manual Gas Limit to Prevent Estimation Crashes
+                const overrides = { gasLimit: 2500000 };
+
+                // Whitelist Check before Transaction
+                if(currentSavingsAction === 'deposit') {
+                    const isWhitelisted = await vaultContract.isWhitelisted(accountAddress);
+                    if(!isWhitelisted) {
+                        showToast("Account not whitelisted by Admin!", "error");
+                        return;
+                    }
                     const wei = ethers.utils.parseUnits(amount, 6);
-                    tx = await accountContract.depositToSavings(wei, 0); 
+                    tx = await accountContract.depositToSavings(wei, 0, overrides); 
                 } else {
                     const sharesWei = ethers.utils.parseUnits(amount, 6);
-                    tx = await accountContract.withdrawFromSavings(sharesWei, 0);
+                    tx = await accountContract.withdrawFromSavings(sharesWei, 0, overrides);
                 }
                 await tx.wait();
                 showToast("Vault Transaction Confirmed!", "success");
