@@ -3,545 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kernel Financial | Personal Treasury</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Kernel | Institutional Banking</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.4.0/dist/modal.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/ethereum-provider@9.4.0/dist/ethereumProvider.umd.min.js"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Ethers.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    
+    <!-- Web3Auth (CDN Version) -->
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@6.1.1/dist/modal.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/base@6.1.1/dist/base.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/ethereum-provider@6.1.1/dist/ethereumProvider.umd.min.js"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        :root {
-            --brand-primary: #0055d4;
-            --brand-dark: #0a1f44;
-            --bg-body: #f3f4f6;
-            --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-        }
-        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        
-        .card { 
-            background-color: var(--bg-card); 
-            border: 1px solid var(--border-color); 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); 
-            margin-bottom: 24px; 
-        }
-        .card-header { 
-            background-color: #ffffff; 
-            border-bottom: 1px solid var(--border-color); 
-            font-weight: 600; 
-            color: var(--brand-dark); 
-            border-radius: 12px 12px 0 0 !important; 
-            padding: 1rem 1.5rem; 
-        }
-        .card-body { padding: 1.5rem; }
-        
-        /* Personal Vault Card */
-        .checking-balance-card { 
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
-            color: #ffffff !important; 
-            border-radius: 16px; 
-            padding: 30px; 
-            margin-bottom: 24px; 
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
-            position: relative; 
-            overflow: hidden; 
-        }
-        .checking-balance-card * { position: relative; z-index: 1; color: #ffffff !important; }
-        
-        .btn-primary { background-color: var(--brand-primary); border: none; }
-        .btn-primary:hover { background-color: #0044aa; }
-        
-        /* Swap Styles */
-        .swap-card { background: #fff; border-radius: 16px; padding: 20px; border: 1px solid var(--border-color); }
-        .token-input-group { background-color: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 10px; }
-        .token-input-group input { background: transparent; border: none; font-size: 1.5rem; font-weight: 600; width: 100%; outline: none; }
-        .swap-arrow { text-align: center; margin: -20px 0; position: relative; z-index: 10; }
-        .swap-arrow i { background: #fff; padding: 8px; border-radius: 50%; border: 1px solid var(--border-color); color: var(--text-muted); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #F3F4F6; }
+        .chase-blue { background-color: #114285; }
+        .chase-blue-text { color: #114285; }
+        .sidebar-link.active { background-color: #E6F0FF; color: #114285; border-left: 4px solid #114285; }
     </style>
 </head>
 <body>
+    <div id="root"></div>
 
-<div id="landing-view">
-    <nav class="navbar navbar-expand-lg fixed-top bg-white border-bottom">
-        <div class="container">
-            <a class="navbar-brand" href="#"><i class="fas fa-layer-group me-2 text-primary"></i>Kernel Financial</a>
-            <button class="btn btn-primary" onclick="showLoginModal()">Login</button>
-        </div>
-    </nav>
-    <section class="hero-section" style="padding-top: 140px; padding-bottom: 100px; text-align: center;">
-        <div class="container">
-            <h1 class="display-4 fw-bold mb-4">Personal Treasury OS</h1>
-            <p class="lead text-muted mb-5">Your personal on-chain bank account.<br>Deposit, Withdraw, and Earn Yield instantly.</p>
-            <div class="d-flex justify-content-center gap-3">
-                <button class="btn btn-primary btn-lg px-5" onclick="showLoginModal()">Access Account</button>
-            </div>
-        </div>
-    </section>
-</div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { ethers } = window;
 
-<div id="dashboard-view" style="display: none;">
-    <nav class="navbar navbar-expand-lg border-bottom mb-4 bg-white">
-        <div class="container">
-            <a class="navbar-brand" href="#" onclick="exitApp()"><i class="fas fa-layer-group me-2 text-primary"></i>Kernel Financial</a>
-            <div class="d-flex align-items-center">
-                <div class="me-3 text-end d-none d-md-block">
-                    <small class="d-block text-muted">Wallet</small>
-                    <span id="walletAddress" class="fw-bold text-success">...</span>
-                </div>
-                <button id="connectBtn" class="btn btn-dark" onclick="showLoginModal()">Switch User</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card"><div class="card-body">
-                    <div class="small text-muted">Total Net Worth</div>
-                    <div class="h3 mb-0" id="totalBalanceDisplay">$0.00</div>
-                </div></div>
-            </div>
-            <div class="col-md-6">
-                <div class="card"><div class="card-body">
-                    <div class="small text-muted">Active Yield (APY)</div>
-                    <div class="h3 mb-0 text-success">8.5%</div>
-                </div></div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header bg-white">
-                <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link active" id="checking-tab" data-bs-toggle="tab" data-bs-target="#checking"><i class="fas fa-university me-2"></i>Personal Vault</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" id="swap-tab" data-bs-toggle="tab" data-bs-target="#swap"><i class="fas fa-exchange-alt me-2"></i>Swap</button>
-                    </li>
-                </ul>
-            </div>
-            
-            <div class="card-body">
-                <div class="tab-content">
-                    
-                    <div class="tab-pane fade show active" id="checking">
-                        <div class="row">
-                            <div class="col-md-5 border-end">
-                                <div class="checking-balance-card">
-                                    <div class="d-flex justify-content-between mb-4">
-                                        <i class="fas fa-wifi fa-rotate-90"></i>
-                                        <span class="text-white-50">PERSONAL</span>
-                                    </div>
-                                    <h6 class="text-white-50 text-uppercase mb-1">Vault Balance (USDC)</h6>
-                                    <h2 class="mb-4" id="vaultBalanceMain">$0.00</h2>
-                                    <div class="d-flex justify-content-between align-items-end">
-                                        <small class="text-white-50 font-monospace" id="cardAddressDisplay">0x...</small>
-                                        <i class="fab fa-cc-visa fa-2x ms-auto"></i>
-                                    </div>
-                                </div>
-
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-success py-2" data-bs-toggle="modal" data-bs-target="#depositModal">
-                                        <i class="fas fa-arrow-down me-2"></i>Deposit Funds
-                                    </button>
-                                    <button class="btn btn-danger py-2" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-                                        <i class="fas fa-arrow-up me-2"></i>Withdraw Funds
-                                    </button>
-                                </div>
-
-                                <div class="mt-4">
-                                    <h6 class="text-muted small fw-bold">LIQUID WALLET</h6>
-                                    <div class="list-group list-group-flush border rounded">
-                                        <div class="list-group-item d-flex justify-content-between">
-                                            <span><i class="fas fa-wallet me-2 text-muted"></i>USDC</span>
-                                            <strong id="walletUSDC">0.00</strong>
-                                        </div>
-                                        <div class="list-group-item d-flex justify-content-between">
-                                            <span><i class="fab fa-ethereum me-2 text-muted"></i>ETH Gas</span>
-                                            <strong id="walletETH">0.00</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-7 ps-md-4">
-                                <h5 class="mb-3">Account Status</h5>
-                                <div class="alert alert-light border text-muted small">
-                                    <i class="fas fa-check-circle text-success me-2"></i> <strong>Unrestricted Access:</strong> You have full control over this vault. Deposits earn yield immediately. Withdrawals are instant.
-                                </div>
-                                
-                                <h5 class="mt-4 mb-3">Quick Transfer</h5>
-                                <div class="card bg-light border-0">
-                                    <div class="card-body">
-                                        <div class="mb-3">
-                                            <label class="small text-muted">Recipient Address</label>
-                                            <input type="text" class="form-control" id="payeeAddress" placeholder="0x...">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="small text-muted">Amount (USDC)</label>
-                                            <input type="number" class="form-control" id="payAmount" placeholder="0.00">
-                                        </div>
-                                        <button class="btn btn-dark w-100" onclick="payVendor()">Send from Wallet</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="swap">
-                        <div class="row justify-content-center">
-                            <div class="col-md-6">
-                                <div class="text-center mb-4">
-                                    <h5>Token Swap</h5>
-                                    <p class="text-muted">Exchange assets instantly via Uniswap V2.</p>
-                                </div>
-                                <div class="swap-card">
-                                    <div class="token-input-group">
-                                        <div class="d-flex justify-content-between">
-                                            <label>You Pay</label>
-                                            <label>Wallet: <span id="swapSellBal">$0.00</span></label>
-                                        </div>
-                                        <div class="d-flex align-items-center">
-                                            <input type="number" placeholder="0.00" id="swapSellAmt">
-                                            <button class="btn btn-light btn-sm rounded-pill ms-2 fw-bold border">USDC</button>
-                                        </div>
-                                    </div>
-                                    <div class="swap-arrow"><i class="fas fa-arrow-down"></i></div>
-                                    <div class="token-input-group">
-                                        <div class="d-flex justify-content-between">
-                                            <label>You Receive</label>
-                                            <label class="text-success">Estimated</label>
-                                        </div>
-                                        <div class="d-flex align-items-center">
-                                            <input type="number" placeholder="0.00" id="swapBuyAmt" readonly>
-                                            <button class="btn btn-light btn-sm rounded-pill ms-2 fw-bold border">ETH</button>
-                                        </div>
-                                    </div>
-                                    <div class="d-grid gap-2 mt-3">
-                                        <button class="btn btn-outline-primary" onclick="approveRouter()">1. Approve</button>
-                                        <button class="btn btn-primary" onclick="executeSwapOrder()">2. Swap</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="depositModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Deposit to Vault</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label>Amount (USDC)</label>
-                    <input type="number" id="depositAmount" class="form-control" placeholder="0.00">
-                </div>
-                <p class="small text-muted">Funds move from your Wallet -> Personal Vault.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline-primary" onclick="approveDeposit()">1. Approve</button>
-                <button class="btn btn-success" onclick="executeDeposit()">2. Deposit</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="withdrawModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Withdraw Funds</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label>Amount (USDC)</label>
-                    <input type="number" id="withdrawAmount" class="form-control" placeholder="0.00">
-                </div>
-                <div class="mb-3">
-                    <label>Send To Address (Optional)</label>
-                    <input type="text" id="withdrawRecipient" class="form-control" placeholder="Leave empty for self">
-                </div>
-                <p class="small text-muted">Funds move from Vault -> Your Wallet (or Recipient).</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger w-100" onclick="executeWithdrawal()">Confirm Withdrawal</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="loginModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-body p-4 text-center">
-                <h5 class="mb-4">Sign In</h5>
-                <div class="d-grid gap-3">
-                    <button class="btn btn-outline-dark" onclick="connectWallet()"><i class="fas fa-wallet me-2"></i> Metamask</button>
-                    <button class="btn btn-primary" onclick="loginWithEmail()"><i class="fas fa-google me-2"></i> Google Login</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-
-<script>
-    // --- CONFIGURATION ---
-    const VAULT_ADDRESS = "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA"; // Public Vault
-    const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; // Arbitrum USDC
-    const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
-    const RPC_URL = "https://arb1.arbitrum.io/rpc"; 
-    const WEB3AUTH_CLIENT_ID = "BM5XyP5tYq5TtEKAbtbtPf8aQkPwytH3X0LiUOFsgBfqB4HnkY39qbZXR_KeLvJMFjiGOF-GJQyE9tUBjuFgS_I";
-
-    // Standard ABIs
-    const YIELD_ABI = [
-        "function deposit(uint256 amount, uint256 minShares) external",
-        "function withdraw(uint256 shareAmount, uint256 minAssets) external",
-        "function shares(address account) view returns (uint256)",
-        "function usdc() view returns (address)"
-    ];
-    const ERC20_ABI = [
-        "function balanceOf(address) view returns (uint256)", 
-        "function approve(address,uint256) returns (bool)", 
-        "function transfer(address to, uint256 amount) returns (bool)",
-        "function decimals() view returns (uint8)"
-    ];
-    const UNISWAP_ABI = [
-        "function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)"
-    ];
-
-    let provider, signer, vaultContract, usdcContract, userAddress, web3auth;
-
-    // --- INIT ---
-    window.onload = async function() {
-        const chainConfig = {
-            chainNamespace: "eip155",
-            chainId: "0xa4b1", 
-            rpcTarget: RPC_URL,
-            displayName: "Arbitrum One",
-            blockExplorerUrl: "https://arbiscan.io",
-            ticker: "ETH",
-            tickerName: "Ether",
+        // --- CONFIGURATION ---
+        const CLIENT_ID = "BM5XyP5tYq5TtEKAbtbtPf8aQkPwytH3X0LiUOFsgBfqB4HnkY39qbZXR_KeLvJMFjiGOF-GJQyE9tUBjuFgS_I";
+        
+        const ADDRESSES = {
+            CHECKING: "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4",
+            KERNEL: "0xC5ABA20edBF35544E5Adb9983b52831ec5d40FDD",
+            INVESTOR_VAULT: "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA",
+            USDC: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" // Mainnet USDC
         };
 
-        try {
-            if(window.EthereumProvider && window.Modal) {
-                const privateKeyProvider = new window.EthereumProvider.EthereumPrivateKeyProvider({ config: { chainConfig } });
-                web3auth = new window.Modal.Web3Auth({
-                    clientId: WEB3AUTH_CLIENT_ID,
-                    web3AuthNetwork: "sapphire_mainnet",
-                    privateKeyProvider: privateKeyProvider,
-                });
-                await web3auth.initModal();
-                if(web3auth.connected) {
-                    const web3authProvider = web3auth.provider;
-                    provider = new ethers.BrowserProvider(web3authProvider);
-                    signer = await provider.getSigner();
-                    userAddress = await signer.getAddress();
-                    const user = await web3auth.getUserInfo();
-                    completeLogin(userAddress, user.email);
+        const ABIS = {
+            CHECKING: [
+                "function sendPayment(address token, address recipient, uint256 amount, string memo)",
+                "function runPayroll(address token, address[] recipients, uint256[] amounts, string batchName)",
+                "function dailyLimits(address) view returns (uint256)"
+            ],
+            KERNEL: [
+                "function deployCapital(address solver, uint256 amount, string invoiceHash)",
+                "function setSolver(address solver, bool status)",
+                "function whitelistedSolvers(address) view returns (bool)"
+            ],
+            INVESTOR: [
+                "function deposit(uint256 amount, uint256 minShares)",
+                "function withdraw(uint256 shareAmount, uint256 minAssets)",
+                "function shares(address) view returns (uint256)"
+            ],
+            ERC20: [
+                "function approve(address spender, uint256 amount) returns (bool)",
+                "function balanceOf(address owner) view returns (uint256)",
+                "function decimals() view returns (uint8)"
+            ]
+        };
+
+        // --- ICONS COMPONENT WRAPPER ---
+        // Lucide icons are injected globally, we create a helper to use them in React
+        const Icon = ({ name, size = 20, className = "" }) => {
+            useEffect(() => {
+                if(window.lucide) window.lucide.createIcons();
+            });
+            return <i data-lucide={name} width={size} height={size} className={className}></i>;
+        };
+
+        // --- MAIN APP ---
+        function App() {
+            const [provider, setProvider] = useState(null);
+            const [signer, setSigner] = useState(null);
+            const [address, setAddress] = useState("");
+            const [viewMode, setViewMode] = useState("personal"); // personal | commercial
+            const [activeTab, setActiveTab] = useState("checking");
+
+            // --- AUTH LOGIC ---
+            const connectRabby = async () => {
+                if (window.ethereum) {
+                    try {
+                        const browserProvider = new ethers.BrowserProvider(window.ethereum);
+                        await browserProvider.send("eth_requestAccounts", []);
+                        const newSigner = await browserProvider.getSigner();
+                        setProvider(browserProvider);
+                        setSigner(newSigner);
+                        setAddress(await newSigner.getAddress());
+                    } catch (err) {
+                        alert("Connection failed: " + err.message);
+                    }
+                } else {
+                    alert("Rabby or MetaMask not found!");
                 }
-            }
-        } catch(e) { console.warn("Init Warning:", e); }
-    };
+            };
 
-    async function completeLogin(address, email = null) {
-        if(provider && signer) {
-            vaultContract = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, signer); 
-            // Try to resolve USDC from contract, else fallback
-            try {
-                const realUsdc = await vaultContract.usdc();
-                usdcContract = new ethers.Contract(realUsdc, ERC20_ABI, signer);
-            } catch(e) {
-                usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
+            const connectWeb3Auth = async () => {
+                try {
+                    // Note: In a real build, Web3Auth requires instantiation from the package.
+                    // This is a simplified CDN implementation check.
+                    if(window.modal && window.modal.Web3Auth) {
+                         const web3auth = new window.modal.Web3Auth({
+                            clientId: CLIENT_ID,
+                            chainConfig: { chainNamespace: "eip155", chainId: "0x1" }
+                        });
+                        await web3auth.initModal();
+                        const web3authProvider = await web3auth.connect();
+                        const browserProvider = new ethers.BrowserProvider(web3authProvider);
+                        const newSigner = await browserProvider.getSigner();
+                        setProvider(browserProvider);
+                        setSigner(newSigner);
+                        setAddress(await newSigner.getAddress());
+                    } else {
+                        alert("Web3Auth library loading. Please try again or use Rabby.");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Web3Auth Error: " + error.message);
+                }
+            };
+
+            // --- LOGIN SCREEN ---
+            if (!address) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                        <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md text-center border-t-8 border-blue-900">
+                            <div className="flex justify-center mb-6 text-blue-900">
+                                <Icon name="shield" size={64} />
+                            </div>
+                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Kernel Bank</h1>
+                            <p className="text-gray-500 mb-8">Secure Institutional DeFi Gateway</p>
+                            
+                            <div className="space-y-4">
+                                <button onClick={connectWeb3Auth} className="w-full bg-blue-900 text-white p-4 rounded-lg font-bold hover:bg-blue-800 transition flex items-center justify-center gap-3">
+                                    <Icon name="mail" /> Sign in with Email / Social
+                                </button>
+                                <button onClick={connectRabby} className="w-full bg-orange-600 text-white p-4 rounded-lg font-bold hover:bg-orange-700 transition flex items-center justify-center gap-3">
+                                    <Icon name="wallet" /> Connect Rabby Wallet
+                                </button>
+                            </div>
+                            <p className="mt-6 text-xs text-gray-400">Secured by Web3Auth & Ethereum</p>
+                        </div>
+                    </div>
+                );
             }
+
+            // --- MAIN DASHBOARD ---
+            return (
+                <div className="min-h-screen flex flex-col">
+                    {/* Header */}
+                    <header className="chase-blue text-white shadow-lg z-10">
+                        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <Icon name="shield" size={28} />
+                                <span className="font-bold text-xl tracking-tight">KERNEL BANK</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="hidden md:flex text-xs bg-blue-800 px-3 py-1 rounded border border-blue-700">
+                                    <span className="opacity-75 mr-2">Connected:</span>
+                                    <span className="font-mono">{address.slice(0,6)}...{address.slice(-4)}</span>
+                                </div>
+                                <button 
+                                    onClick={() => setViewMode(viewMode === 'personal' ? 'commercial' : 'personal')}
+                                    className="bg-white text-blue-900 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-gray-100 transition uppercase tracking-wide"
+                                >
+                                    Switch to {viewMode === 'personal' ? 'Commercial' : 'Personal'}
+                                </button>
+                                <button onClick={() => window.location.reload()} className="hover:text-red-300">
+                                    <Icon name="log-out" size={20} />
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex flex-1 max-w-7xl mx-auto w-full mt-6 px-4 gap-6">
+                        {/* Sidebar */}
+                        <aside className="w-64 hidden md:block">
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="p-4 bg-gray-50 border-b border-gray-100">
+                                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        {viewMode === 'personal' ? 'Personal Banking' : 'Commercial Center'}
+                                    </h3>
+                                </div>
+                                <nav className="p-2 space-y-1">
+                                    {viewMode === 'personal' ? (
+                                        <>
+                                            <SidebarItem label="Checking" icon="credit-card" active={activeTab === 'checking'} onClick={() => setActiveTab('checking')} />
+                                            <SidebarItem label="Wealth Management" icon="trending-up" active={activeTab === 'investor'} onClick={() => setActiveTab('investor')} />
+                                            <SidebarItem label="Transfers" icon="arrow-right-left" />
+                                            <SidebarItem label="Statements" icon="file-text" />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <SidebarItem label="Payroll Operations" icon="users" active={activeTab === 'payroll'} onClick={() => setActiveTab('payroll')} />
+                                            <SidebarItem label="Credit Desk" icon="briefcase" active={activeTab === 'credit'} onClick={() => setActiveTab('credit')} />
+                                            <SidebarItem label="Governance" icon="gavel" />
+                                        </>
+                                    )}
+                                </nav>
+                            </div>
+                        </aside>
+
+                        {/* Content Area */}
+                        <main className="flex-1">
+                            {viewMode === 'personal' ? (
+                                activeTab === 'checking' ? <CheckingAccount signer={signer} /> : <InvestorVault signer={signer} />
+                            ) : (
+                                activeTab === 'payroll' || activeTab === 'checking' ? <PayrollManager signer={signer} /> : <CreditDesk signer={signer} />
+                            )}
+                        </main>
+                    </div>
+                </div>
+            );
         }
 
-        let identityDisplay = address.substring(0,6) + "..." + address.substring(38);
-        if(email) identityDisplay = `${email} (${address.substring(0,4)}...)`;
-        
-        document.getElementById('walletAddress').innerText = identityDisplay;
-        document.getElementById('cardAddressDisplay').innerText = address;
-        document.getElementById('connectBtn').innerHTML = "Connected";
-        document.getElementById('connectBtn').className = "btn btn-success";
+        const SidebarItem = ({ label, icon, active, onClick }) => (
+            <button 
+                onClick={onClick}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors ${active ? 'sidebar-link active' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+                <Icon name={icon} size={18} />
+                {label}
+            </button>
+        );
 
-        enterApp();
-        refreshData();
-        setInterval(refreshData, 15000); 
-    }
+        // --- COMPONENT: CHECKING ACCOUNT ---
+        function CheckingAccount({ signer }) {
+            const [recipient, setRecipient] = useState("");
+            const [amount, setAmount] = useState("");
 
-    async function refreshData() {
-        if(!provider) return;
-        try {
-            // 1. Wallet ETH
-            const ethBal = await provider.getBalance(userAddress);
-            document.getElementById('walletETH').innerText = Number(ethers.formatEther(ethBal)).toFixed(4);
+            const handleSend = async () => {
+                if(!signer) return;
+                try {
+                    const contract = new ethers.Contract(ADDRESSES.CHECKING, ABIS.CHECKING, signer);
+                    const weiAmount = ethers.parseUnits(amount, 6); 
+                    const tx = await contract.sendPayment(ADDRESSES.USDC, recipient, weiAmount, "Web Payment");
+                    alert("Processing Payment...");
+                    await tx.wait();
+                    alert("Payment Sent!");
+                } catch(e) { console.error(e); alert("Failed: " + e.message); }
+            };
 
-            // 2. Wallet USDC
-            const usdcDecimals = await usdcContract.decimals();
-            const usdcBalRaw = await usdcContract.balanceOf(userAddress);
-            const usdcBal = ethers.formatUnits(usdcBalRaw, usdcDecimals);
-            document.getElementById('walletUSDC').innerText = Number(usdcBal).toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('swapSellBal').innerText = "$" + Number(usdcBal).toFixed(2);
+            return (
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 bg-gradient-to-r from-blue-900 to-blue-800 text-white">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-blue-200 text-sm font-medium">Kernel Checking Vault</p>
+                                <h2 className="text-4xl font-bold mt-2">$24,500.00</h2>
+                                <p className="text-blue-200 text-sm mt-1">Available Balance</p>
+                            </div>
+                            <Icon name="credit-card" size={32} className="text-blue-300 opacity-50" />
+                        </div>
+                        <div className="mt-6 flex gap-3">
+                            <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm font-semibold transition">Add Money</button>
+                            <button className="bg-transparent border border-blue-400 hover:bg-blue-800 text-white px-4 py-2 rounded text-sm font-semibold transition">Statements</button>
+                        </div>
+                    </div>
 
-            // 3. Vault Balance (Shares)
-            // Using shares() to read balance since this is a public vault
-            const shareBalRaw = await vaultContract.shares(userAddress);
-            const shareBal = ethers.formatUnits(shareBalRaw, usdcDecimals);
-            document.getElementById('vaultBalanceMain').innerText = Number(shareBal).toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('totalBalanceDisplay').innerText = "$" + (Number(usdcBal) + Number(shareBal)).toFixed(2);
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <Icon name="send" size={18} className="text-blue-600"/> Quick Transfer
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="md:col-span-2">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Recipient</label>
+                                <input type="text" onChange={e => setRecipient(e.target.value)} placeholder="0x..." className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-600 outline-none font-mono text-sm" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Amount (USDC)</label>
+                                <input type="number" onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-600 outline-none" />
+                            </div>
+                        </div>
+                        <button onClick={handleSend} className="mt-4 w-full bg-blue-900 text-white py-3 rounded font-bold hover:bg-blue-800 transition">
+                            Send Payment
+                        </button>
+                    </div>
+                </div>
+            );
+        }
 
-        } catch(e) { console.log("Bal Error", e); }
-    }
+        // --- COMPONENT: INVESTOR VAULT ---
+        function InvestorVault({ signer }) {
+            const [amount, setAmount] = useState("");
 
-    // --- DEPOSIT ---
-    async function approveDeposit() {
-        if(!signer) return alert("Wallet required");
-        try {
-            const amtVal = document.getElementById('depositAmount').value;
-            const decimals = await usdcContract.decimals();
-            const amount = ethers.parseUnits(amtVal, decimals);
-            
-            const tx = await usdcContract.approve(VAULT_ADDRESS, amount);
-            await tx.wait();
-            alert("Approved! Now click Deposit.");
-        } catch(e) { alert("Approval Failed: " + e.message); }
-    }
+            const handleDeposit = async () => {
+                if(!signer) return;
+                try {
+                    const usdc = new ethers.Contract(ADDRESSES.USDC, ABIS.ERC20, signer);
+                    const vault = new ethers.Contract(ADDRESSES.INVESTOR_VAULT, ABIS.INVESTOR, signer);
+                    const wei = ethers.parseUnits(amount, 6);
+                    
+                    alert("Please sign Approval transaction...");
+                    await (await usdc.approve(ADDRESSES.INVESTOR_VAULT, wei)).wait();
+                    
+                    alert("Processing Deposit...");
+                    await (await vault.deposit(wei, 0)).wait();
+                    alert("Deposit Successful!");
+                } catch(e) { console.error(e); alert("Failed: " + e.message); }
+            };
 
-    async function executeDeposit() {
-        if(!signer) return alert("Wallet required");
-        try {
-            const amtVal = document.getElementById('depositAmount').value;
-            const decimals = await usdcContract.decimals();
-            const amount = ethers.parseUnits(amtVal, decimals);
-            
-            const tx = await vaultContract.deposit(amount, 0); 
-            alert("Deposit Sent! Hash: " + tx.hash);
-            await tx.wait();
-            alert("Deposit Successful!");
-            bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
-            refreshData(); 
-        } catch(e) { alert("Deposit Failed: " + e.message); }
-    }
+            return (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-bold text-gray-700">Total Yield Assets</h3>
+                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-bold">APY 8.5%</span>
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-900">$142,050.55</h2>
+                            <p className="text-sm text-gray-400 mt-1">Kernel Investor Vault</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-center items-start">
+                             <h3 className="font-bold text-gray-700 mb-2">Performance</h3>
+                             <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
+                                <div className="bg-green-500 h-2 rounded-full" style={{width: '70%'}}></div>
+                             </div>
+                             <p className="text-xs text-gray-500">+ $12,400 this month</p>
+                        </div>
+                    </div>
 
-    // --- WITHDRAW ---
-    async function executeWithdrawal() {
-        if(!signer) return alert("Wallet required");
-        try {
-            const amtVal = document.getElementById('withdrawAmount').value;
-            const recipient = document.getElementById('withdrawRecipient').value;
-            const decimals = await usdcContract.decimals();
-            const amount = ethers.parseUnits(amtVal, decimals);
-            
-            // 1. Withdraw from Vault
-            const tx = await vaultContract.withdraw(amount, 0);
-            alert("Withdrawal initiated... Hash: " + tx.hash);
-            await tx.wait();
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="font-bold text-blue-900 mb-4 border-b border-gray-100 pb-2">Capital Injection</h3>
+                        <div className="flex gap-4 items-end">
+                            <div className="flex-1">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Deposit Amount (USDC)</label>
+                                <input onChange={e => setAmount(e.target.value)} type="number" className="w-full p-3 border border-gray-300 rounded focus:border-blue-500 outline-none" placeholder="0.00" />
+                            </div>
+                            <button onClick={handleDeposit} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded font-bold transition">
+                                Deposit
+                            </button>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
+                            <Icon name="info" size={12}/> Requires 2 transactions (Approve + Deposit)
+                        </p>
+                    </div>
+                </div>
+            );
+        }
 
-            // 2. If Recipient exists, transfer
-            if(recipient && recipient.length > 10) {
-                alert("Withdrawal complete. Now sending to recipient...");
-                const transferTx = await usdcContract.transfer(recipient, amount);
-                await transferTx.wait();
-                alert("Transfer Complete!");
-            } else {
-                alert("Withdrawal Complete!");
+        // --- COMPONENT: PAYROLL MANAGER (ADMIN) ---
+        function PayrollManager({ signer }) {
+            const [rows, setRows] = useState([{ addr: '', amt: '' }]);
+
+            const addRow = () => setRows([...rows, { addr: '', amt: '' }]);
+            const updateRow = (idx, field, val) => {
+                const newRows = [...rows];
+                newRows[idx][field] = val;
+                setRows(newRows);
             }
 
-            bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-            refreshData(); 
-        } catch(e) { 
-            console.error(e);
-            alert("Transaction Failed: " + (e.reason || e.message)); 
+            const executePayroll = async () => {
+                if(!signer) return;
+                try {
+                    const contract = new ethers.Contract(ADDRESSES.CHECKING, ABIS.CHECKING, signer);
+                    const addrs = rows.map(r => r.addr);
+                    const amts = rows.map(r => ethers.parseUnits(r.amt || "0", 6));
+                    
+                    const tx = await contract.runPayroll(ADDRESSES.USDC, addrs, amts, "Web Batch");
+                    alert("Payroll Batch Submitted");
+                    await tx.wait();
+                    alert("Batch Complete");
+                } catch(e) { alert("Error: " + e.message); }
+            }
+
+            return (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                            <Icon name="users" className="text-blue-900"/> Corporate Payroll
+                        </h2>
+                        <button onClick={executePayroll} className="bg-blue-900 text-white px-6 py-2 rounded font-bold hover:bg-blue-800">
+                            Execute Batch
+                        </button>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-2">
+                        {rows.map((row, i) => (
+                            <div key={i} className="flex gap-2">
+                                <span className="p-2 text-gray-400 font-mono text-sm">{i+1}.</span>
+                                <input placeholder="Recipient Address" value={row.addr} onChange={e => updateRow(i, 'addr', e.target.value)} className="flex-1 p-2 border border-gray-300 rounded font-mono text-sm" />
+                                <input placeholder="Amount" value={row.amt} onChange={e => updateRow(i, 'amt', e.target.value)} className="w-32 p-2 border border-gray-300 rounded text-right" type="number" />
+                            </div>
+                        ))}
+                        <button onClick={addRow} className="text-sm text-blue-600 font-semibold mt-2 hover:underline">+ Add Employee</button>
+                    </div>
+                </div>
+            );
         }
-    }
 
-    // --- PAY FROM WALLET ---
-    async function payVendor() {
-        if(!signer) return alert("Wallet required");
-        try {
-            const payee = document.getElementById('payeeAddress').value;
-            const amtVal = document.getElementById('payAmount').value;
-            const decimals = await usdcContract.decimals();
-            const amount = ethers.parseUnits(amtVal, decimals);
+        // --- COMPONENT: CREDIT DESK (ADMIN) ---
+        function CreditDesk({ signer }) {
+            const [solver, setSolver] = useState("");
+            const [amount, setAmount] = useState("");
+            const [hash, setHash] = useState("");
 
-            const tx = await usdcContract.transfer(payee, amount);
-            alert("Sent! Hash: " + tx.hash);
-            await tx.wait();
-            alert("Payment Confirmed");
-            refreshData();
-        } catch(e) { alert("Payment Failed: " + e.message); }
-    }
+            const deploy = async () => {
+                if(!signer) return;
+                try {
+                    const kernel = new ethers.Contract(ADDRESSES.KERNEL, ABIS.KERNEL, signer);
+                    const wei = ethers.parseUnits(amount, 6);
+                    const tx = await kernel.deployCapital(solver, wei, hash);
+                    await tx.wait();
+                    alert("Capital Deployed");
+                } catch(e) { alert("Error: " + e.message); }
+            }
 
-    // --- SWAP ---
-    async function approveRouter() {
-        try {
-            const sellAmt = document.getElementById('swapSellAmt').value;
-            const decimals = await usdcContract.decimals();
-            const amount = ethers.parseUnits(sellAmt, decimals);
-            const tx = await usdcContract.approve(UNISWAP_ROUTER, amount);
-            await tx.wait();
-            alert("Approved");
-        } catch(e) { alert("Error: " + e.message); }
-    }
+            return (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <Icon name="briefcase" className="text-indigo-600"/> Credit Deployment
+                    </h2>
+                    <div className="space-y-4 max-w-xl">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700">Solver Address</label>
+                            <input onChange={e => setSolver(e.target.value)} className="w-full p-2 border border-gray-300 rounded font-mono" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700">Principal (USDC)</label>
+                            <input onChange={e => setAmount(e.target.value)} type="number" className="w-full p-2 border border-gray-300 rounded" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700">Invoice Hash</label>
+                            <input onChange={e => setHash(e.target.value)} className="w-full p-2 border border-gray-300 rounded" />
+                        </div>
+                        <button onClick={deploy} className="w-full bg-indigo-600 text-white font-bold py-3 rounded hover:bg-indigo-700">
+                            Deploy Funds
+                        </button>
+                    </div>
+                </div>
+            );
+        }
 
-    async function executeSwapOrder() {
-        try {
-            const sellAmt = document.getElementById('swapSellAmt').value;
-            const decimals = await usdcContract.decimals();
-            const amountIn = ethers.parseUnits(sellAmt, decimals);
-            const path = [await usdcContract.getAddress(), "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"]; // Arbitrum WETH
-            const to = userAddress;
-            const deadline = Math.floor(Date.now() / 1000) + 1200;
-            const router = new ethers.Contract(UNISWAP_ROUTER, UNISWAP_ABI, signer);
-            const tx = await router.swapExactTokensForTokens(amountIn, 0, path, to, deadline);
-            await tx.wait();
-            alert("Swap Complete");
-            refreshData();
-        } catch(e) { alert("Error: " + e.message); }
-    }
-
-    // --- UTILS ---
-    function showLoginModal() { new bootstrap.Modal(document.getElementById('loginModal')).show(); }
-    function enterApp() { document.getElementById('landing-view').style.display = 'none'; document.getElementById('dashboard-view').style.display = 'block'; }
-    function exitApp() { document.getElementById('dashboard-view').style.display = 'none'; document.getElementById('landing-view').style.display = 'block'; }
-    function copyUserAddress() { navigator.clipboard.writeText(userAddress); alert("Address Copied"); }
-
-    async function connectWallet() {
-        if(window.ethereum) {
-            provider = new ethers.BrowserProvider(window.ethereum);
-            signer = await provider.getSigner();
-            userAddress = await signer.getAddress();
-            completeLogin(userAddress);
-            bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
-        } else { alert("Install Metamask"); }
-    }
-    async function loginWithEmail() {
-        const web3authProvider = await web3auth.connect();
-        provider = new ethers.BrowserProvider(web3authProvider);
-        signer = await provider.getSigner();
-        userAddress = await signer.getAddress();
-        const user = await web3auth.getUserInfo();
-        completeLogin(userAddress, user.email);
-        bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
-    }
-</script>
-
+        // --- INIT REACT ---
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
