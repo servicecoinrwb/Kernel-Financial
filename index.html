@@ -440,6 +440,9 @@
         // --- COMPONENT: INVESTOR VAULT ---
         function InvestorVault({ signer, address }) {
             const [amount, setAmount] = useState("");
+            const [withdrawAmount, setWithdrawAmount] = useState("");
+            const [activeAction, setActiveAction] = useState("deposit"); // deposit | withdraw
+            
             const [totalAssets, setTotalAssets] = useState(null);
             const [userShares, setUserShares] = useState(null);
             const [sharePrice, setSharePrice] = useState(0);
@@ -461,9 +464,9 @@
 
                         // 3. Calculate Share Price (Assets / Shares)
                         const totShares = await vault.totalShares();
-                        if (totShares > 0) {
+                        if (totShares > 0n) {
                             // Rough calc for display (Wei math should be done with BigInt in prod)
-                            const price = parseFloat(ethers.formatUnits(assets, 6)) / parseFloat(ethers.formatUnits(totShares, 18)); // Assuming 18 dec shares, 6 dec USDC
+                            const price = parseFloat(ethers.formatUnits(assets, 6)) / parseFloat(ethers.formatUnits(totShares, 18));
                             setSharePrice(price);
                         } else {
                             setSharePrice(1);
@@ -481,7 +484,6 @@
                 ? (parseFloat(ethers.formatUnits(userShares, 18)) * sharePrice) // Assuming standard share calc
                 : 0;
 
-
             const handleDeposit = async () => {
                 if(!signer) return;
                 try {
@@ -495,7 +497,28 @@
                     alert("Processing Deposit...");
                     await (await vault.deposit(wei, 0)).wait();
                     alert("Deposit Successful!");
-                } catch(e) { console.error(e); alert("Failed: " + e.message); }
+                    setAmount("");
+                } catch(e) { console.error(e); alert("Failed: " + (e.reason || e.message)); }
+            };
+
+            const handleWithdraw = async () => {
+                if(!signer) return;
+                try {
+                    const vault = new ethers.Contract(ADDRESSES.INVESTOR_VAULT, ABIS.INVESTOR, signer);
+                    const weiShares = ethers.parseUnits(withdrawAmount, 18);
+                    
+                    alert("Processing Withdrawal...");
+                    // 0 minAssets for demo (slippage protection recommended in prod)
+                    await (await vault.withdraw(weiShares, 0)).wait();
+                    alert("Withdrawal Successful!");
+                    setWithdrawAmount("");
+                } catch(e) { console.error(e); alert("Failed: " + (e.reason || e.message)); }
+            };
+
+            const setMaxWithdraw = () => {
+                if(userShares) {
+                    setWithdrawAmount(ethers.formatUnits(userShares, 18));
+                }
             };
 
             return (
@@ -519,25 +542,76 @@
                                 </span>
                              </div>
                              <p className="text-xs text-gray-500">
-                                Shares: {userShares ? parseFloat(ethers.formatUnits(userShares, 18)).toFixed(4) : "0.00"}
+                                Shares: {userShares ? parseFloat(ethers.formatUnits(userShares, 18)).toFixed(4) : "0.0000"}
                              </p>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <h3 className="font-bold text-blue-900 mb-4 border-b border-gray-100 pb-2">Capital Injection</h3>
-                        <div className="flex gap-4 items-end">
-                            <div className="flex-1">
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Deposit Amount (USDC)</label>
-                                <input onChange={e => setAmount(e.target.value)} type="number" className="w-full p-3 border border-gray-300 rounded focus:border-blue-500 outline-none" placeholder="0.00" />
-                            </div>
-                            <button onClick={handleDeposit} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded font-bold transition">
-                                Deposit
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        {/* Tab Switcher */}
+                        <div className="flex border-b border-gray-100">
+                            <button 
+                                onClick={() => setActiveAction('deposit')}
+                                className={`flex-1 py-4 font-bold text-sm uppercase tracking-wide transition ${activeAction === 'deposit' ? 'bg-white text-blue-900 border-b-2 border-blue-900' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                            >
+                                Deposit Capital
+                            </button>
+                            <button 
+                                onClick={() => setActiveAction('withdraw')}
+                                className={`flex-1 py-4 font-bold text-sm uppercase tracking-wide transition ${activeAction === 'withdraw' ? 'bg-white text-orange-600 border-b-2 border-orange-600' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                            >
+                                Withdraw Funds
                             </button>
                         </div>
-                        <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
-                            <Icon name="info" size={12}/> Requires 2 transactions (Approve + Deposit)
-                        </p>
+
+                        <div className="p-6">
+                            {activeAction === 'deposit' ? (
+                                <div>
+                                    <div className="flex gap-4 items-end">
+                                        <div className="flex-1">
+                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Deposit Amount (USDC)</label>
+                                            <input 
+                                                value={amount}
+                                                onChange={e => setAmount(e.target.value)} 
+                                                type="number" 
+                                                className="w-full p-3 border border-gray-300 rounded focus:border-blue-500 outline-none font-semibold text-lg" 
+                                                placeholder="0.00" 
+                                            />
+                                        </div>
+                                        <button onClick={handleDeposit} className="bg-blue-900 hover:bg-blue-800 text-white px-8 py-3.5 rounded font-bold transition">
+                                            Deposit
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
+                                        <Icon name="info" size={12}/> Requires 2 transactions (Approve + Deposit)
+                                    </p>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="flex gap-4 items-end">
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <label className="block text-xs font-bold text-gray-500 uppercase">Withdraw Amount (Shares)</label>
+                                                <button onClick={setMaxWithdraw} className="text-xs text-orange-600 font-bold hover:underline">MAX</button>
+                                            </div>
+                                            <input 
+                                                value={withdrawAmount}
+                                                onChange={e => setWithdrawAmount(e.target.value)} 
+                                                type="number" 
+                                                className="w-full p-3 border border-gray-300 rounded focus:border-orange-500 outline-none font-semibold text-lg" 
+                                                placeholder="0.0000" 
+                                            />
+                                        </div>
+                                        <button onClick={handleWithdraw} className="bg-white border border-orange-600 text-orange-600 hover:bg-orange-50 px-8 py-3.5 rounded font-bold transition">
+                                            Withdraw
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
+                                        Approx Value: {withdrawAmount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(parseFloat(withdrawAmount) * sharePrice) : '$0.00'}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             );
