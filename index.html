@@ -88,8 +88,6 @@
             </p>
             <button id="create-btn" onclick="createAccount()" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-lg px-6 py-4 rounded-xl font-medium transition-all shadow-lg flex items-center justify-center gap-2">
                 <span id="create-btn-text">Deploy Smart Account</span>
-                <!-- WRAPPER FIX: Wrapped icon in a span that holds the ID -->
-                <!-- ID FIXED: changed from create-spinner to create-btn-spinner to match JS logic -->
                 <span id="create-btn-spinner" class="hidden">
                     <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
                 </span>
@@ -165,10 +163,21 @@
                 </div>
             </div>
 
-            <!-- Actions Grid (Placeholder for History or other features) -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 min-h-[200px] flex items-center justify-center text-slate-400 flex-col gap-2">
-                <i data-lucide="activity" class="w-8 h-8 opacity-50"></i>
-                <p>Recent Activity (Coming Soon)</p>
+            <!-- Activity List -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 min-h-[200px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-slate-900">Recent Activity</h3>
+                    <div id="activity-loading" class="hidden">
+                        <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-slate-400"></i>
+                    </div>
+                </div>
+                <div id="activity-list" class="space-y-4">
+                    <!-- Activity items injected by JS -->
+                    <div class="flex items-center justify-center text-slate-400 py-8 flex-col gap-2 opacity-50">
+                        <i data-lucide="activity" class="w-8 h-8"></i>
+                        <p>No transactions yet</p>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -200,7 +209,12 @@
             <input type="text" id="input-transfer-to" placeholder="0x..." class="w-full border border-slate-200 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
             
             <label class="block text-sm font-medium text-slate-700 mb-2">Amount (USDC)</label>
-            <input type="number" id="input-transfer-amount" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+            <div class="relative mb-4">
+                <input type="number" id="input-transfer-amount" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none pr-16">
+                <button onclick="fillMax('input-transfer-amount', 'checking')" class="absolute right-2 top-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold px-2 py-1.5 rounded transition-colors">
+                    MAX
+                </button>
+            </div>
             
             <button onclick="executeTransfer()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg font-medium transition-colors">Confirm Transfer</button>
         </div>
@@ -214,7 +228,12 @@
             <p id="savings-desc" class="text-sm text-slate-500 mb-4">Move funds to the Investor Kernel to earn yield.</p>
             
             <label class="block text-sm font-medium text-slate-700 mb-2">Amount</label>
-            <input type="number" id="input-savings-amount" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-4 py-3 mb-2 focus:ring-2 focus:ring-blue-500 outline-none">
+            <div class="relative mb-2">
+                <input type="number" id="input-savings-amount" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none pr-16">
+                <button onclick="fillMax('input-savings-amount', 'savings-dynamic')" class="absolute right-2 top-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold px-2 py-1.5 rounded transition-colors">
+                    MAX
+                </button>
+            </div>
             <p class="text-xs text-slate-400 mb-4 text-right">Slippage protection enabled (1%)</p>
 
             <button id="savings-btn" onclick="executeSavingsAction()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-medium transition-colors">Confirm</button>
@@ -261,7 +280,13 @@
             "function dailyLimit() view returns (uint256)",
             "function spentToday() view returns (uint256)",
             "function setDailyLimit(uint256 _limit)",
-            "function usdc() view returns (address)"
+            "function usdc() view returns (address)",
+            
+            // Events for Activity Feed
+            "event PaymentSent(address indexed to, uint256 amount)",
+            "event DepositedToSavings(uint256 amount, uint256 sharesMinted)",
+            "event WithdrawnFromSavings(uint256 sharesBurned, uint256 assetsReceived)",
+            "event FundsRecovered(address indexed token, uint256 amount)"
         ];
 
         const ERC20_ABI = [
@@ -276,6 +301,10 @@
         let factoryContract, accountContract, usdcContract;
         let accountAddress = ethers.constants.AddressZero;
         let currentSavingsAction = 'deposit'; // or 'withdraw'
+        
+        // Stored balances for MAX button logic (stored as formatted strings/numbers)
+        let currentCheckingBal = "0";
+        let currentSavingsBal = "0";
 
         // --- INIT ---
         lucide.createIcons();
@@ -361,6 +390,7 @@
             usdcContract = new ethers.Contract(usdcAddr, ERC20_ABI, signer);
 
             refreshData();
+            loadActivityFeed(); // Initial load of history
         }
 
         async function refreshData() {
@@ -380,6 +410,10 @@
                 const checkingFmt = ethers.utils.formatUnits(checkingBalBN, 6);
                 const savingsFmt = ethers.utils.formatUnits(savingsBalBN, 18); // Shares often 18 decimals in vaults
                 
+                // Update Globals for Max Button
+                currentCheckingBal = checkingFmt;
+                currentSavingsBal = savingsFmt;
+
                 const limitFmt = ethers.utils.formatUnits(limitBN, 6);
                 const spentFmt = ethers.utils.formatUnits(spentBN, 6);
 
@@ -400,13 +434,140 @@
                     if(pct > 90) document.getElementById('limit-bar').classList.add('bg-red-500');
                     else document.getElementById('limit-bar').classList.remove('bg-red-500');
                 }
+                
+                // Reload activity in case something happened
+                loadActivityFeed();
 
             } catch (err) {
                 console.error("Refresh failed", err);
             }
         }
 
+        async function loadActivityFeed() {
+            const listEl = document.getElementById('activity-list');
+            const loader = document.getElementById('activity-loading');
+            
+            // Show loader if list is empty (first load)
+            if(listEl.children.length <= 1) loader.classList.remove('hidden');
+
+            try {
+                // Fetch events
+                // 1. PaymentSent
+                const paymentFilter = accountContract.filters.PaymentSent();
+                const paymentEvents = await accountContract.queryFilter(paymentFilter);
+                
+                // 2. DepositToSavings
+                const depositFilter = accountContract.filters.DepositedToSavings();
+                const depositEvents = await accountContract.queryFilter(depositFilter);
+                
+                // 3. WithdrawFromSavings
+                const withdrawFilter = accountContract.filters.WithdrawnFromSavings();
+                const withdrawEvents = await accountContract.queryFilter(withdrawFilter);
+
+                // Combine and normalize
+                const allEvents = [
+                    ...paymentEvents.map(e => ({
+                        type: 'payment',
+                        block: e.blockNumber,
+                        hash: e.transactionHash,
+                        amount: ethers.utils.formatUnits(e.args.amount, 6),
+                        to: e.args.to
+                    })),
+                    ...depositEvents.map(e => ({
+                        type: 'deposit',
+                        block: e.blockNumber,
+                        hash: e.transactionHash,
+                        amount: ethers.utils.formatUnits(e.args.amount, 6)
+                    })),
+                    ...withdrawEvents.map(e => ({
+                        type: 'withdraw',
+                        block: e.blockNumber,
+                        hash: e.transactionHash,
+                        amount: ethers.utils.formatUnits(e.args.assetsReceived, 6) // showing USDC received
+                    }))
+                ];
+
+                // Sort by block number descending (newest first)
+                allEvents.sort((a, b) => b.block - a.block);
+
+                // Render
+                if (allEvents.length === 0) {
+                     listEl.innerHTML = `
+                        <div class="flex items-center justify-center text-slate-400 py-8 flex-col gap-2 opacity-50">
+                            <i data-lucide="activity" class="w-8 h-8"></i>
+                            <p>No transactions yet</p>
+                        </div>`;
+                } else {
+                    listEl.innerHTML = allEvents.map(evt => {
+                        let icon, title, desc, colorClass;
+                        
+                        if (evt.type === 'payment') {
+                            icon = 'arrow-up-right';
+                            colorClass = 'bg-slate-100 text-slate-600';
+                            title = 'Transfer Sent';
+                            desc = `To: ${evt.to.substring(0,6)}...`;
+                        } else if (evt.type === 'deposit') {
+                            icon = 'piggy-bank';
+                            colorClass = 'bg-emerald-100 text-emerald-600';
+                            title = 'Invested in Vault';
+                            desc = 'Moved to Savings';
+                        } else {
+                            icon = 'arrow-down-left';
+                            colorClass = 'bg-blue-100 text-blue-600';
+                            title = 'Withdrawn from Vault';
+                            desc = 'Moved to Checking';
+                        }
+
+                        return `
+                        <div class="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center">
+                                    <i data-lucide="${icon}" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-slate-800">${title}</p>
+                                    <p class="text-xs text-slate-500">${desc}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-slate-900">${evt.type === 'payment' || evt.type === 'deposit' ? '-' : '+'}$${formatMoney(evt.amount)}</p>
+                                <a href="https://etherscan.io/tx/${evt.hash}" target="_blank" class="text-xs text-blue-500 hover:underline">View Tx</a>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+                    
+                    // Re-init icons for new DOM elements
+                    lucide.createIcons();
+                }
+
+            } catch (err) {
+                console.error("Error loading activity", err);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
         // --- ACTIONS ---
+
+        // Helper for Max Buttons
+        function fillMax(inputId, type) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+
+            if (type === 'checking') {
+                input.value = currentCheckingBal;
+            } else if (type === 'savings-dynamic') {
+                // Depends on if we are depositing or withdrawing
+                if (currentSavingsAction === 'deposit') {
+                    // Deposit: Max amount is checking balance
+                    input.value = currentCheckingBal;
+                } else {
+                    // Withdraw: Max amount is savings balance (shares)
+                    input.value = currentSavingsBal;
+                }
+            }
+        }
 
         // 1. Top Up (EOA -> Checking)
         async function executeTopUp() {
@@ -457,6 +618,8 @@
             const btn = document.getElementById('savings-btn');
             const title = document.getElementById('savings-title');
             const desc = document.getElementById('savings-desc');
+            const input = document.getElementById('input-savings-amount');
+            input.value = ""; // clear previous input
             
             if (type === 'deposit') {
                 title.innerText = "Invest in Vault";
