@@ -932,7 +932,7 @@
         const chainConfig = {
             chainNamespace: "eip155",
             chainId: "0x1", // Mainnet
-            rpcTarget: "https://rpc.ankr.com/eth", // Improved RPC
+            rpcTarget: "https://cloudflare-eth.com",
             displayName: "Ethereum Mainnet",
             blockExplorerUrl: "https://etherscan.io",
             ticker: "ETH",
@@ -975,8 +975,7 @@
     async function fetchLandingStats() {
         try {
             // Use a public RPC for reliable fetching even without wallet connection
-            // Using Cloudflare's public ETH Mainnet RPC
-            const readProv = new ethers.JsonRpcProvider("https://rpc.ankr.com/eth");
+            const readProv = new ethers.JsonRpcProvider("https://cloudflare-eth.com");
             
             // Init contracts read-only
             const yieldRo = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, readProv);
@@ -1065,7 +1064,7 @@
             const mockKey = ethers.id("test@kernel.fi");
             const wallet = new ethers.Wallet(mockKey);
             // Read-only fallback
-            provider = new ethers.JsonRpcProvider("https://rpc.ankr.com/eth");
+            provider = new ethers.JsonRpcProvider("https://cloudflare-eth.com");
             signer = wallet.connect(provider);
             userAddress = wallet.address;
             completeLogin(userAddress, "test@kernel.fi (Test Mode)");
