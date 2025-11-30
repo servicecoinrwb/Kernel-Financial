@@ -54,7 +54,8 @@
             CHECKING: [
                 "function sendPayment(address token, address recipient, uint256 amount, string memo)",
                 "function runPayroll(address token, address[] recipients, uint256[] amounts, string batchName)",
-                "function dailyLimits(address) view returns (uint256)"
+                "function dailyLimits(address) view returns (uint256)",
+                "function depositERC20(address token, uint256 amount, uint256 minAmount, string memo, uint256 deadline)"
             ],
             KERNEL: [
                 "function deployCapital(address solver, uint256 amount, string invoiceHash)",
@@ -298,6 +299,10 @@
             const [amount, setAmount] = useState("");
             const [balance, setBalance] = useState(null);
             const [loading, setLoading] = useState(false);
+            
+            // Deposit State
+            const [showDeposit, setShowDeposit] = useState(false);
+            const [depositAmount, setDepositAmount] = useState("");
 
             // Fetch Live Balance
             useEffect(() => {
@@ -330,8 +335,66 @@
                 } catch(e) { console.error(e); alert("Failed: " + e.message); }
             };
 
+            const handleDeposit = async () => {
+                if(!signer) return;
+                try {
+                    const usdc = new ethers.Contract(ADDRESSES.USDC, ABIS.ERC20, signer);
+                    const checking = new ethers.Contract(ADDRESSES.CHECKING, ABIS.CHECKING, signer);
+                    const wei = ethers.parseUnits(depositAmount, 6);
+                    const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour deadline
+
+                    alert("Step 1/2: Please sign USDC Approval...");
+                    const approveTx = await usdc.approve(ADDRESSES.CHECKING, wei);
+                    await approveTx.wait();
+
+                    alert("Step 2/2: Depositing Funds...");
+                    const tx = await checking.depositERC20(ADDRESSES.USDC, wei, 0, "Web Deposit", deadline);
+                    await tx.wait();
+                    
+                    alert("Deposit Complete!");
+                    setShowDeposit(false);
+                    setDepositAmount("");
+                } catch(e) { 
+                    console.error(e); 
+                    alert("Deposit Failed: " + (e.reason || e.message)); 
+                }
+            };
+
             return (
-                <div className="space-y-6">
+                <div className="space-y-6 relative">
+                    {/* Deposit Modal Overlay */}
+                    {showDeposit && (
+                        <div className="absolute inset-0 z-20 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center p-6">
+                            <div className="bg-white shadow-2xl border border-gray-200 p-6 rounded-xl w-full max-w-sm">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-bold text-gray-800">Add Money</h3>
+                                    <button onClick={() => setShowDeposit(false)} className="text-gray-400 hover:text-red-500">
+                                        <Icon name="x" size={24} />
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Amount to Deposit (USDC)</label>
+                                        <input 
+                                            type="number" 
+                                            value={depositAmount}
+                                            onChange={(e) => setDepositAmount(e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-600 outline-none text-lg font-semibold"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <button 
+                                        onClick={handleDeposit}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded font-bold transition flex items-center justify-center gap-2"
+                                    >
+                                        <Icon name="arrow-down-circle" size={18} /> Confirm Deposit
+                                    </button>
+                                    <p className="text-xs text-center text-gray-400">Transfers funds from your wallet to Checking Vault.</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 bg-gradient-to-r from-blue-900 to-blue-800 text-white">
                         <div className="flex justify-between items-start">
                             <div>
@@ -344,7 +407,9 @@
                             <Icon name="credit-card" size={32} className="text-blue-300 opacity-50" />
                         </div>
                         <div className="mt-6 flex gap-3">
-                            <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm font-semibold transition">Add Money</button>
+                            <button onClick={() => setShowDeposit(true)} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm font-semibold transition flex items-center gap-2">
+                                <Icon name="plus" size={16} /> Add Money
+                            </button>
                             <button className="bg-transparent border border-blue-400 hover:bg-blue-800 text-white px-4 py-2 rounded text-sm font-semibold transition">Statements</button>
                         </div>
                     </div>
