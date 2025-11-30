@@ -89,7 +89,8 @@
             <button id="create-btn" onclick="createAccount()" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-lg px-6 py-4 rounded-xl font-medium transition-all shadow-lg flex items-center justify-center gap-2">
                 <span id="create-btn-text">Deploy Smart Account</span>
                 <!-- WRAPPER FIX: Wrapped icon in a span that holds the ID -->
-                <span id="create-spinner" class="hidden">
+                <!-- ID FIXED: changed from create-spinner to create-btn-spinner to match JS logic -->
+                <span id="create-btn-spinner" class="hidden">
                     <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
                 </span>
             </button>
