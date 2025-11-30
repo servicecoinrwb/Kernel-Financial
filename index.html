@@ -575,7 +575,7 @@
             "function approve(address spender, uint256 amount) returns (bool)"
         ];
 
-        // ADDED: Propose/Upgrade Kernel logic
+        // ADDED: isWhitelisted for checks AND setInvestorStatus for admin AND pushCapitalToKernel
         const VAULT_ABI = [
             "function totalManagedAssets() view returns (uint256)",
             "function totalShares() view returns (uint256)",
