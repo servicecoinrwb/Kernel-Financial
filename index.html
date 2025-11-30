@@ -887,9 +887,23 @@
             if (!amount) return;
 
             try {
+                // Pre-flight check for Idle Funds
+                const totalAssets = await vaultContract.totalManagedAssets();
+                const capitalInKernel = await vaultContract.capitalInKernel();
+                const idle = totalAssets.sub(capitalInKernel);
+                const pushWei = ethers.utils.parseUnits(amount, 6);
+
+                if (pushWei.gt(idle)) {
+                    const idleFmt = ethers.utils.formatUnits(idle, 6);
+                    showToast(`Insufficient Idle Funds (Max: $${formatMoney(idleFmt)})`, "error");
+                    return;
+                }
+
                 showToast("Pushing Capital to Kernel...");
-                const wei = ethers.utils.parseUnits(amount, 6);
-                const tx = await vaultContractSigner.pushCapitalToKernel(wei);
+                
+                // Add Gas Limit
+                const overrides = { gasLimit: 2500000 };
+                const tx = await vaultContractSigner.pushCapitalToKernel(pushWei, overrides);
                 await tx.wait();
                 showToast("Capital Pushed Successfully!", "success");
                 // Clear input
@@ -910,11 +924,21 @@
             if(!amount) return;
 
             try {
+                // Pre-flight check: Kernel must have enough USDC to deploy
+                const kernelBal = await usdcContract.balanceOf(kernelAddress);
+                const loanWei = ethers.utils.parseUnits(amount, 6);
+
+                if (loanWei.gt(kernelBal)) {
+                    const balFmt = ethers.utils.formatUnits(kernelBal, 6);
+                    showToast(`Insufficient Kernel Liquidity (Max: $${formatMoney(balFmt)})`, "error");
+                    return;
+                }
+
                 showToast("Deploying Capital...");
-                const wei = ethers.utils.parseUnits(amount, 6);
                 
                 // Admin (Owner) calls this on Kernel
-                const tx = await kernelContractSigner.deployCapital(solver, wei, ref);
+                const overrides = { gasLimit: 2500000 };
+                const tx = await kernelContractSigner.deployCapital(solver, loanWei, ref, overrides);
                 await tx.wait();
                 
                 showToast("Capital Deployed Successfully!", "success");
