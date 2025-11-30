@@ -848,11 +848,11 @@
     const UNISWAP_ROUTER_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
     
     // Formspree Endpoint (FIXED: Was missing)
-    const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID_HERE"; 
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/xzzlrnwg"; 
 
     // RPC URL - Using a robust public node
-    const RPC_URL = "https://eth.llamarpc.com"; 
-    const CHAIN_ID = 1; // 1 for Mainnet, 11155111 for Sepolia
+    const RPC_URL = "https://arb1.arbitrum.io/rpc"; 
+    const CHAIN_ID = 42161;
     
     // Default Asset List
     let trackedAssets = [
@@ -933,14 +933,14 @@
         await fetchLandingStats();
         
         // 2. Initialize Web3Auth
-        const chainConfig = {
+            const chainConfig = {
             chainNamespace: "eip155",
-            chainId: "0x" + CHAIN_ID.toString(16), // Convert to hex
+            chainId: "0xa4b1", // Hex for 42161
             rpcTarget: RPC_URL,
-            displayName: "Ethereum Mainnet",
-            blockExplorerUrl: "https://etherscan.io",
+            displayName: "Arbitrum One",
+            blockExplorerUrl: "https://arbiscan.io",
             ticker: "ETH",
-            tickerName: "Ethereum",
+            tickerName: "Ether",
         };
 
         try {
