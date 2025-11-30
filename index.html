@@ -37,7 +37,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useCallback } = React;
         const { ethers } = window;
 
         // --- CONFIGURATION ---
@@ -47,7 +47,7 @@
             CHECKING: "0x9e1A2e80fd0Ae1f499002D6d1ed18C2DD0BB44b4",
             KERNEL: "0xC5ABA20edBF35544E5Adb9983b52831ec5d40FDD",
             INVESTOR_VAULT: "0x2761BF4292d9812FD1e757fD890a4cF4BF18A7dA",
-            USDC: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" // Mainnet USDC
+            USDC: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" // Mainnet USDC
         };
 
         const ABIS = {
@@ -64,7 +64,9 @@
             INVESTOR: [
                 "function deposit(uint256 amount, uint256 minShares)",
                 "function withdraw(uint256 shareAmount, uint256 minAssets)",
-                "function shares(address) view returns (uint256)"
+                "function shares(address) view returns (uint256)",
+                "function totalManagedAssets() view returns (uint256)",
+                "function totalShares() view returns (uint256)"
             ],
             ERC20: [
                 "function approve(address spender, uint256 amount) returns (bool)",
@@ -74,12 +76,18 @@
         };
 
         // --- ICONS COMPONENT WRAPPER ---
-        // Lucide icons are injected globally, we create a helper to use them in React
         const Icon = ({ name, size = 20, className = "" }) => {
             useEffect(() => {
                 if(window.lucide) window.lucide.createIcons();
             });
             return <i data-lucide={name} width={size} height={size} className={className}></i>;
+        };
+
+        // --- HELPER: FORMAT CURRENCY ---
+        const formatUSDC = (wei) => {
+            if (!wei) return "$0.00";
+            const val = parseFloat(ethers.formatUnits(wei, 6));
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
         };
 
         // --- MAIN APP ---
@@ -110,8 +118,6 @@
 
             const connectWeb3Auth = async () => {
                 try {
-                    // Note: In a real build, Web3Auth requires instantiation from the package.
-                    // This is a simplified CDN implementation check.
                     if(window.modal && window.modal.Web3Auth) {
                          const web3auth = new window.modal.Web3Auth({
                             clientId: CLIENT_ID,
@@ -217,7 +223,7 @@
                         {/* Content Area */}
                         <main className="flex-1">
                             {viewMode === 'personal' ? (
-                                activeTab === 'checking' ? <CheckingAccount signer={signer} /> : <InvestorVault signer={signer} />
+                                activeTab === 'checking' ? <CheckingAccount signer={signer} address={address} /> : <InvestorVault signer={signer} address={address} />
                             ) : (
                                 activeTab === 'payroll' || activeTab === 'checking' ? <PayrollManager signer={signer} /> : <CreditDesk signer={signer} />
                             )}
@@ -238,9 +244,30 @@
         );
 
         // --- COMPONENT: CHECKING ACCOUNT ---
-        function CheckingAccount({ signer }) {
+        function CheckingAccount({ signer, address }) {
             const [recipient, setRecipient] = useState("");
             const [amount, setAmount] = useState("");
+            const [balance, setBalance] = useState(null);
+            const [loading, setLoading] = useState(false);
+
+            // Fetch Live Balance
+            useEffect(() => {
+                const fetchBalance = async () => {
+                    if (!signer) return;
+                    try {
+                        setLoading(true);
+                        const usdc = new ethers.Contract(ADDRESSES.USDC, ABIS.ERC20, signer);
+                        // The balance of the Checking Account is the USDC held by the Vault Contract
+                        const bal = await usdc.balanceOf(ADDRESSES.CHECKING);
+                        setBalance(bal);
+                    } catch (err) {
+                        console.error("Error fetching checking balance:", err);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                fetchBalance();
+            }, [signer]);
 
             const handleSend = async () => {
                 if(!signer) return;
@@ -260,7 +287,9 @@
                         <div className="flex justify-between items-start">
                             <div>
                                 <p className="text-blue-200 text-sm font-medium">Kernel Checking Vault</p>
-                                <h2 className="text-4xl font-bold mt-2">$24,500.00</h2>
+                                <h2 className="text-4xl font-bold mt-2">
+                                    {loading ? "Loading..." : formatUSDC(balance)}
+                                </h2>
                                 <p className="text-blue-200 text-sm mt-1">Available Balance</p>
                             </div>
                             <Icon name="credit-card" size={32} className="text-blue-300 opacity-50" />
@@ -294,8 +323,49 @@
         }
 
         // --- COMPONENT: INVESTOR VAULT ---
-        function InvestorVault({ signer }) {
+        function InvestorVault({ signer, address }) {
             const [amount, setAmount] = useState("");
+            const [totalAssets, setTotalAssets] = useState(null);
+            const [userShares, setUserShares] = useState(null);
+            const [sharePrice, setSharePrice] = useState(0);
+
+            // Fetch Vault Data
+            useEffect(() => {
+                const fetchData = async () => {
+                    if (!signer) return;
+                    try {
+                        const vault = new ethers.Contract(ADDRESSES.INVESTOR_VAULT, ABIS.INVESTOR, signer);
+                        
+                        // 1. Get Total Assets in Vault
+                        const assets = await vault.totalManagedAssets();
+                        setTotalAssets(assets);
+
+                        // 2. Get User Shares
+                        const shares = await vault.shares(address);
+                        setUserShares(shares);
+
+                        // 3. Calculate Share Price (Assets / Shares)
+                        const totShares = await vault.totalShares();
+                        if (totShares > 0) {
+                            // Rough calc for display (Wei math should be done with BigInt in prod)
+                            const price = parseFloat(ethers.formatUnits(assets, 6)) / parseFloat(ethers.formatUnits(totShares, 18)); // Assuming 18 dec shares, 6 dec USDC
+                            setSharePrice(price);
+                        } else {
+                            setSharePrice(1);
+                        }
+
+                    } catch (e) {
+                        console.error("Vault read error:", e);
+                    }
+                };
+                fetchData();
+            }, [signer, address]);
+
+            // Calculate estimated value of user holdings
+            const userValue = (userShares && totalAssets) 
+                ? (parseFloat(ethers.formatUnits(userShares, 18)) * sharePrice) // Assuming standard share calc
+                : 0;
+
 
             const handleDeposit = async () => {
                 if(!signer) return;
@@ -318,18 +388,24 @@
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-bold text-gray-700">Total Yield Assets</h3>
+                                <h3 className="font-bold text-gray-700">Total Yield Assets (TVL)</h3>
                                 <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-bold">APY 8.5%</span>
                             </div>
-                            <h2 className="text-3xl font-bold text-gray-900">$142,050.55</h2>
+                            <h2 className="text-3xl font-bold text-gray-900">
+                                {formatUSDC(totalAssets)}
+                            </h2>
                             <p className="text-sm text-gray-400 mt-1">Kernel Investor Vault</p>
                         </div>
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-center items-start">
-                             <h3 className="font-bold text-gray-700 mb-2">Performance</h3>
-                             <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
-                                <div className="bg-green-500 h-2 rounded-full" style={{width: '70%'}}></div>
+                             <h3 className="font-bold text-gray-700 mb-2">Your Position</h3>
+                             <div className="w-full mb-2">
+                                <span className="text-2xl font-bold text-blue-900">
+                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(userValue)}
+                                </span>
                              </div>
-                             <p className="text-xs text-gray-500">+ $12,400 this month</p>
+                             <p className="text-xs text-gray-500">
+                                Shares: {userShares ? parseFloat(ethers.formatUnits(userShares, 18)).toFixed(4) : "0.00"}
+                             </p>
                         </div>
                     </div>
 
