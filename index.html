@@ -853,6 +853,11 @@
             const to = document.getElementById('input-transfer-to').value;
             const amount = document.getElementById('input-transfer-amount').value;
             if (!to || !amount) return;
+            // Pre-flight Check
+            if (parseFloat(amount) > parseFloat(currentCheckingBal)) {
+                showToast("Insufficient Balance", "error");
+                return;
+            }
             try {
                 const wei = ethers.utils.parseUnits(amount, 6);
                 const tx = await accountContract.pay(to, wei);
@@ -884,6 +889,20 @@
         async function executeSavingsAction() {
             const amount = document.getElementById('input-savings-amount').value;
             if (!amount) return;
+            
+            // Pre-flight Check
+            if (currentSavingsAction === 'deposit') {
+                if (parseFloat(amount) > parseFloat(currentCheckingBal)) {
+                    showToast("Insufficient Checking Balance", "error");
+                    return;
+                }
+            } else {
+                if (parseFloat(amount) > parseFloat(currentSavingsBal)) {
+                    showToast("Insufficient Savings Balance", "error");
+                    return;
+                }
+            }
+
             try {
                 let tx;
                 toggleModal('modal-savings');
