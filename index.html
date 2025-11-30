@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kernel Financial | Corporate Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Google Fonts: Inter for that clean Fintech look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Web3Auth SDKs -->
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.4.0/dist/modal.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/ethereum-provider@9.4.0/dist/ethereumProvider.umd.min.js"></script>
 
@@ -142,7 +139,6 @@
         </div>
     </section>
     
-    <!-- Stats Ticker -->
     <div class="container mb-5">
         <div class="row g-4 mb-5">
             <div class="col-md-4">
@@ -171,7 +167,6 @@
             </div>
         </div>
 
-        <!-- Trusted Partners Section -->
         <div class="row justify-content-center align-items-center mb-5 py-4 bg-light rounded-3 border-0">
             <div class="col-12 text-center mb-4">
                 <small class="text-uppercase text-muted fw-bold" style="letter-spacing: 1px;">Trusted by Industry Leaders</small>
@@ -194,7 +189,6 @@
         </div>
     </div>
 
-    <!-- Features Grid -->
     <section id="onboarding" class="py-5 bg-white">
         <div class="container">
             <div class="text-center mb-5">
@@ -260,7 +254,6 @@
     </nav>
 
     <div class="container">
-        <!-- Stats -->
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="card"><div class="card-body">
@@ -282,7 +275,6 @@
             </div>
         </div>
 
-        <!-- Main Tabs -->
         <div class="card">
             <div class="card-header bg-white">
                 <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
@@ -298,7 +290,6 @@
                     <li class="nav-item">
                         <button class="nav-link" id="solver-tab" data-bs-toggle="tab" data-bs-target="#solver"><i class="fas fa-building me-2"></i>Merchant Portal</button>
                     </li>
-                    <!-- ADMIN TAB (HIDDEN BY DEFAULT) -->
                     <li class="nav-item" id="adminNavItem" style="display: none;">
                         <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin"><i class="fas fa-user-shield me-2"></i>Admin Controls</button>
                     </li>
@@ -308,7 +299,6 @@
             <div class="card-body">
                 <div class="tab-content">
                     
-                    <!-- 1. CHECKING VAULT -->
                     <div class="tab-pane fade show active" id="checking">
                         <div class="row">
                             <div class="col-md-5 border-end">
@@ -320,14 +310,12 @@
                                     <h6 class="text-white-50 text-uppercase mb-1" id="cardLabel">Balance (USDC)</h6>
                                     <h2 class="mb-4" id="checkingBalanceMain">$0.00</h2>
                                     <div class="d-flex justify-content-between align-items-end">
-                                        <!-- CLICKABLE ADDRESS FOR COPYING -->
                                         <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem; cursor: pointer;" id="cardAddressDisplay" onclick="copyUserAddress()" title="Click to Copy">Not Connected</small>
                                         <i class="far fa-copy text-white-50 ms-2" style="cursor: pointer;" onclick="copyUserAddress()"></i>
                                         <i class="fab fa-cc-visa fa-2x ms-auto"></i>
                                     </div>
                                 </div>
                                 
-                                <!-- EXPLICIT WALLET ADDRESS DISPLAY (FOR FUNDING) -->
                                 <div class="mb-3">
                                     <label class="small text-muted fw-bold mb-1">YOUR WALLET ADDRESS (FUND HERE)</label>
                                     <div class="input-group">
@@ -338,12 +326,11 @@
                                     <div class="form-text small">Send ETH or tokens to this address to use the app.</div>
                                 </div>
 
-                                <!-- Toggle View Switch -->
                                 <div class="d-flex justify-content-center mb-3">
                                     <div class="btn-group" role="group">
                                         <input type="radio" class="btn-check" name="balanceView" id="viewWallet" autocomplete="off" checked onclick="toggleBalanceView('wallet')">
                                         <label class="btn btn-outline-primary btn-sm" for="viewWallet">My Wallet</label>
-                                      
+                                        
                                         <input type="radio" class="btn-check" name="balanceView" id="viewVault" autocomplete="off" onclick="toggleBalanceView('vault')">
                                         <label class="btn btn-outline-primary btn-sm" for="viewVault">Checking Vault</label>
                                     </div>
@@ -354,14 +341,10 @@
                                     <button class="btn btn-link btn-sm text-decoration-none p-0" data-bs-toggle="modal" data-bs-target="#addTokenModal">+ Add Asset</button>
                                 </div>
                                 
-                                <!-- Dynamic Asset List -->
                                 <div class="list-group list-group-flush border rounded mb-4" id="assetListContainer">
-                                    <!-- Populated by JS -->
-                                </div>
+                                    </div>
 
-                                <!-- Actions: Receive, Fund & Withdraw -->
                                 <div class="d-grid gap-2">
-                                    <!-- NEW RECEIVE BUTTON -->
                                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiveModal">
                                         <i class="fas fa-arrow-down me-2"></i>Receive / Fund Wallet
                                     </button>
@@ -384,8 +367,7 @@
                                 <div class="mb-3">
                                     <label>Pay From Asset</label>
                                     <select class="form-select" id="assetSelector" onchange="updateAssetDisplay()">
-                                        <!-- Dynamic Options -->
-                                    </select>
+                                        </select>
                                 </div>
                                 <div class="mb-3">
                                     <label>Recipient Address</label>
@@ -414,7 +396,6 @@
                         </div>
                     </div>
 
-                    <!-- 2. SWAP TAB (NEW) -->
                     <div class="tab-pane fade" id="swap">
                         <div class="row justify-content-center">
                             <div class="col-md-6">
@@ -423,7 +404,6 @@
                                     <p class="text-muted">Convert corporate assets using Uniswap V2.</p>
                                 </div>
                                 <div class="swap-card">
-                                    <!-- Sell -->
                                     <div class="token-input-group">
                                         <div class="d-flex justify-content-between">
                                             <label>You Pay</label>
@@ -439,7 +419,6 @@
 
                                     <div class="swap-arrow"><i class="fas fa-arrow-down"></i></div>
 
-                                    <!-- Buy -->
                                     <div class="token-input-group">
                                         <div class="d-flex justify-content-between">
                                             <label>You Receive</label>
@@ -453,7 +432,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Swap Info -->
                                     <div class="d-flex justify-content-between text-muted small mb-3 px-2">
                                         <span>Rate</span>
                                         <span>1 ETH = 2,450 USDC</span>
@@ -479,7 +457,6 @@
                         </div>
                     </div>
 
-                    <!-- 3. YIELD TAB -->
                     <div class="tab-pane fade" id="investor">
                         <div class="row">
                             <div class="col-md-6 border-end">
@@ -510,10 +487,74 @@
                         </div>
                     </div>
 
-                    <!-- 5. ADMIN TAB -->
+                    <div class="tab-pane fade" id="solver">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <div class="text-center mb-4">
+                                    <h5>Merchant Liquidity</h5>
+                                    <p class="text-muted">Factor invoices and access instant working capital.</p>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header bg-white">
+                                        <i class="fas fa-file-invoice-dollar me-2 text-primary"></i>New Capital Request
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label>Invoice Buyer / Debtor</label>
+                                                <input type="text" id="invoiceBuyer" class="form-control" placeholder="e.g. Walmart Inc.">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label>Invoice Amount (USDC)</label>
+                                                <input type="number" id="requestAmount" class="form-control" placeholder="50000.00">
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-light border small">
+                                            <div class="d-flex justify-content-between">
+                                                <span>Factoring Fee (1.5%):</span>
+                                                <strong>Calculated on approval</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Net Advance:</span>
+                                                <strong>~98.5%</strong>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-dark w-100" onclick="submitInvoiceRequest()">
+                                            <i class="fas fa-paper-plane me-2"></i>Submit Invoice for Factoring
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning bg-opacity-10 text-warning-emphasis border-warning">
+                                        <i class="fas fa-history me-2"></i>Loan Repayment
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted">Repay outstanding capital to release collateral.</p>
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="small">Principal (USDC)</label>
+                                                <input type="number" id="repayPrincipal" class="form-control" placeholder="0.00">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="small">Accrued Fee (USDC)</label>
+                                                <input type="number" id="repayFee" class="form-control" placeholder="0.00">
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-outline-warning text-dark flex-grow-1" onclick="approveKernelUSDC()">1. Approve USDC</button>
+                                            <button class="btn btn-warning flex-grow-1" onclick="repayLoan()">2. Repay Loan</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="tab-pane fade" id="admin">
                         
-                        <!-- Protocol Access Management -->
                         <div class="row g-4 mb-5">
                             <div class="col-12">
                                 <h5 class="mb-3 text-muted border-bottom pb-2">Registry Explorer (Check Status)</h5>
@@ -548,7 +589,6 @@
                             </div>
                         </div>
 
-                        <!-- ROW 1: Checking Vault Admin -->
                         <div class="row g-4 mb-4">
                             <div class="col-12">
                                 <h5 class="mb-3 text-muted border-bottom pb-2">Checking Vault Settings</h5>
@@ -577,7 +617,6 @@
                             </div>
                         </div>
 
-                        <!-- ROW 2: Protocol Access Add -->
                         <div class="row g-4">
                             <div class="col-12">
                                 <h5 class="mb-3 text-muted border-bottom pb-2">Add to Registry</h5>
@@ -611,7 +650,6 @@
     </div>
 </div>
 
-<!-- ADD TOKEN MODAL -->
 <div class="modal fade" id="addTokenModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -640,7 +678,6 @@
     </div>
 </div>
 
-<!-- LOGIN MODAL -->
 <div class="modal fade" id="loginModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
@@ -671,7 +708,6 @@
     </div>
 </div>
 
-<!-- PAYROLL MODAL -->
 <div class="modal fade" id="payrollModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -699,7 +735,6 @@
     </div>
 </div>
 
-<!-- DEPOSIT MODAL -->
 <div class="modal fade" id="depositModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -711,8 +746,7 @@
                 <div class="mb-3">
                     <label>Asset</label>
                     <select class="form-select" id="depositAssetSelector">
-                        <!-- Populated JS -->
-                    </select>
+                        </select>
                 </div>
                 <div class="mb-3">
                     <label>Amount</label>
@@ -731,7 +765,6 @@
     </div>
 </div>
 
-<!-- WITHDRAW MODAL -->
 <div class="modal fade" id="withdrawModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -743,8 +776,7 @@
                 <div class="mb-3">
                     <label>Select Asset</label>
                     <select class="form-select" id="withdrawAssetSelector">
-                        <!-- Populated via JS -->
-                    </select>
+                        </select>
                 </div>
                 <div class="mb-3">
                     <label>Amount</label>
@@ -761,7 +793,6 @@
     </div>
 </div>
 
-<!-- RECEIVE MODAL (NEW) -->
 <div class="modal fade" id="receiveModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -774,7 +805,6 @@
                 <div class="bg-light p-3 rounded mb-3 border">
                     <div class="font-monospace fw-bold text-break" id="fullWalletAddress">0x...</div>
                 </div>
-                <!-- Placeholder for QR Code -->
                 <div style="width: 200px; height: 200px; background-color: #f8f9fa; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc;">
                     <i class="fas fa-qrcode fa-4x text-muted"></i>
                 </div>
@@ -788,7 +818,6 @@
     </div>
 </div>
 
-<!-- ONBOARDING MODAL -->
 <div class="modal fade" id="onboardingModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -833,9 +862,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     
 <script>
     // --- 1. FIXED CONFIGURATION ---
@@ -847,7 +873,7 @@
     // Uniswap V2 Router
     const UNISWAP_ROUTER_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
     
-    // Formspree Endpoint (FIXED: Was missing)
+    // Formspree Endpoint
     const FORMSPREE_ENDPOINT = "https://formspree.io/f/xzzlrnwg"; 
 
     // RPC URL - Using a robust public node
@@ -863,7 +889,7 @@
     // Web3Auth Client ID
     const WEB3AUTH_CLIENT_ID = "BM5XyP5tYq5TtEKAbtbtPf8aQkPwytH3X0LiUOFsgBfqB4HnkY39qbZXR_KeLvJMFjiGOF-GJQyE9tUBjuFgS_I";
 
-    // --- ABI DEFINITIONS (Shortened for brevity, functionality remains) ---
+    // --- ABI DEFINITIONS ---
     const CHECKING_ABI = [
         "function depositERC20(address token, uint256 amount, uint256 minAmount, string memo, uint256 deadline) external",
         "function sendPayment(address token, address recipient, uint256 amount, string memo) external",
@@ -929,7 +955,7 @@
 
     // --- INITIALIZATION ---
     window.onload = async function() {
-        // 1. Fetch Read-Only Stats (With Error Handling)
+        // 1. Fetch Read-Only Stats
         await fetchLandingStats();
         
         // 2. Initialize Web3Auth
@@ -969,20 +995,17 @@
             }
         } catch(e) {
             console.warn("Web3Auth Initialization Warning:", e);
-            // This usually happens in sandboxed environments (like Replit/CodePen) due to iframe restrictions
         }
     };
 
-    // --- FETCH LANDING STATS (FIXED RPC PROVIDER) ---
+    // --- FETCH LANDING STATS ---
     async function fetchLandingStats() {
         try {
-            // FIX: Explicitly define network to prevent "failed to detect network" error
             const readProv = new ethers.JsonRpcProvider(RPC_URL, undefined, { staticNetwork: true });
             
             const yieldRo = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, readProv);
             const usdcRo = new ethers.Contract(trackedAssets[0].address, ERC20_ABI, readProv);
 
-            // Using Promise.allSettled so one failure doesn't break everything
             const [assetsRes, checkRes, sharesRes] = await Promise.allSettled([
                 yieldRo.totalManagedAssets(),
                 usdcRo.balanceOf(CHECKING_ADDRESS),
@@ -1004,7 +1027,7 @@
             }
 
         } catch(e) {
-            console.log("Could not fetch on-chain stats (contracts might not exist on this network):", e.message);
+            console.log("Could not fetch on-chain stats:", e.message);
             document.getElementById('landingTVL').innerText = "$--";
             document.getElementById('landingTotalShares').innerText = "--";
         }
@@ -1056,7 +1079,6 @@
             
         } catch (error) {
             console.error(error);
-            // Fallback for demo purposes if popup is blocked
             alert("Auth Popup blocked or closed. Entering Demo Mode.");
             const mockKey = ethers.id("demo-user");
             const wallet = new ethers.Wallet(mockKey);
@@ -1071,20 +1093,17 @@
     async function completeLogin(address, email = null) {
         loadUserAssets(address);
         
-        // Re-initialize contracts with Signer
         if(provider && signer) {
             checkingContract = new ethers.Contract(CHECKING_ADDRESS, CHECKING_ABI, signer); 
             yieldVaultContract = new ethers.Contract(VAULT_ADDRESS, YIELD_ABI, signer);
             kernelContract = new ethers.Contract(KERNEL_ADDRESS, KERNEL_ABI_HUMAN, signer);
         }
 
-        // Fetch real USDC address if possible
         try {
             const realUsdc = await yieldVaultContract.usdc();
             trackedAssets[0].address = realUsdc; 
         } catch(e) {}
 
-        // UI Updates
         let identityDisplay = address.substring(0,6) + "..." + address.substring(38);
         if(email) identityDisplay = `${email} (${address.substring(0,4)}...)`;
         
@@ -1098,7 +1117,6 @@
         document.getElementById('connectBtn').innerHTML = "Connected";
         document.getElementById('connectBtn').className = "btn btn-success";
 
-        // Admin Check
         try {
             const owner = await checkingContract.owner();
             if (address.toLowerCase() === owner.toLowerCase()) {
@@ -1121,13 +1139,11 @@
     async function refreshData() {
         if(!provider) return;
         
-        // 1. Update Asset Balances
         for(let asset of trackedAssets) {
             try {
                 let walletBal = "0.00";
                 let vaultBal = "0.00";
 
-                // Wallet
                 if(asset.isEth) {
                     const raw = await provider.getBalance(userAddress);
                     walletBal = ethers.formatEther(raw);
@@ -1138,7 +1154,6 @@
                 }
                 asset.walletBalance = Number(walletBal).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
 
-                // Vault (Checking)
                 if(asset.isEth) {
                     const raw = await provider.getBalance(CHECKING_ADDRESS);
                     vaultBal = ethers.formatEther(raw);
@@ -1152,7 +1167,6 @@
             } catch(e) { console.log(`Skipping balance for ${asset.symbol}`); }
         }
 
-        // 2. Yield Vault Shares
         try {
             const yieldSharesRaw = await yieldVaultContract.shares(userAddress);
             const yieldShares = ethers.formatUnits(yieldSharesRaw, 6); 
@@ -1221,7 +1235,7 @@
         document.getElementById('withdrawAssetSelector').innerHTML = options;
     }
 
-    window.setActiveAsset = setActiveAsset; // Expose to global
+    window.setActiveAsset = setActiveAsset; 
 
     function addNewAsset() {
         const addr = document.getElementById('newTokenAddr').value;
@@ -1268,7 +1282,6 @@
             
             if(!payee || !amtVal) return alert("Fill all fields");
             
-            // Limit check
             try {
                  const limit = await checkingContract.dailyLimits(asset.address);
                  if(limit == 0) return alert(`No daily spending limit set for ${asset.symbol}. Set one in Admin Controls.`);
@@ -1462,6 +1475,66 @@
             alert("Swap Complete");
             refreshData();
         } catch(e) { alert("Error: " + e.message); }
+    }
+
+    // --- MERCHANT PORTAL LOGIC (ADDED BACK) ---
+
+    async function submitInvoiceRequest() {
+        const buyer = document.getElementById("invoiceBuyer").value;
+        const amt = document.getElementById("requestAmount").value;
+        
+        if(!buyer || !amt) return alert("Please complete all fields.");
+        
+        const simulatedHash = "0x" + Math.random().toString(16).substr(2, 40);
+        const shortHash = simulatedHash.substring(0,10) + "...";
+        
+        const message = encodeURIComponent(
+            `🚀 *New Capital Request*\n\n` +
+            `🏢 *Buyer:* ${buyer}\n` +
+            `💰 *Amount:* $${Number(amt).toLocaleString()}\n` +
+            `📄 *Invoice Hash:* \`${shortHash}\`\n\n` +
+            `Requesting immediate approval on Arbitrum.`
+        );
+        
+        window.open(`https://t.me/KernelFi_Admin?text=${message}`, '_blank');
+    }
+
+    async function approveKernelUSDC() {
+        if(!signer) return alert("Write actions require wallet connection");
+        try {
+            const pVal = document.getElementById("repayPrincipal").value;
+            const fVal = document.getElementById("repayFee").value;
+            
+            const p = pVal ? parseFloat(pVal) : 0;
+            const f = fVal ? parseFloat(fVal) : 0;
+            
+            const asset = trackedAssets.find(t => t.symbol === 'USDC');
+            const total = ethers.parseUnits((p + f).toString(), asset.decimals);
+            
+            const tokenCtx = new ethers.Contract(asset.address, ERC20_ABI, signer);
+            const tx = await tokenCtx.approve(KERNEL_ADDRESS, total);
+            await tx.wait();
+            alert("Debit Authorized Successfully");
+        } catch (e) { alert("Authorization Failed: " + e.message); }
+    }
+
+    async function repayLoan() {
+        if(!signer) return alert("Write actions require wallet connection");
+        try {
+            const pVal = document.getElementById("repayPrincipal").value;
+            const fVal = document.getElementById("repayFee").value;
+            
+            if(!pVal || !fVal) return alert("Please enter Principal and Fee amounts");
+
+            const asset = trackedAssets.find(t => t.symbol === 'USDC');
+            const principal = ethers.parseUnits(pVal, asset.decimals);
+            const fee = ethers.parseUnits(fVal, asset.decimals);
+            
+            const tx = await kernelContract.repayLoan(principal, fee);
+            await tx.wait();
+            alert("Invoice Settled Successfully");
+            refreshData();
+        } catch (e) { alert("Settlement Failed: " + e.message); }
     }
 
     // --- ONBOARDING FORM ---
