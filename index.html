@@ -317,16 +317,8 @@
                                     <h2 class="mb-4" id="checkingBalanceMain">$0.00</h2>
                                     <div class="d-flex justify-content-between align-items-end">
                                         <small class="text-white-50" style="font-family: monospace; font-size: 1.1rem; cursor: pointer;" id="cardAddressDisplay" onclick="copyUserAddress()" title="Click to Copy">Not Connected</small>
-                                        <i class="far fa-copy text-white-50 ms-2" style="cursor: pointer;" onclick="copyUserAddress()"></i>
-                                        <i class="fab fa-cc-visa fa-2x ms-auto"></i>
+                                        <i class="fab fa-cc-visa fa-2x"></i>
                                     </div>
-                                </div>
-                                
-                                <!-- Explicit Address Copy Field -->
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-wallet text-muted"></i></span>
-                                    <input type="text" class="form-control bg-light border-start-0 font-monospace text-muted" id="explicitWalletAddr" value="Not Connected" readonly style="font-size: 0.85rem;">
-                                    <button class="btn btn-outline-secondary" onclick="copyUserAddress()">Copy</button>
                                 </div>
 
                                 <!-- Toggle View Switch -->
@@ -453,7 +445,7 @@
                                         <span>$0.00 (Gasless)</span>
                                     </div>
 
-                                    <button class="btn btn-primary w-100 py-3 rounded-3" onclick="executeSwapOrder()">
+                                    <button class="btn btn-primary w-100 py-3 rounded-3" onclick="signSwapOrder()">
                                         Sign Order
                                     </button>
                                 </div>
@@ -495,6 +487,65 @@
                                 <button class="btn btn-outline-danger w-100" onclick="redeemFromYield()">Redeem to Wallet</button>
                                 <div class="mt-3 text-center">
                                     <small class="text-muted">Settlement: Instant if liquidity available</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. MERCHANT TAB -->
+                    <div class="tab-pane fade" id="solver">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <!-- REQUEST FUNDING SECTION -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Request Capital</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Counterparty / Buyer</label>
+                                                <input type="text" class="form-control" id="invoiceBuyer" placeholder="e.g. Walmart, Inc.">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Invoice Amount (USD)</label>
+                                                <input type="number" class="form-control" id="requestAmount">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Upload Invoice (PDF/Img)</label>
+                                                <input type="file" class="form-control" id="invoiceFile">
+                                                <div class="form-text">Document will be hashed on-chain for verification.</div>
+                                            </div>
+                                            <div class="col-12 text-end">
+                                                <button class="btn btn-primary px-4" onclick="submitInvoiceRequest()">
+                                                    <i class="fas fa-paper-plane me-2"></i>Submit for Approval
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-center mb-4">
+                                    <h5>Invoice Settlement</h5>
+                                    <p class="text-muted">Repay outstanding credit lines to release collateral.</p>
+                                </div>
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label>Principal Amount</label>
+                                                <input type="number" id="repayPrincipal" class="form-control">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label>Accrued Fees</label>
+                                                <input type="number" id="repayFee" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-outline-primary" onclick="approveKernelUSDC()">1. Authorize Debit</button>
+                                            <button class="btn btn-success" onclick="repayLoan()">2. Settle Invoice</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -872,8 +923,7 @@
         "function runPayroll(address token, address[] recipients, uint256[] amounts, string batchName) external",
         "function setDailyLimit(address token, uint256 limit) external",
         "function setWhitelistedPayee(address token, address payee, bool status) external",
-        "function owner() view returns (address)",
-        "function dailyLimits(address token) view returns (uint256)"
+        "function owner() view returns (address)" // Added Owner check
     ];
     
     const YIELD_ABI = [
@@ -1005,16 +1055,13 @@
         const mockWallet = new ethers.Wallet(mockPrivateKey);
         userAddress = mockWallet.address;
         
-        // FIX: Initialize provider if missing (read-only fallback)
-        if(!provider) {
-            provider = new ethers.JsonRpcProvider("https://eth.llamarpc.com");
-        }
-        
-        // FIX: Assign signer so write functions work
-        signer = mockWallet.connect(provider);
-        
         console.log(`Simulated Login for: ${email}`);
         console.log(`Address: ${userAddress}`);
+        console.log(`Private Key (SIMULATION ONLY): ${mockPrivateKey}`);
+        
+        if(window.ethereum) {
+             provider = new ethers.BrowserProvider(window.ethereum); 
+        }
         
         completeLogin(userAddress, email); // Pass email to completeLogin
         bootstrap.Modal.getInstance(document.getElementById('loginModal'))?.hide();
@@ -1233,7 +1280,7 @@
 
     // --- BANKING: SEND PAYMENT ---
     async function payVendor() {
-        // NOTE: Removed "Write actions require Metamask" alert to allow testing with Mock Signer
+        if(!signer) return alert("Write actions require Metamask connection (not simulation)");
         try {
             const payee = document.getElementById('payeeAddress').value;
             const amtVal = document.getElementById('payAmount').value;
@@ -1242,15 +1289,6 @@
             const asset = trackedAssets.find(t => t.symbol === symbol);
             
             if(!payee || !amtVal) return alert("Fill all fields");
-
-            // CHECK DAILY LIMIT
-            try {
-                 const limit = await checkingContract.dailyLimits(asset.address);
-                 if(limit == 0) {
-                     alert(`SECURITY ALERT: No daily spending limit set for ${asset.symbol}.\n\nAs the Owner, you must set a limit in 'Admin Controls' before funds can be moved.`);
-                     return;
-                 }
-            } catch(e) { console.log("Limit check failed", e); }
 
             const amount = ethers.parseUnits(amtVal, asset.decimals); 
             const tx = await checkingContract.sendPayment(asset.address, payee, amount, memo);
@@ -1265,6 +1303,7 @@
 
     // --- BANKING: DEPOSIT ---
     async function approveDeposit() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const symbol = document.getElementById('depositAssetSelector').value;
             const asset = trackedAssets.find(t => t.symbol === symbol);
@@ -1280,6 +1319,7 @@
     }
 
     async function executeDeposit() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const symbol = document.getElementById('depositAssetSelector').value;
             const asset = trackedAssets.find(t => t.symbol === symbol);
@@ -1290,14 +1330,7 @@
 
             let tx;
             if(asset.isEth) {
-                 // Native ETH deposit via receive()
-                 // The Checking contract handles ETH via fallback, but our depositERC20 function expects a token address
-                 // For ETH, we send directly to the contract address
-                 const txParams = {
-                    to: CHECKING_ADDRESS,
-                    value: amount
-                 };
-                 tx = await signer.sendTransaction(txParams);
+                 tx = await checkingContract.depositERC20(asset.address, amount, amount, memo, deadline, { value: amount });
             } else {
                  tx = await checkingContract.depositERC20(asset.address, amount, amount, memo, deadline);
             }
@@ -1311,6 +1344,7 @@
 
     // --- BANKING: WITHDRAW ---
     async function executeWithdrawal() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const symbol = document.getElementById('withdrawAssetSelector').value;
             const asset = trackedAssets.find(t => t.symbol === symbol);
@@ -1332,6 +1366,7 @@
 
     // --- BANKING: PAYROLL ---
     async function runPayroll() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const asset = activeAsset;
             const raw = document.getElementById('batchData').value;
@@ -1374,6 +1409,7 @@
     }
 
     async function approveKernelUSDC() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const pVal = document.getElementById("repayPrincipal").value;
             const fVal = document.getElementById("repayFee").value;
@@ -1390,6 +1426,7 @@
     }
 
     async function repayLoan() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const pVal = document.getElementById("repayPrincipal").value;
             const fVal = document.getElementById("repayFee").value;
@@ -1406,6 +1443,7 @@
 
     // --- YIELD VAULT: APPROVE DEPOSIT ---
     async function approveYieldDeposit() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const amtVal = document.getElementById('investAmount').value;
             if(!amtVal) return alert("Enter amount");
@@ -1422,6 +1460,7 @@
 
     // --- YIELD VAULT: DEPOSIT ---
     async function investInYield() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const amtVal = document.getElementById('investAmount').value;
             if(!amtVal) return alert("Enter amount");
@@ -1438,6 +1477,7 @@
 
     // --- YIELD VAULT: REDEEM ---
     async function redeemFromYield() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const amtVal = document.getElementById('redeemAmount').value;
             if(!amtVal) return alert("Enter shares amount");
@@ -1454,6 +1494,7 @@
 
     // --- ADMIN FUNCTIONS ---
     async function setDailyLimit() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const token = document.getElementById('limitToken').value;
             const limit = document.getElementById('limitAmount').value;
@@ -1466,6 +1507,7 @@
     }
 
     async function whitelistPayee() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const token = document.getElementById('wlToken').value;
             const payee = document.getElementById('wlPayee').value;
@@ -1476,6 +1518,7 @@
     }
 
     async function whitelistInvestor() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const addr = document.getElementById('investorAddress').value;
             const tx = await yieldVaultContract.setInvestorStatus(addr, true);
@@ -1485,6 +1528,7 @@
     }
 
     async function whitelistMerchant() {
+        if(!signer) return alert("Write actions require Metamask connection");
         try {
             const addr = document.getElementById('merchantAddress').value;
             const tx = await kernelContract.setSolver(addr, true);
