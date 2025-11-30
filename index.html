@@ -78,10 +78,45 @@
 
         // --- ICONS COMPONENT WRAPPER ---
         const Icon = ({ name, size = 20, className = "" }) => {
+            const [svgHtml, setSvgHtml] = useState("");
+
             useEffect(() => {
-                if(window.lucide) window.lucide.createIcons();
-            });
-            return <i data-lucide={name} width={size} height={size} className={className}></i>;
+                // Ensure Lucide is loaded and has icons
+                if (window.lucide && window.lucide.icons) {
+                    // Convert kebab-case (e.g., "credit-card") to PascalCase (e.g., "CreditCard")
+                    // This is required because lucide.icons uses PascalCase keys
+                    const iconKey = name
+                        .split('-')
+                        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                        .join('');
+
+                    const iconData = window.lucide.icons[iconKey];
+
+                    if (iconData) {
+                        // Generate the SVG string using Lucide's toSvg method
+                        // We apply dimensions here, but styling (className) is better handled by the wrapper
+                        const svg = iconData.toSvg({
+                            width: size,
+                            height: size,
+                            'stroke-width': 2 // Standard stroke width
+                        });
+                        setSvgHtml(svg);
+                    } else {
+                        console.warn(`Icon not found: ${name} (${iconKey})`);
+                    }
+                }
+            }, [name, size]);
+
+            // We render the SVG inside a span using dangerouslySetInnerHTML.
+            // This prevents React from trying to reconcile the internal DOM nodes of the SVG,
+            // avoiding the "removeChild" error.
+            // We pass the className to this wrapper so margins/colors work correctly.
+            return (
+                <span 
+                    className={`inline-flex items-center justify-center ${className}`}
+                    dangerouslySetInnerHTML={{ __html: svgHtml }} 
+                />
+            );
         };
 
         // --- HELPER: FORMAT CURRENCY ---
