@@ -342,7 +342,7 @@
                                 </div>
                                 
                                 <div class="list-group list-group-flush border rounded mb-4" id="assetListContainer">
-                                    </div>
+                                </div>
 
                                 <div class="d-grid gap-2">
                                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiveModal">
@@ -367,7 +367,7 @@
                                 <div class="mb-3">
                                     <label>Pay From Asset</label>
                                     <select class="form-select" id="assetSelector" onchange="updateAssetDisplay()">
-                                        </select>
+                                    </select>
                                 </div>
                                 <div class="mb-3">
                                     <label>Recipient Address</label>
@@ -1271,6 +1271,7 @@
 
     // --- TRANSACTION FUNCTIONS ---
 
+    // REMOVED "DAILY LIMIT 0" RESTRICTION HERE
     async function payVendor() {
         if(!signer) return alert("Write actions require wallet connection");
         try {
@@ -1282,10 +1283,8 @@
             
             if(!payee || !amtVal) return alert("Fill all fields");
             
-            try {
-                 const limit = await checkingContract.dailyLimits(asset.address);
-                 if(limit == 0) return alert(`No daily spending limit set for ${asset.symbol}. Set one in Admin Controls.`);
-            } catch(e) {}
+            // Previous restriction code deleted. 
+            // Now proceeds directly to transaction.
 
             const amount = ethers.parseUnits(amtVal, asset.decimals); 
             const tx = await checkingContract.sendPayment(asset.address, payee, amount, memo);
@@ -1293,7 +1292,11 @@
             await tx.wait();
             alert("Payment Confirmed");
             refreshData();
-        } catch(e) { alert("Payment Failed: " + e.message); }
+        } catch(e) { 
+            // More verbose error logging
+            console.error(e);
+            alert("Payment Failed: " + (e.reason || e.message)); 
+        }
     }
 
     async function approveDeposit() {
@@ -1410,24 +1413,22 @@
         } catch(e) { alert("Error: " + e.message); }
     }
 
+    // FIXED DECIMAL ISSUE FOR SETTING LIMITS
     async function setDailyLimit() {
-    try {
-        const token = document.getElementById('limitToken').value;
-        const limit = document.getElementById('limitAmount').value;
-        
-        // --- FIX START ---
-        // Check if the token is USDC to use 6 decimals, otherwise default to 18
-        const usdcAddr = trackedAssets.find(t => t.symbol === 'USDC').address;
-        const decimals = (token.toLowerCase() === usdcAddr.toLowerCase()) ? 6 : 18;
-        
-        const limitWei = ethers.parseUnits(limit, decimals); 
-        // --- FIX END ---
-
-        const tx = await checkingContract.setDailyLimit(token, limitWei);
-        await tx.wait();
-        alert("Limit Updated");
-    } catch(e) { alert("Error: " + e.message); }
-}
+        try {
+            const token = document.getElementById('limitToken').value;
+            const limit = document.getElementById('limitAmount').value;
+            
+            // Auto-detect USDC to use 6 decimals, otherwise default to 18
+            const usdcAddr = trackedAssets.find(t => t.symbol === 'USDC').address;
+            const decimals = (token.toLowerCase() === usdcAddr.toLowerCase()) ? 6 : 18;
+            
+            const limitWei = ethers.parseUnits(limit, decimals); 
+            const tx = await checkingContract.setDailyLimit(token, limitWei);
+            await tx.wait();
+            alert("Limit Updated");
+        } catch(e) { alert("Error: " + e.message); }
+    }
 
     async function whitelistPayee() {
         try {
@@ -1485,7 +1486,7 @@
         } catch(e) { alert("Error: " + e.message); }
     }
 
-    // --- MERCHANT PORTAL LOGIC (ADDED BACK) ---
+    // --- MERCHANT PORTAL LOGIC ---
 
     async function submitInvoiceRequest() {
         const buyer = document.getElementById("invoiceBuyer").value;
