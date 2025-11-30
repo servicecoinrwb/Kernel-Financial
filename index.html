@@ -563,8 +563,9 @@
                 const spentBN = await accountContract.spentToday();
 
                 // Format (Assuming USDC is 6 decimals, Shares usually 18 or 6. We'll assume 6 for USDC)
+                // Note: In prod, fetch decimals() from token.
                 const checkingFmt = ethers.utils.formatUnits(checkingBalBN, 6);
-                const savingsFmt = ethers.utils.formatUnits(savingsBalBN, 18); 
+                const savingsFmt = ethers.utils.formatUnits(savingsBalBN, 6); // Shares often 18 decimals in vaults but we force 6 here
                 
                 // Update Globals for Max Button
                 currentCheckingBal = checkingFmt;
@@ -711,7 +712,7 @@
                 // Note: Solidity math is integer. We do floating point here for display.
                 // Assets = 6 decimals (USDC), Shares = 18 decimals
                 const assetsFmt = parseFloat(ethers.utils.formatUnits(totalAssets, 6));
-                const sharesFmt = parseFloat(ethers.utils.formatUnits(totalShares, 18));
+                const sharesFmt = parseFloat(ethers.utils.formatUnits(totalShares, 6));
                 
                 let price = 1.0;
                 if(sharesFmt > 0) {
@@ -899,7 +900,7 @@
                     // For simplicity in this demo, we will assume user inputs SHARES amount 
                     // or implement a basic conversion if we had the price.
                     // Let's treat input as SHARES for withdrawal for now.
-                    const sharesWei = ethers.utils.parseUnits(amount, 18);
+                    const sharesWei = ethers.utils.parseUnits(amount, 6);
                     tx = await accountContract.withdrawFromSavings(sharesWei, 0);
                 }
 
