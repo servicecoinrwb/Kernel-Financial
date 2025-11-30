@@ -1411,15 +1411,23 @@
     }
 
     async function setDailyLimit() {
-        try {
-            const token = document.getElementById('limitToken').value;
-            const limit = document.getElementById('limitAmount').value;
-            const limitWei = ethers.parseUnits(limit, 18); 
-            const tx = await checkingContract.setDailyLimit(token, limitWei);
-            await tx.wait();
-            alert("Limit Updated");
-        } catch(e) { alert("Error: " + e.message); }
-    }
+    try {
+        const token = document.getElementById('limitToken').value;
+        const limit = document.getElementById('limitAmount').value;
+        
+        // --- FIX START ---
+        // Check if the token is USDC to use 6 decimals, otherwise default to 18
+        const usdcAddr = trackedAssets.find(t => t.symbol === 'USDC').address;
+        const decimals = (token.toLowerCase() === usdcAddr.toLowerCase()) ? 6 : 18;
+        
+        const limitWei = ethers.parseUnits(limit, decimals); 
+        // --- FIX END ---
+
+        const tx = await checkingContract.setDailyLimit(token, limitWei);
+        await tx.wait();
+        alert("Limit Updated");
+    } catch(e) { alert("Error: " + e.message); }
+}
 
     async function whitelistPayee() {
         try {
