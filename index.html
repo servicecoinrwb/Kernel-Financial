@@ -233,7 +233,7 @@
                     </div>
                     <div class="relative z-10">
                         <p class="text-orange-100 font-medium mb-2">Total Bitcoin Balance</p>
-                        <h3 class="text-5xl font-bold mb-6">0.0000 <span class="text-2xl opacity-80">BTC</span></h3>
+                        <h3 class="text-5xl font-bold mb-6"><span id="bal-btc-main">0.00000000</span> <span class="text-2xl opacity-80">BTC</span></h3>
                         
                         <div class="flex flex-col sm:flex-row gap-4 mt-8">
                             <button onclick="toggleModal('modal-btc-deposit')" class="bg-white text-orange-600 px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-orange-50 transition-colors flex items-center justify-center gap-2">
@@ -277,14 +277,19 @@
                 </div>
             </div>
 
-            <!-- BTC Transaction History (Placeholder) -->
+            <!-- BTC Transaction History (Live) -->
             <div class="mt-8">
                 <h3 class="text-lg font-bold text-slate-900 mb-4">Bitcoin Transactions</h3>
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
-                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300">
-                        <i data-lucide="history" class="w-8 h-8"></i>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 min-h-[200px]">
+                    <div id="btc-tx-loading" class="hidden flex justify-center py-8">
+                         <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-orange-500"></i>
                     </div>
-                    <p class="text-slate-500">No transactions found on the Bitcoin blockchain.</p>
+                    <div id="btc-tx-list" class="space-y-4">
+                         <div class="flex items-center justify-center text-slate-400 py-8 flex-col gap-2 opacity-50">
+                            <i data-lucide="history" class="w-8 h-8"></i>
+                            <p>No transactions found.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -297,7 +302,7 @@
             </div>
 
             <!-- Global Vault Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- TVL -->
                 <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
                     <div class="relative z-10">
@@ -340,6 +345,21 @@
                     <p class="text-xs text-slate-500 mt-2">Utilization: <span id="eco-util-pct">0%</span></p>
                 </div>
                 
+                <!-- NEW: BTC Treasury Card -->
+                <div class="bg-orange-50 p-6 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden lg:col-span-4">
+                    <div class="relative z-10 flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-bold text-orange-800 mb-1">Cold Storage Reserves</p>
+                            <h3 class="text-3xl font-bold text-slate-900"><span id="eco-btc-treasury">0.00000000</span> BTC</h3>
+                            <p class="text-xs text-orange-600 font-medium mt-1">
+                                Native Bitcoin held in Multisig Custody
+                            </p>
+                        </div>
+                        <div class="hidden md:block">
+                            <i data-lucide="lock" class="w-12 h-12 text-orange-300"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Solver Inspector -->
@@ -668,6 +688,7 @@
     <script>
         // --- CONFIGURATION ---
         const FACTORY_ADDRESS = "0x7090825ed699229Fe60E59163E439737E22b67dE";
+        const BTC_ADDRESS = "3545zePwogymE18dEqGUqv2qbKGmqfnF1u";
         
         // Minimal ABIs
         const FACTORY_ABI = [
@@ -759,9 +780,119 @@
                 }
             });
 
-            if(viewName === 'ecosystem') loadEcosystemData();
+            if(viewName === 'bitcoin') fetchBitcoinData();
+            if(viewName === 'ecosystem') { loadEcosystemData(); fetchBitcoinData(); }
             if(viewName === 'solver') loadSolverData();
             if(viewName === 'admin') loadAdminData();
+        }
+        
+        // --- BITCOIN DATA FETCH ---
+        async function fetchBitcoinData() {
+            try {
+                // Use mempool.space API to fetch address details
+                const response = await fetch(`https://mempool.space/api/address/${BTC_ADDRESS}`);
+                if (!response.ok) throw new Error("Failed to fetch BTC data");
+                
+                const data = await response.json();
+                
+                // Calculate balance in Satoshis
+                const funded = data.chain_stats.funded_txo_sum;
+                const spent = data.chain_stats.spent_txo_sum;
+                const balanceSats = funded - spent;
+                
+                // Convert to BTC (8 decimals)
+                const balanceBTC = (balanceSats / 100000000).toFixed(8);
+                
+                // Update UI elements if they exist
+                const balBtcMain = document.getElementById('bal-btc-main');
+                const balBtcEco = document.getElementById('eco-btc-treasury');
+                
+                if (balBtcMain) balBtcMain.innerText = balanceBTC;
+                if (balBtcEco) balBtcEco.innerText = balanceBTC;
+                
+                // Fetch Transactions
+                fetchBitcoinTransactions();
+                
+            } catch (error) {
+                console.error("Error fetching Bitcoin data:", error);
+            }
+        }
+        
+        async function fetchBitcoinTransactions() {
+            const listEl = document.getElementById('btc-tx-list');
+            const loader = document.getElementById('btc-tx-loading');
+            
+            if (!listEl) return;
+            
+            if (listEl.children.length <= 1) {
+                if (loader) loader.classList.remove('hidden');
+            }
+            
+            try {
+                const response = await fetch(`https://mempool.space/api/address/${BTC_ADDRESS}/txs`);
+                if (!response.ok) throw new Error("Failed to fetch BTC txs");
+                
+                const txs = await response.json();
+                
+                if (loader) loader.classList.add('hidden');
+                
+                if (txs.length === 0) {
+                     listEl.innerHTML = `
+                        <div class="flex items-center justify-center text-slate-400 py-8 flex-col gap-2 opacity-50">
+                            <i data-lucide="history" class="w-8 h-8"></i>
+                            <p>No transactions found.</p>
+                        </div>`;
+                } else {
+                     listEl.innerHTML = txs.slice(0, 10).map(tx => {
+                        // Determine if incoming or outgoing for our address
+                        let isIncoming = false;
+                        let amountSats = 0;
+                        
+                        // Check outputs for our address (Incoming)
+                        for (const out of tx.vout) {
+                            if (out.scriptpubkey_address === BTC_ADDRESS) {
+                                isIncoming = true;
+                                amountSats += out.value;
+                            }
+                        }
+                        
+                        // If not incoming to us, assume outgoing (simplified logic)
+                        // For a strict wallet view we'd check inputs too, but for a treasury address usually mostly receive
+                        // Let's stick to displaying what we received in that tx
+                        
+                        const amountBTC = (amountSats / 100000000).toFixed(8);
+                        const txIdShort = `${tx.txid.substring(0, 6)}...${tx.txid.substring(tx.txid.length - 6)}`;
+                        const time = tx.status.block_time ? new Date(tx.status.block_time * 1000).toLocaleDateString() : "Pending";
+                        
+                        let icon = isIncoming ? 'arrow-down-left' : 'arrow-up-right';
+                        let colorClass = isIncoming ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600';
+                        let title = isIncoming ? 'Received BTC' : 'Sent BTC';
+                        
+                        return `
+                        <div class="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center">
+                                    <i data-lucide="${icon}" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-slate-800">${title}</p>
+                                    <p class="text-xs text-slate-500">${time} • <a href="https://mempool.space/tx/${tx.txid}" target="_blank" class="text-blue-500 hover:underline">${txIdShort}</a></p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-slate-900">${isIncoming ? '+' : '-'}${amountBTC} BTC</p>
+                                <p class="text-xs text-slate-400">${tx.status.confirmed ? 'Confirmed' : 'Unconfirmed'}</p>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+                }
+                lucide.createIcons();
+                
+            } catch (error) {
+                console.error("Error fetching BTC txs:", error);
+                if (loader) loader.classList.add('hidden');
+            }
         }
 
         // --- WALLET CONNECTION ---
