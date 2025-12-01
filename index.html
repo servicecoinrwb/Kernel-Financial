@@ -154,7 +154,7 @@
             </div>
 
             <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Checking Balance -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -184,7 +184,7 @@
                     </div>
                 </div>
 
-                <!-- Token Swap (Replaces Limits) -->
+                <!-- Token Swap -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                         <i data-lucide="repeat" class="w-24 h-24 text-violet-600"></i>
@@ -199,8 +199,25 @@
                         </div>
                         <div class="mt-2 flex justify-between items-center text-xs text-slate-400">
                             <span>Trade USDC, ETH, WBTC</span>
-                            <button onclick="toggleModal('modal-limit')" class="hover:text-blue-600">Set Limits</button>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Security / Limits (Restored) -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i data-lucide="shield-check" class="w-24 h-24 text-purple-600"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-sm font-medium text-slate-500">Daily Limit</p>
+                            <button onclick="toggleModal('modal-limit')" class="text-xs text-blue-600 hover:underline">Edit</button>
+                        </div>
+                        <h3 class="text-3xl font-bold text-slate-900 mb-2">$<span id="limit-daily">--</span></h3>
+                        <div class="w-full bg-slate-100 rounded-full h-2 mb-2">
+                            <div id="limit-bar" class="bg-purple-500 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500">Spent Today: $<span id="limit-spent">0.00</span></p>
                     </div>
                 </div>
             </div>
@@ -1296,8 +1313,10 @@
                 } else {
                     document.getElementById('limit-daily').innerText = formatMoney(limitFmt);
                     document.getElementById('limit-spent').innerText = formatMoney(spentFmt);
+                    
                     const pct = Math.min((parseFloat(spentFmt) / parseFloat(limitFmt)) * 100, 100);
                     document.getElementById('limit-bar').style.width = `${pct}%`;
+                    
                     if(pct > 90) document.getElementById('limit-bar').classList.add('bg-red-500');
                     else document.getElementById('limit-bar').classList.remove('bg-red-500');
                 }
