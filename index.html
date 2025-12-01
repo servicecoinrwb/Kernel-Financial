@@ -42,6 +42,9 @@
         .btc-gradient {
             background: linear-gradient(135deg, #F7931A 0%, #B36509 100%);
         }
+        .bridge-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen relative overflow-x-hidden">
@@ -65,6 +68,9 @@
             <div id="nav-tabs" class="hidden flex gap-1 md:gap-2 overflow-x-auto">
                 <button onclick="switchView('dashboard')" id="tab-dashboard" class="nav-active px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="layout-dashboard" class="w-4 h-4"></i> My Account
+                </button>
+                <button onclick="switchView('deposit')" id="tab-deposit" class="nav-inactive px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="arrow-down-circle" class="w-4 h-4"></i> Deposit
                 </button>
                 <button onclick="switchView('bitcoin')" id="tab-bitcoin" class="nav-inactive px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="bitcoin" class="w-4 h-4"></i> Bitcoin
@@ -209,6 +215,88 @@
                         <p>No transactions yet</p>
                     </div>
                 </div>
+            </div>
+        </div>
+        
+        <!-- View: Deposit (Smart Linker) -->
+        <div id="view-deposit" class="hidden">
+             <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900">Deposit Funds</h2>
+                    <p class="text-slate-500">Bridge assets from other networks or buy with card.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                
+                <!-- Option 1: Cross-Chain Bridge -->
+                <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-1 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-full h-2 bridge-gradient"></div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 rounded-xl bridge-gradient flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-500/30">
+                            <i data-lucide="arrow-left-right" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Bridge from Other Chain</h3>
+                        <p class="text-sm text-slate-500 mb-6">Transfer USDC, ETH, or other tokens from Ethereum, Base, Optimism, or Polygon directly to your wallet on Arbitrum.</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">From Network</label>
+                                <select id="link-source-chain" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                                    <option value="1">Ethereum Mainnet</option>
+                                    <option value="8453">Base</option>
+                                    <option value="10">Optimism</option>
+                                    <option value="137">Polygon</option>
+                                    <option value="56">BSC</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Asset to Bridge</label>
+                                <select id="link-source-token" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                                    <option value="USDC">USDC</option>
+                                    <option value="ETH">ETH</option>
+                                    <option value="USDT">USDT</option>
+                                </select>
+                            </div>
+                            
+                            <button onclick="openBridgeLink()" class="w-full bridge-gradient text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:opacity-90 flex items-center justify-center gap-2 mt-4">
+                                Bridge Now <i data-lucide="external-link" class="w-4 h-4"></i>
+                            </button>
+                            <p class="text-[10px] text-center text-slate-400">Opens Jumper.Exchange in new tab</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Option 2: Fiat On-Ramp -->
+                <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-1 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-green-500"></div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center text-white mb-6 shadow-lg shadow-green-500/30">
+                            <i data-lucide="credit-card" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Buy with Card</h3>
+                        <p class="text-sm text-slate-500 mb-6">Don't have crypto yet? Purchase USDC directly with your credit card or bank transfer via MoonPay.</p>
+                        
+                        <div class="bg-slate-50 p-4 rounded-xl mb-6 border border-slate-200">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-slate-500 uppercase">Receiving</span>
+                                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Arbitrum</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                                    $
+                                </div>
+                                <span class="font-bold text-slate-700">USDC</span>
+                            </div>
+                        </div>
+
+                        <button onclick="openFiatLink()" class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-8">
+                            Buy Crypto <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </button>
+                        <p class="text-[10px] text-center text-slate-400 mt-4">Opens MoonPay in new tab</p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -789,7 +877,7 @@
 
         // --- NAVIGATION ---
         function switchView(viewName) {
-            const views = ['dashboard', 'bitcoin', 'ecosystem', 'solver', 'admin'];
+            const views = ['dashboard', 'deposit', 'bitcoin', 'ecosystem', 'solver', 'admin'];
             
             views.forEach(v => {
                 const el = document.getElementById('view-' + v);
@@ -994,6 +1082,37 @@
                 if (loader) loader.classList.add('hidden');
             }
         }
+        
+        // --- SMART LINKING (DEPOSIT) ---
+        function openBridgeLink() {
+            const chainId = document.getElementById('link-source-chain').value;
+            const token = document.getElementById('link-source-token').value;
+            
+            if(!userAddress) {
+                showToast("Please connect wallet first", "error");
+                return;
+            }
+            
+            // Construct Jumper URL
+            // Destination: Arbitrum (42161), USDC
+            // Recipient: Connected Wallet (userAddress)
+            // To Token Address (USDC on Arb): 0xaf88d065e77c8cC2239327C5EDb3A432268e5831
+            
+            const url = `https://jumper.exchange/?fromChain=${chainId}&fromToken=${token}&toChain=42161&toToken=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&toAddress=${userAddress}`;
+            
+            window.open(url, '_blank');
+        }
+        
+        function openFiatLink() {
+             if(!userAddress) {
+                showToast("Please connect wallet first", "error");
+                return;
+            }
+            // MoonPay Link with wallet pre-filled
+            const url = `https://buy.moonpay.com?currencyCode=usdc_arbitrum&walletAddress=${userAddress}`;
+            window.open(url, '_blank');
+        }
+
 
         // --- WALLET CONNECTION ---
         async function connectWallet() {
