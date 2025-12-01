@@ -672,8 +672,8 @@
             <p class="text-sm text-slate-500 mb-6">Send BTC to your dedicated Treasury Address via the <strong class="text-slate-900">Bitcoin Mainnet</strong>.</p>
             
             <!-- QR Placeholder -->
-            <div class="w-48 h-48 bg-slate-100 mx-auto mb-6 rounded-lg flex items-center justify-center border border-slate-200">
-                <i data-lucide="qr-code" class="w-24 h-24 text-slate-300"></i>
+            <div class="w-48 h-48 bg-slate-100 mx-auto mb-6 rounded-lg flex items-center justify-center border border-slate-200 overflow-hidden">
+                 <img id="btc-deposit-qr" alt="BTC Deposit QR" class="w-full h-full object-contain" src="">
             </div>
 
             <div class="bg-slate-100 p-4 rounded-xl mb-6">
@@ -829,6 +829,12 @@
                 // Update UI with address
                 document.getElementById('display-btc-address').innerText = userBtcAddress;
                 document.getElementById('modal-btc-address').innerText = userBtcAddress;
+                
+                // Update QR Code
+                const qrImg = document.getElementById('btc-deposit-qr');
+                if(qrImg) {
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${userBtcAddress}`;
+                }
                 
                 // Fetch Data
                 fetchBitcoinData();
@@ -1183,6 +1189,9 @@
                 document.getElementById('eco-share-ratio').innerText = price.toFixed(4);
                 document.getElementById('eco-util-bar').style.width = `${util}%`;
                 document.getElementById('eco-util-pct').innerText = `${util.toFixed(1)}%`;
+                
+                // Load BTC info here too if address exists
+                if(userBtcAddress) fetchBitcoinData();
             } catch(err) { console.error("Eco data failed", err); }
         }
 
