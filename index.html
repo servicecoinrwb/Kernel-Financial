@@ -45,6 +45,9 @@
         .bridge-gradient {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
         }
+        .swap-gradient {
+            background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen relative overflow-x-hidden">
@@ -181,21 +184,23 @@
                     </div>
                 </div>
 
-                <!-- Security / Limits -->
+                <!-- Token Swap (Replaces Limits) -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i data-lucide="shield-check" class="w-24 h-24 text-purple-600"></i>
+                        <i data-lucide="repeat" class="w-24 h-24 text-violet-600"></i>
                     </div>
                     <div class="relative z-10">
-                        <div class="flex justify-between items-start mb-1">
-                            <p class="text-sm font-medium text-slate-500">Daily Limit</p>
-                            <button onclick="toggleModal('modal-limit')" class="text-xs text-blue-600 hover:underline">Edit</button>
+                        <p class="text-sm font-medium text-slate-500 mb-1">Quick Swap</p>
+                        <h3 class="text-3xl font-bold text-slate-900 mb-4">Exchange</h3>
+                        <div class="flex gap-2">
+                             <button onclick="openSwapModal()" class="w-full swap-gradient text-white text-sm py-2 rounded-lg font-medium shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                                Swap Assets <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
+                             </button>
                         </div>
-                        <h3 class="text-3xl font-bold text-slate-900 mb-2">$<span id="limit-daily">--</span></h3>
-                        <div class="w-full bg-slate-100 rounded-full h-2 mb-2">
-                            <div id="limit-bar" class="bg-purple-500 h-2 rounded-full" style="width: 0%"></div>
+                        <div class="mt-2 flex justify-between items-center text-xs text-slate-400">
+                            <span>Trade USDC, ETH, WBTC</span>
+                            <button onclick="toggleModal('modal-limit')" class="hover:text-blue-600">Set Limits</button>
                         </div>
-                        <p class="text-xs text-slate-500">Spent Today: $<span id="limit-spent">0.00</span></p>
                     </div>
                 </div>
             </div>
@@ -747,6 +752,45 @@
         </div>
     </div>
 
+    <!-- Swap Modal -->
+    <div id="modal-swap" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+            <button onclick="toggleModal('modal-swap')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h3 class="text-xl font-bold mb-4">Swap Tokens</h3>
+            <p class="text-sm text-slate-500 mb-6">Exchange USDC for other assets via Uniswap.</p>
+            
+            <div class="space-y-4">
+                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <p class="text-xs font-bold text-slate-500 uppercase mb-1">Sell</p>
+                    <div class="flex justify-between items-center">
+                         <span class="font-bold text-lg text-slate-800">USDC</span>
+                         <span class="text-sm text-slate-500">Arbitrum</span>
+                    </div>
+                 </div>
+                 
+                 <div class="flex justify-center -my-2">
+                     <div class="bg-white p-1 rounded-full border border-slate-200 shadow-sm z-10">
+                         <i data-lucide="arrow-down" class="w-4 h-4 text-slate-400"></i>
+                     </div>
+                 </div>
+
+                 <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Buy</label>
+                    <select id="swap-token-select" class="w-full bg-white border border-slate-200 text-slate-800 text-sm rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                        <option value="ETH">ETH</option>
+                        <option value="WBTC">WBTC</option>
+                        <option value="ARB">ARB</option>
+                    </select>
+                </div>
+                
+                <button onclick="executeSwap()" class="w-full swap-gradient text-white py-3 rounded-xl font-bold text-lg transition-all shadow-lg hover:opacity-90 flex items-center justify-center gap-2 mt-4">
+                    Proceed to Uniswap <i data-lucide="external-link" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Bitcoin Deposit Modal (NEW) -->
     <div id="modal-btc-deposit" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative text-center">
@@ -799,6 +843,7 @@
     <script>
         // --- CONFIGURATION ---
         const FACTORY_ADDRESS = "0x7090825ed699229Fe60E59163E439737E22b67dE";
+        const RELAY_API_KEY = "YOUR_RELAY_API_KEY"; // Replace this
         // BTC Address removed from here. Now dynamic.
         
         // Minimal ABIs
@@ -1112,6 +1157,34 @@
             const url = `https://buy.moonpay.com?currencyCode=usdc_arbitrum&walletAddress=${userAddress}`;
             window.open(url, '_blank');
         }
+        
+        // --- SWAP FUNCTIONS ---
+        function openSwapModal() {
+            toggleModal('modal-swap');
+        }
+        
+        function executeSwap() {
+            const token = document.getElementById('swap-token-select').value;
+            
+            if(!userAddress) {
+                showToast("Please connect wallet first", "error");
+                return;
+            }
+            
+            // Simple linking to Uniswap on Arbitrum
+            // Input: USDC (0xaf88d065e77c8cC2239327C5EDb3A432268e5831)
+            // Output: Dynamic
+            
+            let outputToken = "ETH"; // Default
+            
+            if(token === 'WBTC') outputToken = '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f';
+            else if(token === 'ARB') outputToken = '0x912CE59144191C1204E64559FE8253a0e49E6548';
+            
+            const url = `https://app.uniswap.org/#/swap?inputCurrency=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&outputCurrency=${outputToken}&chain=arbitrum`;
+            
+            window.open(url, '_blank');
+            toggleModal('modal-swap');
+        }
 
 
         // --- WALLET CONNECTION ---
@@ -1308,9 +1381,6 @@
                 document.getElementById('eco-share-ratio').innerText = price.toFixed(4);
                 document.getElementById('eco-util-bar').style.width = `${util}%`;
                 document.getElementById('eco-util-pct').innerText = `${util.toFixed(1)}%`;
-                
-                // Load BTC info here too if address exists
-                if(userBtcAddress) fetchBitcoinData();
             } catch(err) { console.error("Eco data failed", err); }
         }
 
@@ -1389,70 +1459,6 @@
         }
 
         // --- ADMIN LOGIC ---
-        async function loadAdminData() {
-            if(!vaultContract) return;
-            try {
-                // Get Kernel Status for Upgrades
-                const currentKernel = await vaultContract.kernel();
-                const pendingKernel = await vaultContract.pendingKernel();
-                const unlockTime = await vaultContract.kernelUpdateTime();
-
-                document.getElementById('adm-curr-kernel').innerText = `${currentKernel.substring(0,6)}...${currentKernel.substring(38)}`;
-                
-                if(pendingKernel !== ethers.constants.AddressZero) {
-                    document.getElementById('adm-pending-kernel').innerText = `${pendingKernel.substring(0,6)}...${pendingKernel.substring(38)}`;
-                    
-                    const now = Math.floor(Date.now() / 1000);
-                    if(now >= unlockTime) {
-                        document.getElementById('adm-unlock-time').innerText = "Ready to Execute";
-                        document.getElementById('adm-unlock-time').className = "font-medium text-green-600";
-                        // Enable Button
-                        const btn = document.getElementById('btn-upgrade-kernel');
-                        btn.disabled = false;
-                        btn.className = "w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2";
-                        btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4"></i> 2. Execute Upgrade`;
-                    } else {
-                        const timeLeft = unlockTime - now;
-                        const hours = Math.ceil(timeLeft / 3600);
-                        document.getElementById('adm-unlock-time').innerText = `Locked (${hours}h remaining)`;
-                    }
-                } else {
-                    document.getElementById('adm-pending-kernel').innerText = "None";
-                    document.getElementById('adm-unlock-time').innerText = "--";
-                }
-                
-            } catch(err) { console.error("Admin data failed", err); }
-        }
-
-        async function executeProposeKernel() {
-            const newKernel = document.getElementById('input-new-kernel').value;
-            if(!ethers.utils.isAddress(newKernel)) return showToast("Invalid Address", "error");
-
-            try {
-                showToast("Proposing Kernel Update...");
-                const tx = await vaultContractSigner.proposeKernel(newKernel);
-                await tx.wait();
-                showToast("Proposal Submitted! (24h Lock)", "success");
-                loadAdminData();
-            } catch(err) {
-                console.error(err);
-                showToast("Proposal Failed", "error");
-            }
-        }
-
-        async function executeUpgradeKernel() {
-            try {
-                showToast("Executing Upgrade...");
-                const tx = await vaultContractSigner.upgradeKernel();
-                await tx.wait();
-                showToast("Kernel Upgraded Successfully!", "success");
-                loadAdminData();
-            } catch(err) {
-                console.error(err);
-                showToast("Execution Failed (Check Timelock)", "error");
-            }
-        }
-
         async function setSolverStatus(status) {
             const addr = document.getElementById('input-admin-solver').value;
             if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
