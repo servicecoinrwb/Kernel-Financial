@@ -250,6 +250,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                
                 <!-- Option 1: Cross-Chain Bridge -->
                 <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-1 overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-full h-2 bridge-gradient"></div>
@@ -317,6 +318,7 @@
                         <p class="text-[10px] text-center text-slate-400 mt-4">Opens MoonPay in new tab</p>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -651,8 +653,6 @@
                 <h3 class="text-xl font-bold text-slate-900 mb-6">Lending Operations</h3>
                 
                 <!-- Fund Kernel -->
-                <!-- REMOVED: Fund Kernel Button as manual push is restricted to onlyKernel. 
-                     We rely on Issue Loan (Deploy Capital) which pulls automatically. -->
                 <div class="mb-8 pb-8 border-b border-slate-100 opacity-50">
                     <h4 class="font-semibold text-slate-800 mb-2">1. Fund Kernel (Automatic)</h4>
                     <p class="text-xs text-slate-500 mb-4">Capital is automatically pulled from Vault when issuing loans. No manual action required.</p>
@@ -1306,12 +1306,15 @@
                 let util = 0;
                 if(assetsFmt > 0) util = (kernelFmt / assetsFmt) * 100;
 
+                // Calculate Idle Liquidity (Vault Balance)
+                // We use USDC balance of Vault Address for accuracy
                 const vaultBal = await usdcContract.balanceOf(vaultAddress);
                 const idleFmt = parseFloat(ethers.utils.formatUnits(vaultBal, 6));
 
                 document.getElementById('eco-tvl').innerText = formatMoney(assetsFmt);
                 document.getElementById('eco-deployed').innerText = formatMoney(kernelFmt);
                 
+                // FIX: Check if eco-idle exists before updating
                 const idleEl = document.getElementById('eco-idle');
                 if(idleEl) idleEl.innerText = formatMoney(idleFmt);
                 
@@ -1319,8 +1322,6 @@
                 document.getElementById('eco-share-ratio').innerText = price.toFixed(4);
                 document.getElementById('eco-util-bar').style.width = `${util}%`;
                 document.getElementById('eco-util-pct').innerText = `${util.toFixed(1)}%`;
-                
-                if(userBtcAddress) fetchBitcoinData();
             } catch(err) { console.error("Eco data failed", err); }
         }
 
@@ -1332,6 +1333,7 @@
                 const prinFmt = ethers.utils.formatUnits(principal, 6);
                 document.getElementById('my-principal').innerText = formatMoney(prinFmt);
 
+                // Fetch Available Liquidity from Kernel USDC Balance
                 const kernelBal = await usdcContract.balanceOf(kernelAddress);
                 const kernelBalFmt = ethers.utils.formatUnits(kernelBal, 6);
                 document.getElementById('solver-available-liquidity').innerText = formatMoney(kernelBalFmt);
@@ -1342,46 +1344,66 @@
         function calculateRepayment() {
             const input = document.getElementById('input-repay-principal').value;
             const amount = parseFloat(input || 0);
+            
+            // 10% Interest Calculation
             const fee = amount * 0.10;
             const total = amount + fee;
+
             document.getElementById('calc-principal').innerText = formatMoney(amount);
             document.getElementById('calc-fee').innerText = formatMoney(fee);
             document.getElementById('calc-total').innerText = formatMoney(total);
         }
 
         async function approveUSDCForKernel() {
+            // Solvers pay from their EOA, not the Checking Account contract
             const amount = document.getElementById('input-repay-principal').value;
             if(!amount) return;
+            
+            // Approval must cover Principal + 10% Fee
             const total = parseFloat(amount) * 1.10;
             const totalWei = ethers.utils.parseUnits(total.toFixed(6), 6);
+
             try {
                 showToast("Approving USDC...");
                 const tx = await usdcContract.approve(kernelAddress, totalWei);
                 await tx.wait();
-                showToast("Approved!", "success");
-            } catch(err) { console.error(err); showToast("Approval failed", "error"); }
+                showToast("Approved! You can now repay.", "success");
+            } catch(err) {
+                console.error(err);
+                showToast("Approval failed", "error");
+            }
         }
 
         async function executeRepay() {
             const amount = document.getElementById('input-repay-principal').value;
             if(!amount) return;
+
             const principalWei = ethers.utils.parseUnits(amount, 6);
+            
+            // Calculate Fee Wei (10%)
+            // We use JS math here for demo, but ideal to use BigNumber math
             const feeWei = principalWei.div(10); 
+
             try {
                 showToast("Repaying Loan...");
+                // EOA calls Kernel directly
                 const tx = await kernelContractSigner.repayLoan(principalWei, feeWei);
                 await tx.wait();
-                showToast("Loan Repaid!", "success");
-                loadSolverData();
+                showToast("Loan Repaid Successfully!", "success");
+                loadSolverData(); // Refresh UI
                 document.getElementById('input-repay-principal').value = "";
                 calculateRepayment();
-            } catch(err) { console.error(err); showToast("Repayment failed", "error"); }
+            } catch(err) {
+                console.error(err);
+                showToast("Repayment failed", "error");
+            }
         }
 
         // --- ADMIN LOGIC ---
         async function loadAdminData() {
             if(!vaultContract) return;
             try {
+                // Get Kernel Status for Upgrades
                 const currentKernel = await vaultContract.kernel();
                 const pendingKernel = await vaultContract.pendingKernel();
                 const unlockTime = await vaultContract.kernelUpdateTime();
@@ -1390,10 +1412,12 @@
                 
                 if(pendingKernel !== ethers.constants.AddressZero) {
                     document.getElementById('adm-pending-kernel').innerText = `${pendingKernel.substring(0,6)}...${pendingKernel.substring(38)}`;
+                    
                     const now = Math.floor(Date.now() / 1000);
                     if(now >= unlockTime) {
                         document.getElementById('adm-unlock-time').innerText = "Ready to Execute";
                         document.getElementById('adm-unlock-time').className = "font-medium text-green-600";
+                        // Enable Button
                         const btn = document.getElementById('btn-upgrade-kernel');
                         btn.disabled = false;
                         btn.className = "w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2";
@@ -1407,19 +1431,24 @@
                     document.getElementById('adm-pending-kernel').innerText = "None";
                     document.getElementById('adm-unlock-time').innerText = "--";
                 }
+                
             } catch(err) { console.error("Admin data failed", err); }
         }
 
         async function executeProposeKernel() {
             const newKernel = document.getElementById('input-new-kernel').value;
             if(!ethers.utils.isAddress(newKernel)) return showToast("Invalid Address", "error");
+
             try {
                 showToast("Proposing Kernel Update...");
                 const tx = await vaultContractSigner.proposeKernel(newKernel);
                 await tx.wait();
                 showToast("Proposal Submitted! (24h Lock)", "success");
                 loadAdminData();
-            } catch(err) { console.error(err); showToast("Proposal Failed", "error"); }
+            } catch(err) {
+                console.error(err);
+                showToast("Proposal Failed", "error");
+            }
         }
 
         async function executeUpgradeKernel() {
@@ -1429,108 +1458,163 @@
                 await tx.wait();
                 showToast("Kernel Upgraded Successfully!", "success");
                 loadAdminData();
-            } catch(err) { console.error(err); showToast("Execution Failed (Check Timelock)", "error"); }
+            } catch(err) {
+                console.error(err);
+                showToast("Execution Failed (Check Timelock)", "error");
+            }
         }
 
         async function setSolverStatus(status) {
             const addr = document.getElementById('input-admin-solver').value;
             if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
+
             try {
                 showToast(status ? "Whitelisting Solver..." : "Revoking Solver...");
                 const tx = await kernelContractSigner.setSolver(addr, status);
                 await tx.wait();
                 showToast("Solver Status Updated!", "success");
-            } catch(err) { console.error(err); showToast("Admin Action Failed", "error"); }
+            } catch(err) {
+                console.error(err);
+                showToast("Admin Action Failed", "error");
+            }
         }
 
         async function setInvestorStatus(status) {
             const addr = document.getElementById('input-admin-investor').value;
             if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
+
             try {
                 showToast(status ? "Whitelisting Investor..." : "Revoking Investor...");
                 const tx = await vaultContractSigner.setInvestorStatus(addr, status);
                 await tx.wait();
                 showToast("Investor Status Updated!", "success");
-            } catch(err) { console.error(err); showToast("Admin Action Failed", "error"); }
+            } catch(err) {
+                console.error(err);
+                showToast("Admin Action Failed", "error");
+            }
         }
 
         async function executePushCapital() {
             const amount = document.getElementById('input-push-amount').value;
             if (!amount) return;
+
+            // Permission Check
             try {
+                const owner = await vaultContract.owner();
+                if(owner.toLowerCase() !== userAddress.toLowerCase()) {
+                    return showToast("Admin Access Required", "error");
+                }
+            } catch(e) { console.error("Owner check failed", e); }
+
+            try {
+                // Balance Check
                 const vaultBal = await usdcContract.balanceOf(vaultAddress);
                 const pushWei = ethers.utils.parseUnits(amount, 6);
+
                 if (pushWei.gt(vaultBal)) {
                     const balFmt = ethers.utils.formatUnits(vaultBal, 6);
                     showToast(`Insufficient Idle Funds (Max: $${formatMoney(balFmt)})`, "error");
                     return;
                 }
+
                 showToast("Pushing Capital to Kernel...");
+                
+                // Add Gas Limit
                 const overrides = { gasLimit: 2500000 };
-                // NOTE: Contract has onlyKernelOrOwner, so Admin EOA works
                 const tx = await vaultContractSigner.pushCapitalToKernel(pushWei, overrides);
                 await tx.wait();
                 showToast("Capital Pushed Successfully!", "success");
+                // Clear input
                 document.getElementById('input-push-amount').value = "";
-                loadEcosystemData();
-            } catch(err) { console.error(err); showToast("Push Failed", "error"); }
+                loadEcosystemData(); // refresh TVL stats
+            } catch(err) {
+                console.error(err);
+                showToast("Push Failed", "error");
+            }
         }
 
         async function executeDeployCapital() {
             const solver = document.getElementById('input-loan-solver').value;
             const amount = document.getElementById('input-loan-amount').value;
             const ref = document.getElementById('input-loan-ref').value || "LOAN-" + Date.now();
+
             if(!ethers.utils.isAddress(solver)) return showToast("Invalid Solver Address", "error");
             if(!amount) return;
 
+            // Permission Check
             try {
+                const owner = await kernelContract.owner();
+                if(owner.toLowerCase() !== userAddress.toLowerCase()) {
+                    return showToast("Admin Access Required", "error");
+                }
+            } catch(e) { console.error("Owner check failed", e); }
+
+            try {
+                // Liquidity Check
                 const kernelBal = await usdcContract.balanceOf(kernelAddress);
                 const loanWei = ethers.utils.parseUnits(amount, 6);
+
                 if (loanWei.gt(kernelBal)) {
                     const balFmt = ethers.utils.formatUnits(kernelBal, 6);
                     showToast(`Insufficient Kernel Liquidity (Max: $${formatMoney(balFmt)})`, "error");
                     return;
                 }
+
                 showToast("Deploying Capital...");
+                
                 const overrides = { gasLimit: 2500000 };
                 const tx = await kernelContractSigner.deployCapital(solver, loanWei, ref, overrides);
                 await tx.wait();
+                
                 showToast("Capital Deployed Successfully!", "success");
+                // Clear inputs
                 document.getElementById('input-loan-amount').value = "";
-                loadEcosystemData(); 
-            } catch(err) { console.error(err); showToast("Deployment Failed", "error"); }
+                document.getElementById('input-loan-ref').value = "";
+                loadEcosystemData(); // refresh stats
+            } catch(err) {
+                console.error(err);
+                showToast("Deployment Failed", "error");
+            }
         }
 
         async function checkSolver() {
             const addr = document.getElementById('input-solver-addr').value;
             if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
+
             try {
                 const isWhitelisted = await kernelContract.whitelistedSolvers(addr);
                 const principal = await kernelContract.activePrincipal(addr);
+                
                 const panel = document.getElementById('solver-result');
                 const statusText = document.getElementById('solver-status-text');
                 const statusIcon = document.getElementById('solver-status-icon');
                 const prinText = document.getElementById('solver-principal');
                 document.getElementById('solver-addr-display').innerText = addr;
+
                 panel.classList.remove('hidden');
+
                 if(isWhitelisted) {
                     statusText.innerText = "Whitelisted";
-                    statusText.classList.remove('text-red-600'); statusText.classList.add('text-green-600');
+                    statusText.classList.remove('text-red-600');
+                    statusText.classList.add('text-green-600');
                     statusIcon.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>`;
                     statusIcon.className = "w-8 h-8 rounded-full bg-green-100 flex items-center justify-center";
                 } else {
                     statusText.innerText = "Not Whitelisted";
-                    statusText.classList.add('text-red-600'); statusText.classList.remove('text-green-600');
+                    statusText.classList.add('text-red-600');
+                    statusText.classList.remove('text-green-600');
                     statusIcon.innerHTML = `<i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>`;
                     statusIcon.className = "w-8 h-8 rounded-full bg-red-100 flex items-center justify-center";
                 }
+
                 const prinFmt = ethers.utils.formatUnits(principal, 6);
                 prinText.innerText = `$${formatMoney(prinFmt)}`;
                 lucide.createIcons();
             } catch(err) { console.error(err); showToast("Check failed", "error"); }
         }
 
-        // --- SHARED UTILS ---
+        // --- SHARED ACTIONS (TOPUP/TRANSFER/ETC) ---
+        // (Existing functions kept as is)
         function fillMax(inputId, type) {
             const input = document.getElementById(inputId);
             if (!input) return;
@@ -1540,7 +1624,7 @@
                 else input.value = currentSavingsBal;
             }
         }
-        
+
         async function executeTopUp() {
             const amount = document.getElementById('input-topup').value;
             if (!amount) return;
@@ -1556,12 +1640,18 @@
         }
 
         function openTransferModal() { toggleModal('modal-transfer'); }
+
         async function executeTransfer() {
             const to = document.getElementById('input-transfer-to').value;
             const amount = document.getElementById('input-transfer-amount').value;
             if (!to || !amount) return;
-            if (parseFloat(amount) > parseFloat(currentCheckingBal)) { showToast("Insufficient Balance", "error"); return; }
+            // Pre-flight Check
+            if (parseFloat(amount) > parseFloat(currentCheckingBal)) {
+                showToast("Insufficient Balance", "error");
+                return;
+            }
             try {
+                // Add Gas Limit
                 const wei = ethers.utils.parseUnits(amount, 6);
                 const tx = await accountContract.pay(to, wei, { gasLimit: 250000 });
                 toggleModal('modal-transfer');
@@ -1578,6 +1668,7 @@
             const title = document.getElementById('savings-title');
             const desc = document.getElementById('savings-desc');
             document.getElementById('input-savings-amount').value = "";
+            
             if (type === 'deposit') {
                 title.innerText = "Invest in Vault"; desc.innerText = "Move USDC from Checking to Savings.";
                 btn.innerText = "Confirm Deposit"; btn.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-medium transition-colors";
@@ -1591,19 +1682,35 @@
         async function executeSavingsAction() {
             const amount = document.getElementById('input-savings-amount').value;
             if (!amount) return;
+            
+            // Pre-flight Check
             if (currentSavingsAction === 'deposit') {
-                if (parseFloat(amount) > parseFloat(currentCheckingBal)) { showToast("Insufficient Checking Balance", "error"); return; }
+                if (parseFloat(amount) > parseFloat(currentCheckingBal)) {
+                    showToast("Insufficient Checking Balance", "error");
+                    return;
+                }
             } else {
-                if (parseFloat(amount) > parseFloat(currentSavingsBal)) { showToast("Insufficient Savings Balance", "error"); return; }
+                if (parseFloat(amount) > parseFloat(currentSavingsBal)) {
+                    showToast("Insufficient Savings Balance", "error");
+                    return;
+                }
             }
+
             try {
                 let tx;
                 toggleModal('modal-savings');
                 showToast("Interacting with Vault...");
+                
+                // Add Manual Gas Limit to Prevent Estimation Crashes
                 const overrides = { gasLimit: 2500000 };
+
+                // Whitelist Check before Transaction
                 if(currentSavingsAction === 'deposit') {
                     const isWhitelisted = await vaultContract.isWhitelisted(accountAddress);
-                    if(!isWhitelisted) { showToast("Account not whitelisted by Admin!", "error"); return; }
+                    if(!isWhitelisted) {
+                        showToast("Account not whitelisted by Admin!", "error");
+                        return;
+                    }
                     const wei = ethers.utils.parseUnits(amount, 6);
                     tx = await accountContract.depositToSavings(wei, 0, overrides); 
                 } else {
@@ -1630,13 +1737,16 @@
             } catch (err) { console.error(err); showToast("Update failed", "error"); }
         }
 
+        // --- UTILS ---
         function toggleModal(id) {
             const el = document.getElementById(id);
             if (el.classList.contains('hidden')) el.classList.remove('hidden');
             else el.classList.add('hidden');
         }
 
-        function formatMoney(amount) { return parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function formatMoney(amount) {
+            return parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
 
         function setBtnLoading(id, isLoading) {
             const btn = document.getElementById(id);
