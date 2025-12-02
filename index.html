@@ -653,6 +653,8 @@
                 <h3 class="text-xl font-bold text-slate-900 mb-6">Lending Operations</h3>
                 
                 <!-- Fund Kernel -->
+                <!-- REMOVED: Fund Kernel Button as manual push is restricted to onlyKernel. 
+                     We rely on Issue Loan (Deploy Capital) which pulls automatically. -->
                 <div class="mb-8 pb-8 border-b border-slate-100 opacity-50">
                     <h4 class="font-semibold text-slate-800 mb-2">1. Fund Kernel (Automatic)</h4>
                     <p class="text-xs text-slate-500 mb-4">Capital is automatically pulled from Vault when issuing loans. No manual action required.</p>
@@ -1284,9 +1286,13 @@
                             <div><p class="font-semibold text-slate-800">${title}</p><p class="text-xs text-slate-500">${desc}</p></div></div>
                             <div class="text-right"><p class="font-bold text-slate-900">${evt.type==='withdraw'?'+':'-'}$${formatMoney(evt.amount)}</p><a href="https://etherscan.io/tx/${evt.hash}" target="_blank" class="text-xs text-blue-500 hover:underline">View Tx</a></div></div>`;
                     }).join('');
-                    lucide.createIcons();
                 }
-            } catch (err) { console.error("Error loading activity", err); } finally { loader.classList.add('hidden'); }
+                lucide.createIcons();
+                
+            } catch (error) {
+                console.error("Error loading activity", err);
+                if (loader) loader.classList.add('hidden');
+            }
         }
 
         // --- ECOSYSTEM ---
@@ -1334,8 +1340,9 @@
                 document.getElementById('my-principal').innerText = formatMoney(prinFmt);
 
                 // Fetch Available Liquidity from Kernel USDC Balance
-                const kernelBal = await usdcContract.balanceOf(kernelAddress);
-                const kernelBalFmt = ethers.utils.formatUnits(kernelBal, 6);
+                // FIX: Get Vault Balance instead of Kernel Balance as liquidity
+                const vaultBal = await usdcContract.balanceOf(vaultAddress);
+                const kernelBalFmt = ethers.utils.formatUnits(vaultBal, 6);
                 document.getElementById('solver-available-liquidity').innerText = formatMoney(kernelBalFmt);
 
             } catch(err) { console.error("Solver data failed", err); }
@@ -1494,44 +1501,7 @@
             }
         }
 
-        async function executePushCapital() {
-            const amount = document.getElementById('input-push-amount').value;
-            if (!amount) return;
-
-            // Permission Check
-            try {
-                const owner = await vaultContract.owner();
-                if(owner.toLowerCase() !== userAddress.toLowerCase()) {
-                    return showToast("Admin Access Required", "error");
-                }
-            } catch(e) { console.error("Owner check failed", e); }
-
-            try {
-                // Balance Check
-                const vaultBal = await usdcContract.balanceOf(vaultAddress);
-                const pushWei = ethers.utils.parseUnits(amount, 6);
-
-                if (pushWei.gt(vaultBal)) {
-                    const balFmt = ethers.utils.formatUnits(vaultBal, 6);
-                    showToast(`Insufficient Idle Funds (Max: $${formatMoney(balFmt)})`, "error");
-                    return;
-                }
-
-                showToast("Pushing Capital to Kernel...");
-                
-                // Add Gas Limit
-                const overrides = { gasLimit: 2500000 };
-                const tx = await vaultContractSigner.pushCapitalToKernel(pushWei, overrides);
-                await tx.wait();
-                showToast("Capital Pushed Successfully!", "success");
-                // Clear input
-                document.getElementById('input-push-amount').value = "";
-                loadEcosystemData(); // refresh TVL stats
-            } catch(err) {
-                console.error(err);
-                showToast("Push Failed", "error");
-            }
-        }
+        // MANUAL PUSH REMOVED - Only allowing Automatic via Deploy
 
         async function executeDeployCapital() {
             const solver = document.getElementById('input-loan-solver').value;
@@ -1550,13 +1520,13 @@
             } catch(e) { console.error("Owner check failed", e); }
 
             try {
-                // Liquidity Check
-                const kernelBal = await usdcContract.balanceOf(kernelAddress);
+                // FIX: Liquidity Check uses VAULT balance, not Kernel
+                const vaultBal = await usdcContract.balanceOf(vaultAddress);
                 const loanWei = ethers.utils.parseUnits(amount, 6);
 
-                if (loanWei.gt(kernelBal)) {
-                    const balFmt = ethers.utils.formatUnits(kernelBal, 6);
-                    showToast(`Insufficient Kernel Liquidity (Max: $${formatMoney(balFmt)})`, "error");
+                if (loanWei.gt(vaultBal)) {
+                    const balFmt = ethers.utils.formatUnits(vaultBal, 6);
+                    showToast(`Insufficient Vault Liquidity (Max: $${formatMoney(balFmt)})`, "error");
                     return;
                 }
 
