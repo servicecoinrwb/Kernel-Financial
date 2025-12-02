@@ -1,154 +1,210 @@
-NeoBank Protocol 🏦
+# NeoBank Protocol 🏦  
+_The Future of Personal Finance On-Chain_
 
-The Future of Personal Finance on-chain.
+NeoBank is a decentralized, self-custodial banking platform that bridges the gap between:
 
-NeoBank is a decentralized, self-custodial banking platform that bridges the gap between personal smart contract wallets, institutional DeFi lending, and native Bitcoin cold storage. It provides a unified interface for managing Checking, Savings (Yield Vaults), and Treasury assets.
+- Personal smart contract wallets  
+- Institutional DeFi lending  
+- Native Bitcoin cold storage  
 
-🌟 Key Features
+It provides a unified interface for managing **Checking**, **Savings (Yield Vaults)**, and **Treasury** assets.
 
-👤 Personal Banking
+---
 
-Smart Checking Accounts: Every user deploys their own CheckingAccount smart contract via a Factory.
+## 📚 Table of Contents
 
-Self-Custody: You own the keys. You own the contract.
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+  - [Personal Banking](#-personal-banking)
+  - [Investment & Lending (The Core)](#-investment--lending-the-core)
+  - [Native Bitcoin Vault](#-native-bitcoin-vault)
+  - [Interoperability](#-interoperability)
+  - [Governance & Security](#-governance--security)
+- [Architecture](#-architecture)
+  - [Smart Contracts](#smart-contracts)
+  - [Frontend Stack](#frontend-stack)
+- [Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+- [User Guide](#-user-guide)
+  - [1. Dashboard (My Account)](#1-dashboard-my-account)
+  - [2. Bitcoin Tab](#2-bitcoin-tab)
+  - [3. Ecosystem Tab](#3-ecosystem-tab)
+  - [4. Admin Tab Owner-Only](#4-admin-tab-owner-only)
+- [Security & Disclaimer](#%EF%B8%8F-security--disclaimer)
+- [License](#-license)
 
-Daily Spending Limits: Set security caps on daily outflows to protect against key compromise.
+---
 
-Yield Integration: One-click deposits into the InvestorVault to earn yield on idle USDC.
+## 🔍 Overview
 
-💰 Investment & Lending (The Core)
+NeoBank Protocol turns your on-chain wallet into a **personal bank**, with:
 
-Investor Vault: A pooled investment vehicle that mints shares representing ownership.
+- Non-custodial **Checking Accounts** (smart contract wallets)
+- Pooled **Investor Vaults** for yield and lending
+- A **Kernel System** that routes capital to whitelisted borrowers (Solvers)
+- Native **Bitcoin cold storage tracking** inside an EVM app
 
-Kernel System: The "Brain" of the protocol. It manages liquidity, enforces fee splits (DAO vs Investors), and routes capital to whitelisted Solvers.
+---
 
-Atomic Utilization: Capital is pulled from the Vault to the Kernel only when a loan is deployed, maximizing efficiency.
+## 🌟 Key Features
 
-₿ Native Bitcoin Vault
+### 👤 Personal Banking
 
-Cold Storage Tracking: Monitor native Bitcoin assets on the Bitcoin Mainnet directly from the EVM dashboard.
+- **Smart Checking Accounts**  
+  Every user deploys their own `CheckingAccount` smart contract via a `NeoBankFactory`.
 
-Live Mempool Data: Fetches real-time balances and transaction history using public APIs.
+- **Self-Custody by Design**  
+  You own the keys. You own the contract. No pooled custodial risk.
 
-Dynamic QR Codes: Generate deposit addresses for your cold storage instantly.
+- **Daily Spending Limits**  
+  Configure daily outflow caps to reduce damage in case of key compromise or malicious approvals.
 
-🌉 Interoperability
+- **Yield Integration**  
+  One-click deposit of idle USDC into the `InvestorVault` to earn yield while funds are not in use.
 
-Smart Bridging: Integrated "Deposit" tab linking to Jumper.Exchange for cross-chain transfers (Optimism, Base, Polygon -> Arbitrum).
+---
 
-Token Swaps: Quick link integration for swapping USDC/ETH/WBTC via Uniswap.
+### 💰 Investment & Lending (The Core)
 
-Fiat On-Ramp: Direct links to MoonPay for fiat-to-crypto purchases.
+- **Investor Vault**  
+  Pooled capital vault that mints **shares** representing ownership in the pool.  
+  - ERC20-style accounting  
+  - Capital base for all lending activity
 
-🛡️ Governance & Security
+- **Kernel System – “The Brain”**  
+  The Kernel manages protocol-level logic:
+  - Enforces fee splits (DAO vs. Investors)
+  - Routes capital to whitelisted **Solvers** (borrowers)
+  - Orchestrates loan deployment and repayment
 
-Timelocked Upgrades: Critical system changes (like upgrading the Kernel) require a 48-hour timelock.
+- **Atomic Utilization**  
+  Capital only leaves the `InvestorVault` and moves to the `Kernel` when a loan is actually deployed.  
+  - No idle capital parked in lending contracts  
+  - Maximizes capital efficiency and utilization
 
-Role-Based Access: Admin controls for whitelisting investors and solvers.
+---
 
-Reentrancy Protection: All monetary functions are guarded against reentrancy attacks.
+### ₿ Native Bitcoin Vault
 
-🏗 Architecture
+- **Cold Storage Tracking**  
+  Monitor **native Bitcoin balances** on the Bitcoin mainnet directly from the EVM dashboard.
 
-The system consists of a Frontend (Single-Page Application) and a set of Smart Contracts on Arbitrum.
+- **Live Mempool Data**  
+  Uses public APIs (e.g., mempool.space) to fetch:
+  - Current BTC balance
+  - Live transaction history
 
-Smart Contracts
+- **Dynamic QR Codes**  
+  Generate deposit addresses as QR codes for seamless cold-storage deposits.
 
-NeoBankFactory: The entry point. Deploys personal CheckingAccount contracts and maintains a registry of users.
+---
 
-CheckingAccount: The user's personal wallet. Holds USDC, manages daily limits, and interacts with the Vault.
+### 🌉 Interoperability
 
-InvestorVault: Holds pooled capital. Issues Shares (ERC20-like accounting) to depositors. Enforces timelocks on Kernel upgrades.
+- **Smart Bridging**  
+  Integrated “Deposit” tab linking to cross-chain routers such as **Jumper.Exchange**:  
+  - From Optimism, Base, Polygon → Arbitrum
 
-Kernel: Manages lending logic. Whitelists "Solvers" (borrowers), issues loans, and distributes repayment fees.
+- **Token Swaps**  
+  Quick-link integration to DEXes (e.g., Uniswap) for:
+  - USDC ↔ ETH  
+  - USDC ↔ WBTC  
 
-Frontend Stack
+- **Fiat On-Ramp**  
+  Direct links to providers like **MoonPay** for fiat → crypto purchases.
 
-Core: HTML5, JavaScript (ES6+)
+---
 
-Blockchain: Ethers.js (v5.7.2)
+### 🛡️ Governance & Security
 
-Styling: Tailwind CSS (CDN)
+- **Timelocked Upgrades**  
+  Critical system changes (e.g., upgrading the Kernel logic) are protected by a **48-hour timelock**.
 
-Icons: Lucide Icons
+- **Role-Based Access Control**  
+  Admin roles control:
+  - Whitelisting of investors  
+  - Whitelisting of solvers (borrowers)
 
-Data: Mempool.space API (for Bitcoin data)
+- **Reentrancy Protection**  
+  All monetary functions are guarded using industry-standard **Reentrancy Guards**.
 
-🚀 Getting Started
+---
 
-Prerequisites
+## 🏗 Architecture
 
-A Web3 Wallet (e.g., Rabby, MetaMask).
+The protocol is composed of:
 
-An EVM-compatible network (Arbitrum One recommended).
+- A **Frontend**: Single-Page Application (SPA)
+- A set of **Smart Contracts** deployed on **Arbitrum**
 
-USDC tokens for testing.
+### Smart Contracts
 
-Installation
+- **`NeoBankFactory`**  
+  - Entry point to the system  
+  - Deploys per-user `CheckingAccount` contracts  
+  - Maintains a registry of users and their accounts
+
+- **`CheckingAccount`**  
+  - User’s personal smart contract wallet  
+  - Holds USDC and potentially other supported assets  
+  - Enforces daily spending limits  
+  - Interfaces with the `InvestorVault` for savings/yield
+
+- **`InvestorVault`**  
+  - Holds pooled capital (e.g., USDC deposits)  
+  - Issues **Shares** (ERC20-like) to represent ownership  
+  - Enforces timelocks related to Kernel upgrades and configuration
+
+- **`Kernel`**  
+  - Core lending logic  
+  - Whitelists **Solvers** (approved borrowers)  
+  - Deploys loans and tracks principal & fees  
+  - Distributes repayment fees according to predefined splits
+
+---
+
+### Frontend Stack
+
+- **Core:**  
+  - HTML5  
+  - JavaScript (ES6+)
+
+- **Blockchain:**  
+  - `ethers.js` (v5.7.2)
+
+- **Styling:**  
+  - Tailwind CSS (via CDN)
+
+- **Icons:**  
+  - Lucide Icons
+
+- **Data Sources:**  
+  - `mempool.space` (or similar) APIs for Bitcoin data (balances, transactions)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+You’ll need:
+
+- A Web3-enabled wallet:  
+  - e.g., **Rabby**, **MetaMask**
+
+- Network access to:  
+  - **Arbitrum One** (recommended target network)
+
+- Some **USDC** for testing deposits and transfers.
+
+---
+
+### Installation
 
 Clone the repository:
 
-git clone [https://github.com/your-username/neobank-protocol.git](https://github.com/your-username/neobank-protocol.git)
-
-
-Open the Interface:
-Simply open index.html in any modern web browser. No build process (npm install / npm start) is required for the frontend as it uses CDN libraries for portability.
-
-Configuration
-
-To point the frontend to your own deployed contracts, edit the configuration block at the bottom of index.html:
-
-// --- CONFIGURATION ---
-const FACTORY_ADDRESS = "0xYOUR_FACTORY_ADDRESS_HERE"; 
-const RELAY_API_KEY = "YOUR_RELAY_API_KEY"; // Optional: For future Relay integration
-
-
-📖 User Guide
-
-1. Dashboard (My Account)
-
-Connect Wallet: Connect your EOA (Externally Owned Account).
-
-Create Account: If you are new, click "Deploy Smart Account" to create your on-chain Checking contract.
-
-Top Up: Send USDC from your EOA to your Checking Account.
-
-Transfer: Send payments to other addresses (subject to Daily Limits).
-
-Savings: Deposit USDC into the Vault to earn yield. You receive Shares in return.
-
-2. Bitcoin Tab
-
-Setup: Enter your public Bitcoin Address (e.g., bc1q... or 3...) to track your cold storage.
-
-Deposit: Click "Deposit" to see your QR code. Send native BTC from any exchange or wallet.
-
-History: View live incoming/outgoing BTC transactions.
-
-3. Ecosystem Tab
-
-View global protocol stats: Total Value Locked (TVL), Share Price, and Capital Utilization.
-
-Solver Inspector: Check if an address is a whitelisted borrower and view their active principal.
-
-4. Admin Tab (Owner Only)
-
-Lending Operations:
-
-Issue Loan: Deploy capital from the Vault -> Kernel -> Solver.
-
-Governance:
-
-Propose Kernel: Start the 48h timer to upgrade the system logic.
-
-Execute Upgrade: Finalize the upgrade after the timer expires.
-
-Management:
-
-Manage Solvers: Whitelist addresses allowed to borrow funds.
-
-Manage Investors: Whitelist user Checking Accounts allowed to deposit.
-
-⚠️ Disclaimer
-
-This software is provided "as is" without warranty of any kind. The smart contracts utilize advanced patterns such as Timelocks and Reentrancy Guards, but have not been audited by a third party. Use at your own risk. Ensure you verify all addresses and limits before deploying substantial capital.
+```bash
+git clone https://github.com/your-username/neobank-protocol.git
+cd neobank-protocol
