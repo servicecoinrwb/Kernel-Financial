@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeoBank | Future of Personal Finance</title>
-    <link rel="icon" href="https://imageview.mechanicaltemp.com/objects/uploads/68e58bc2-f838-4c28-a268-62e35edcc998">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -73,8 +72,11 @@
                 <button onclick="switchView('dashboard')" id="tab-dashboard" class="nav-active px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="layout-dashboard" class="w-4 h-4"></i> My Account
                 </button>
+                <button onclick="switchView('wallet')" id="tab-wallet" class="nav-inactive px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="wallet-2" class="w-4 h-4"></i> Wallet
+                </button>
                 <button onclick="switchView('deposit')" id="tab-deposit" class="nav-inactive px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="arrow-down-circle" class="w-4 h-4"></i> Deposit
+                    <i data-lucide="arrow-down-circle" class="w-4 h-4"></i> Banking
                 </button>
                 <button onclick="switchView('bitcoin')" id="tab-bitcoin" class="nav-inactive px-3 md:px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="bitcoin" class="w-4 h-4"></i> Bitcoin
@@ -141,7 +143,7 @@
             <!-- Header Info -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900">My Overview</h2>
+                    <h2 class="text-2xl font-bold text-slate-900">My Account</h2>
                     <p class="text-slate-500 text-sm">Managing Smart Account: <span id="contract-address" class="font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded ml-1 cursor-pointer" onclick="copyAddress()">0x...</span></p>
                 </div>
                 <div class="flex gap-2">
@@ -159,7 +161,7 @@
                 <!-- Checking Balance -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i data-lucide="wallet" class="w-24 h-24 text-blue-600"></i>
+                        <i data-lucide="landmark" class="w-24 h-24 text-blue-600"></i>
                     </div>
                     <div class="relative z-10">
                         <p class="text-sm font-medium text-slate-500 mb-1">Checking Balance</p>
@@ -204,7 +206,7 @@
                     </div>
                 </div>
                 
-                <!-- Security / Limits (Restored) -->
+                <!-- Security / Limits -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                         <i data-lucide="shield-check" class="w-24 h-24 text-purple-600"></i>
@@ -241,26 +243,105 @@
             </div>
         </div>
         
-        <!-- View: Deposit (Smart Linker) -->
+        <!-- View: Wallet (Personal EOA) -->
+        <div id="view-wallet" class="hidden">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900">My Wallet</h2>
+                <p class="text-slate-500">Assets held in your connected personal wallet (Self-Custody).</p>
+            </div>
+            
+            <!-- Wallet Card -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 mb-8">
+                 <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                            <i data-lucide="wallet-2" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-slate-500 mb-1">Connected Address</p>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-2xl font-bold text-slate-900 font-mono" id="wallet-addr-full">0x...</h3>
+                                <button onclick="copyUserAddress()" class="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="flex gap-3">
+                         <a href="#" id="wallet-explorer-link" target="_blank" class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-2">
+                             View on Explorer <i data-lucide="external-link" class="w-3 h-3"></i>
+                         </a>
+                     </div>
+                 </div>
+            </div>
+            
+            <!-- Assets Grid -->
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- ETH -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+                             <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=026" class="w-6 h-6" alt="ETH">
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900">Ethereum</p>
+                            <p class="text-xs text-slate-500">ETH (Gas Token)</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xl font-bold text-slate-900" id="wallet-bal-eth">0.0000</p>
+                        <p class="text-xs text-slate-400">ETH</p>
+                    </div>
+                </div>
+                
+                <!-- USDC -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                             <img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=026" class="w-6 h-6" alt="USDC">
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900">USD Coin</p>
+                            <p class="text-xs text-slate-500">USDC</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xl font-bold text-slate-900" id="wallet-bal-usdc">0.00</p>
+                        <p class="text-xs text-slate-400">USDC</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 p-6 bg-blue-50 rounded-2xl border border-blue-100">
+                <h4 class="font-bold text-blue-800 mb-2">Need to fund your account?</h4>
+                <p class="text-sm text-blue-600 mb-4">Transfer funds from this wallet to your Smart Checking Account to start earning yield and using banking features.</p>
+                <button onclick="toggleModal('modal-topup')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors text-sm">
+                    Go to Top Up
+                </button>
+            </div>
+
+        </div>
+        
+        <!-- View: Banking (Bridge/Fiat) -->
         <div id="view-deposit" class="hidden">
              <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-3xl font-bold text-slate-900">Deposit Funds</h2>
-                    <p class="text-slate-500">Bridge assets from other networks or buy with card.</p>
+                    <h2 class="text-3xl font-bold text-slate-900">Banking Services</h2>
+                    <p class="text-slate-500">On-ramp, off-ramp, and bridge assets securely.</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 
-                <!-- Option 1: Cross-Chain Bridge -->
+                <!-- Option 1: Bridge (Inbound) -->
                 <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-1 overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-full h-2 bridge-gradient"></div>
                     <div class="p-8">
                         <div class="w-12 h-12 rounded-xl bridge-gradient flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-500/30">
                             <i data-lucide="arrow-left-right" class="w-6 h-6"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Bridge from Other Chain</h3>
-                        <p class="text-sm text-slate-500 mb-6">Transfer USDC, ETH, or other tokens from Ethereum, Base, Optimism, or Polygon directly to your wallet on Arbitrum.</p>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Bridge to Arbitrum</h3>
+                        <p class="text-sm text-slate-500 mb-6">Transfer USDC from Ethereum, Base, Optimism, or Polygon.</p>
                         
                         <div class="space-y-4">
                             <div>
@@ -273,24 +354,15 @@
                                     <option value="56">BSC</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Asset to Bridge</label>
-                                <select id="link-source-token" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
-                                    <option value="USDC">USDC</option>
-                                    <option value="ETH">ETH</option>
-                                    <option value="USDT">USDT</option>
-                                </select>
-                            </div>
                             
                             <button onclick="openBridgeLink()" class="w-full bridge-gradient text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:opacity-90 flex items-center justify-center gap-2 mt-4">
                                 Bridge Now <i data-lucide="external-link" class="w-4 h-4"></i>
                             </button>
-                            <p class="text-[10px] text-center text-slate-400">Opens Jumper.Exchange in new tab</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Option 2: Fiat On-Ramp -->
+                <!-- Option 2: Buy Crypto (On-Ramp) -->
                 <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-1 overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-full h-2 bg-green-500"></div>
                     <div class="p-8">
@@ -298,25 +370,28 @@
                             <i data-lucide="credit-card" class="w-6 h-6"></i>
                         </div>
                         <h3 class="text-xl font-bold text-slate-900 mb-2">Buy with Card</h3>
-                        <p class="text-sm text-slate-500 mb-6">Don't have crypto yet? Purchase USDC directly with your credit card or bank transfer via MoonPay.</p>
+                        <p class="text-sm text-slate-500 mb-6">Purchase USDC directly with your credit card or bank transfer via MoonPay.</p>
                         
-                        <div class="bg-slate-50 p-4 rounded-xl mb-6 border border-slate-200">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-slate-500 uppercase">Receiving</span>
-                                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Arbitrum</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                                    $
-                                </div>
-                                <span class="font-bold text-slate-700">USDC</span>
-                            </div>
-                        </div>
-
-                        <button onclick="openFiatLink()" class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-8">
+                        <button onclick="openFiatLink('buy')" class="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-8">
                             Buy Crypto <i data-lucide="external-link" class="w-4 h-4"></i>
                         </button>
-                        <p class="text-[10px] text-center text-slate-400 mt-4">Opens MoonPay in new tab</p>
+                        <p class="text-[10px] text-center text-slate-400 mt-4">Powered by MoonPay</p>
+                    </div>
+                </div>
+
+                <!-- Option 3: Sell to Exchange (Off-Ramp) -->
+                <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-1 overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-blue-500"></div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center text-white mb-6 shadow-lg shadow-blue-500/30">
+                            <i data-lucide="landmark" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Send to Exchange</h3>
+                        <p class="text-sm text-slate-500 mb-6">Withdraw USDC to your Coinbase or Robinhood deposit address for instant liquidity.</p>
+                        
+                        <button onclick="openTransferModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-8">
+                            Withdraw <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -364,7 +439,7 @@
                     </div>
                     <div class="relative z-10">
                         <p class="text-orange-100 font-medium mb-2">Total Bitcoin Balance</p>
-                        <h3 class="text-5xl font-bold mb-6"><span id="bal-btc-main">0.00000000</span> <span class="text-2xl opacity-80">BTC</span></h3>
+                        <h3 class="text-5xl font-bold mb-6"><span id="bal-btc-main">...</span> <span class="text-2xl opacity-80">BTC</span></h3>
                         
                         <div class="flex flex-col sm:flex-row gap-4 mt-8">
                             <button onclick="toggleModal('modal-btc-deposit')" class="bg-white text-orange-600 px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-orange-50 transition-colors flex items-center justify-center gap-2">
@@ -484,7 +559,7 @@
                     <div class="relative z-10 flex justify-between items-center">
                         <div>
                             <p class="text-sm font-bold text-orange-800 mb-1">Cold Storage Reserves</p>
-                            <h3 class="text-3xl font-bold text-slate-900"><span id="eco-btc-treasury">0.00000000</span> BTC</h3>
+                            <h3 class="text-3xl font-bold text-slate-900"><span id="eco-btc-treasury">...</span> BTC</h3>
                             <p class="text-xs text-orange-600 font-medium mt-1">
                                 Native Bitcoin held in Multisig Custody <span id="eco-btc-addr-hint" class="text-slate-400 font-mono ml-2 font-normal opacity-70 text-[10px]"></span>
                             </p>
@@ -549,7 +624,7 @@
                     <div class="relative z-10">
                         <p class="text-sm font-medium text-slate-400 mb-1">Available Liquidity</p>
                         <h3 class="text-3xl font-bold mb-2">$<span id="solver-available-liquidity">Loading...</span></h3>
-                        <p class="text-xs text-slate-400">Funds ready for deployment</p>
+                        <p class="text-xs text-slate-400">Funds ready for deployment (Vault)</p>
                     </div>
                     <div class="absolute top-0 right-0 p-4 opacity-10">
                         <i data-lucide="droplet" class="w-24 h-24"></i>
@@ -653,18 +728,12 @@
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-xl mx-auto mb-8">
                 <h3 class="text-xl font-bold text-slate-900 mb-6">Lending Operations</h3>
                 
-                <!-- Fund Kernel -->
-                <!-- REMOVED: Fund Kernel Button as manual push is restricted to onlyKernel. 
-                     We rely on Issue Loan (Deploy Capital) which pulls automatically. -->
-                <div class="mb-8 pb-8 border-b border-slate-100 opacity-50">
-                    <h4 class="font-semibold text-slate-800 mb-2">1. Fund Kernel (Automatic)</h4>
-                    <p class="text-xs text-slate-500 mb-4">Capital is automatically pulled from Vault when issuing loans. No manual action required.</p>
-                </div>
-
+                <!-- Fund Kernel removed. Using Issue Loan instead. -->
+                
                 <!-- Issue Loan -->
                 <div>
-                    <h4 class="font-semibold text-slate-800 mb-2">2. Issue Loan (Deploy Capital)</h4>
-                    <p class="text-xs text-slate-500 mb-4">Disburse funds from Kernel to Solver.</p>
+                    <h4 class="font-semibold text-slate-800 mb-2">Issue Loan (Deploy Capital)</h4>
+                    <p class="text-xs text-slate-500 mb-4">Disburse funds from Vault -> Kernel -> Solver automatically.</p>
                     
                     <label class="block text-xs font-medium text-slate-600 mb-1">Solver Address</label>
                     <input type="text" id="input-loan-solver" placeholder="0x..." class="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -858,7 +927,8 @@
     <script>
         // --- CONFIGURATION ---
         const FACTORY_ADDRESS = "0x7090825ed699229Fe60E59163E439737E22b67dE";
-        const RELAY_API_KEY = "YOUR_RELAY_API_KEY"; 
+        const RELAY_API_KEY = "YOUR_RELAY_API_KEY"; // Replace this
+        // BTC Address removed from here. Now dynamic.
         
         // Minimal ABIs
         const FACTORY_ABI = [
@@ -891,6 +961,7 @@
             "function approve(address spender, uint256 amount) returns (bool)"
         ];
 
+        // ADDED: isWhitelisted for checks AND setInvestorStatus for admin AND pushCapitalToKernel
         const VAULT_ABI = [
             "function totalManagedAssets() view returns (uint256)",
             "function totalShares() view returns (uint256)",
@@ -906,6 +977,7 @@
             "function kernel() view returns (address)"
         ];
 
+        // ADDED: Methods for Repay Loan, Admin Whitelist, and Deploy Capital
         const KERNEL_ABI = [
             "function whitelistedSolvers(address) view returns (bool)",
             "function activePrincipal(address) view returns (uint256)",
@@ -925,6 +997,8 @@
         let currentSavingsAction = 'deposit'; 
         let currentCheckingBal = "0";
         let currentSavingsBal = "0";
+
+        // New BTC State
         let userBtcAddress = localStorage.getItem('neo_btc_address') || "";
 
         // --- INIT ---
@@ -932,7 +1006,7 @@
 
         // --- NAVIGATION ---
         function switchView(viewName) {
-            const views = ['dashboard', 'deposit', 'bitcoin', 'ecosystem', 'solver', 'admin'];
+            const views = ['dashboard', 'deposit', 'bitcoin', 'ecosystem', 'solver', 'admin', 'wallet'];
             
             views.forEach(v => {
                 const el = document.getElementById('view-' + v);
@@ -953,6 +1027,7 @@
             if(viewName === 'ecosystem') { loadEcosystemData(); }
             if(viewName === 'solver') loadSolverData();
             if(viewName === 'admin') loadAdminData();
+            if(viewName === 'wallet') loadWalletData();
         }
         
         function loadBitcoinView() {
@@ -989,6 +1064,8 @@
                 showToast("Please enter a Bitcoin address", "error");
                 return;
             }
+            
+            // Simple validation (check length/starts with)
             if (addr.length < 26 || (!addr.startsWith('1') && !addr.startsWith('3') && !addr.startsWith('bc1'))) {
                 showToast("Invalid Bitcoin address format", "error");
                 return;
@@ -1004,7 +1081,7 @@
         function disconnectBitcoin() {
             userBtcAddress = "";
             localStorage.removeItem('neo_btc_address');
-            document.getElementById('input-btc-setup').value = ""; 
+            document.getElementById('input-btc-setup').value = ""; // Clear input
             showToast("Wallet Unlinked", "info");
             loadBitcoinView();
         }
@@ -1013,31 +1090,47 @@
             document.getElementById('input-btc-setup').value = "3545zePwogymE18dEqGUqv2qbKGmqfnF1u";
         }
 
+        // --- BITCOIN DATA FETCH ---
         async function fetchBitcoinData() {
             if(!userBtcAddress) return;
             
+            // Adding visual feedback by setting text to "..." before fetching
+            const balBtcMain = document.getElementById('bal-btc-main');
+            const balBtcEco = document.getElementById('eco-btc-treasury');
+            const hintEco = document.getElementById('eco-btc-addr-hint');
+            
+            if (balBtcMain) balBtcMain.innerText = "...";
+            if (balBtcEco) balBtcEco.innerText = "...";
+
             try {
+                // Use mempool.space API to fetch address details
                 const response = await fetch(`https://mempool.space/api/address/${userBtcAddress}`);
                 if (!response.ok) throw new Error("Failed to fetch BTC data");
                 
                 const data = await response.json();
+                
+                // Calculate balance in Satoshis
                 const funded = data.chain_stats.funded_txo_sum;
                 const spent = data.chain_stats.spent_txo_sum;
                 const balanceSats = funded - spent;
+                
+                // Convert to BTC (8 decimals)
                 const balanceBTC = (balanceSats / 100000000).toFixed(8);
                 
-                const balBtcMain = document.getElementById('bal-btc-main');
-                const balBtcEco = document.getElementById('eco-btc-treasury');
-                const hintEco = document.getElementById('eco-btc-addr-hint');
+                // Update UI elements if they exist
                 
                 if (balBtcMain) balBtcMain.innerText = balanceBTC;
                 if (balBtcEco) balBtcEco.innerText = balanceBTC;
                 if (hintEco) hintEco.innerText = `(${userBtcAddress.substring(0,4)}...${userBtcAddress.substring(userBtcAddress.length-4)})`;
                 
+                // Fetch Transactions
                 fetchBitcoinTransactions();
                 
             } catch (error) {
                 console.error("Error fetching Bitcoin data:", error);
+                // Revert to 0.00000000 or show error state if fetch fails
+                if (balBtcMain) balBtcMain.innerText = "0.00000000";
+                if (balBtcEco) balBtcEco.innerText = "0.00000000";
             }
         }
         
@@ -1046,29 +1139,49 @@
             
             const listEl = document.getElementById('btc-tx-list');
             const loader = document.getElementById('btc-tx-loading');
+            
             if (!listEl) return;
             
-            if (listEl.children.length <= 1 && loader) loader.classList.remove('hidden');
+            // Show loader only if list is empty
+            if (listEl.children.length <= 1) {
+                if (loader) loader.classList.remove('hidden');
+            }
             
             try {
                 const response = await fetch(`https://mempool.space/api/address/${userBtcAddress}/txs`);
                 if (!response.ok) throw new Error("Failed to fetch BTC txs");
                 
                 const txs = await response.json();
+                
                 if (loader) loader.classList.add('hidden');
                 
                 if (txs.length === 0) {
-                     listEl.innerHTML = `<div class="flex items-center justify-center text-slate-400 py-8 flex-col gap-2 opacity-50"><i data-lucide="history" class="w-8 h-8"></i><p>No transactions found.</p></div>`;
+                     listEl.innerHTML = `
+                        <div class="flex items-center justify-center text-slate-400 py-8 flex-col gap-2 opacity-50">
+                            <i data-lucide="history" class="w-8 h-8"></i>
+                            <p>No transactions found.</p>
+                        </div>`;
                 } else {
                      listEl.innerHTML = txs.slice(0, 10).map(tx => {
+                        // Determine if incoming or outgoing for our address
                         let isIncoming = false;
                         let amountSats = 0;
                         
+                        // Check outputs for our address (Incoming)
                         for (const out of tx.vout) {
                             if (out.scriptpubkey_address === userBtcAddress) {
                                 isIncoming = true;
                                 amountSats += out.value;
                             }
+                        }
+                        
+                        // If not incoming, calculate outgoing (sum of inputs from us - change back to us)
+                        if (!isIncoming) {
+                             // Simplified for display: show total output value sent to others
+                             // In a real wallet we'd parse inputs precisely. 
+                             // Here we default to total output minus change (if any)
+                             // For simplicity in this view, let's just show total transacted value involved if complexity is high
+                             // Or fallback to 0 if not simple receive.
                         }
                         
                         const amountBTC = (amountSats / 100000000).toFixed(8);
@@ -1079,7 +1192,23 @@
                         let colorClass = isIncoming ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600';
                         let title = isIncoming ? 'Received BTC' : 'Sent BTC';
                         
-                        return `<div class="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center"><i data-lucide="${icon}" class="w-5 h-5"></i></div><div><p class="font-semibold text-slate-800">${title}</p><p class="text-xs text-slate-500">${time} • <a href="https://mempool.space/tx/${tx.txid}" target="_blank" class="text-blue-500 hover:underline">${txIdShort}</a></p></div></div><div class="text-right"><p class="font-bold text-slate-900">${isIncoming ? '+' : '-'}${amountBTC} BTC</p><p class="text-xs text-slate-400">${tx.status.confirmed ? 'Confirmed' : 'Unconfirmed'}</p></div></div>`;
+                        return `
+                        <div class="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center">
+                                    <i data-lucide="${icon}" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-slate-800">${title}</p>
+                                    <p class="text-xs text-slate-500">${time} • <a href="https://mempool.space/tx/${tx.txid}" target="_blank" class="text-blue-500 hover:underline">${txIdShort}</a></p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-slate-900">${isIncoming ? '+' : '-'}${amountBTC} BTC</p>
+                                <p class="text-xs text-slate-400">${tx.status.confirmed ? 'Confirmed' : 'Unconfirmed'}</p>
+                            </div>
+                        </div>
+                        `;
                     }).join('');
                 }
                 lucide.createIcons();
@@ -1088,6 +1217,557 @@
                 console.error("Error fetching BTC txs:", error);
                 if (loader) loader.classList.add('hidden');
             }
+        }
+        
+        // --- SMART LINKING (DEPOSIT) ---
+        function openBridgeLink() {
+            const chainId = document.getElementById('link-source-chain').value;
+            const token = document.getElementById('link-source-token').value;
+            
+            if(!userAddress) {
+                showToast("Please connect wallet first", "error");
+                return;
+            }
+            
+            // Construct Jumper URL
+            // Destination: Arbitrum (42161), USDC
+            // Recipient: Connected Wallet (userAddress)
+            // To Token Address (USDC on Arb): 0xaf88d065e77c8cC2239327C5EDb3A432268e5831
+            
+            const url = `https://jumper.exchange/?fromChain=${chainId}&fromToken=${token}&toChain=42161&toToken=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&toAddress=${userAddress}`;
+            
+            window.open(url, '_blank');
+        }
+        
+        function openFiatLink() {
+             if(!userAddress) {
+                showToast("Please connect wallet first", "error");
+                return;
+            }
+            // MoonPay Link with wallet pre-filled
+            const url = `https://buy.moonpay.com?currencyCode=usdc_arbitrum&walletAddress=${userAddress}`;
+            window.open(url, '_blank');
+        }
+        
+        // --- SWAP FUNCTIONS ---
+        function openSwapModal() {
+            toggleModal('modal-swap');
+        }
+        
+        function executeSwap() {
+            const token = document.getElementById('swap-token-select').value;
+            
+            if(!userAddress) {
+                showToast("Please connect wallet first", "error");
+                return;
+            }
+            
+            // Simple linking to Uniswap on Arbitrum
+            // Input: USDC (0xaf88d065e77c8cC2239327C5EDb3A432268e5831)
+            // Output: Dynamic
+            
+            let outputToken = "ETH"; // Default
+            
+            if(token === 'WBTC') outputToken = '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f';
+            else if(token === 'ARB') outputToken = '0x912CE59144191C1204E64559FE8253a0e49E6548';
+            
+            const url = `https://app.uniswap.org/#/swap?inputCurrency=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&outputCurrency=${outputToken}&chain=arbitrum`;
+            
+            window.open(url, '_blank');
+            toggleModal('modal-swap');
+        }
+
+
+        // --- WALLET CONNECTION ---
+        async function connectWallet() {
+            if (!window.ethereum) return showToast("Metamask not found!", "error");
+            try {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                
+                document.getElementById('connect-btn').classList.add('hidden');
+                document.getElementById('wallet-info').classList.remove('hidden');
+                document.getElementById('user-address').innerText = `${userAddress.substring(0,6)}...${userAddress.substring(38)}`;
+                
+                initContracts();
+            } catch (err) {
+                console.error(err);
+                showToast("Connection failed", "error");
+            }
+        }
+
+        async function initContracts() {
+            factoryContract = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, signer);
+            try {
+                // Fetch Global Addrs
+                vaultAddress = await factoryContract.INVESTOR_VAULT();
+                kernelAddress = await factoryContract.KERNEL();
+
+                vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
+                vaultContractSigner = new ethers.Contract(vaultAddress, VAULT_ABI, signer); // Write capability for Admin
+                kernelContract = new ethers.Contract(kernelAddress, KERNEL_ABI, provider); // Read-only
+                kernelContractSigner = new ethers.Contract(kernelAddress, KERNEL_ABI, signer); // Write
+
+                // Check for User Account
+                const acct = await factoryContract.getAccount(userAddress);
+                if (acct !== ethers.constants.AddressZero) {
+                    accountAddress = acct;
+                    loadDashboard();
+                    document.getElementById('nav-tabs').classList.remove('hidden');
+                } else {
+                    document.getElementById('view-landing').classList.add('hidden');
+                    document.getElementById('view-create').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Error initializing", "error");
+            }
+        }
+
+        // --- CREATE ACCOUNT ---
+        async function createAccount() {
+            try {
+                setBtnLoading('create-btn', true);
+                const tx = await factoryContract.createAccount();
+                showToast("Deploying Account... Please wait.");
+                await tx.wait();
+                const acct = await factoryContract.getAccount(userAddress);
+                accountAddress = acct;
+                setBtnLoading('create-btn', false);
+                document.getElementById('view-create').classList.add('hidden');
+                document.getElementById('nav-tabs').classList.remove('hidden');
+                loadDashboard();
+                showToast("Account Deployed Successfully!", "success");
+            } catch (err) {
+                console.error(err);
+                setBtnLoading('create-btn', false);
+                showToast("Deployment failed", "error");
+            }
+        }
+
+        // --- DASHBOARD ---
+        async function loadDashboard() {
+            document.getElementById('view-landing').classList.add('hidden');
+            document.getElementById('view-create').classList.add('hidden');
+            switchView('dashboard');
+            document.getElementById('contract-address').innerText = `${accountAddress.substring(0,6)}...${accountAddress.substring(38)}`;
+            
+            accountContract = new ethers.Contract(accountAddress, ACCOUNT_ABI, signer);
+            const usdcAddr = await accountContract.usdc();
+            usdcContract = new ethers.Contract(usdcAddr, ERC20_ABI, signer);
+
+            refreshData();
+            loadActivityFeed();
+        }
+
+        async function refreshData() {
+            if (!accountContract) return;
+            try {
+                const checkingBalBN = await accountContract.getCheckingBalance();
+                const savingsBalBN = await accountContract.getSavingsBalance();
+                const limitBN = await accountContract.dailyLimit();
+                const spentBN = await accountContract.spentToday();
+
+                const checkingFmt = ethers.utils.formatUnits(checkingBalBN, 6);
+                const savingsFmt = ethers.utils.formatUnits(savingsBalBN, 6); 
+                currentCheckingBal = checkingFmt;
+                currentSavingsBal = savingsFmt;
+
+                const limitFmt = ethers.utils.formatUnits(limitBN, 6);
+                const spentFmt = ethers.utils.formatUnits(spentBN, 6);
+
+                document.getElementById('bal-checking').innerText = formatMoney(checkingFmt);
+                document.getElementById('bal-savings').innerText = formatMoney(savingsFmt);
+                
+                if (parseFloat(limitFmt) === 0) {
+                    document.getElementById('limit-daily').innerText = "Unlimited";
+                    document.getElementById('limit-bar').style.width = "0%";
+                } else {
+                    document.getElementById('limit-daily').innerText = formatMoney(limitFmt);
+                    document.getElementById('limit-spent').innerText = formatMoney(spentFmt);
+                    const pct = Math.min((parseFloat(spentFmt) / parseFloat(limitFmt)) * 100, 100);
+                    document.getElementById('limit-bar').style.width = `${pct}%`;
+                    if(pct > 90) document.getElementById('limit-bar').classList.add('bg-red-500');
+                    else document.getElementById('limit-bar').classList.remove('bg-red-500');
+                }
+                loadActivityFeed();
+            } catch (err) { console.error("Refresh failed", err); }
+        }
+
+        async function loadActivityFeed() {
+            const listEl = document.getElementById('activity-list');
+            const loader = document.getElementById('activity-loading');
+            if(listEl.children.length <= 1) loader.classList.remove('hidden');
+
+            try {
+                const paymentFilter = accountContract.filters.PaymentSent();
+                const depositFilter = accountContract.filters.DepositedToSavings();
+                const withdrawFilter = accountContract.filters.WithdrawnFromSavings();
+
+                const [pEvts, dEvts, wEvts] = await Promise.all([
+                    accountContract.queryFilter(paymentFilter),
+                    accountContract.queryFilter(depositFilter),
+                    accountContract.queryFilter(withdrawFilter)
+                ]);
+
+                const allEvents = [
+                    ...pEvts.map(e => ({ type: 'payment', block: e.blockNumber, hash: e.transactionHash, amount: ethers.utils.formatUnits(e.args.amount, 6), to: e.args.to })),
+                    ...dEvts.map(e => ({ type: 'deposit', block: e.blockNumber, hash: e.transactionHash, amount: ethers.utils.formatUnits(e.args.amount, 6) })),
+                    ...wEvts.map(e => ({ type: 'withdraw', block: e.blockNumber, hash: e.transactionHash, amount: ethers.utils.formatUnits(e.args.assetsReceived, 6) }))
+                ];
+
+                allEvents.sort((a, b) => b.block - a.block);
+
+                if (allEvents.length === 0) {
+                     listEl.innerHTML = `<div class="flex items-center justify-center text-slate-400 py-8 flex-col gap-2 opacity-50"><i data-lucide="activity" class="w-8 h-8"></i><p>No transactions yet</p></div>`;
+                } else {
+                    listEl.innerHTML = allEvents.map(evt => {
+                        let icon, title, desc, colorClass;
+                        if (evt.type === 'payment') { icon='arrow-up-right'; colorClass='bg-slate-100 text-slate-600'; title='Transfer Sent'; desc=`To: ${evt.to.substring(0,6)}...`; }
+                        else if (evt.type === 'deposit') { icon='piggy-bank'; colorClass='bg-emerald-100 text-emerald-600'; title='Invested in Vault'; desc='Moved to Savings'; }
+                        else { icon='arrow-down-left'; colorClass='bg-blue-100 text-blue-600'; title='Withdrawn from Vault'; desc='Moved to Checking'; }
+                        
+                        return `<div class="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
+                            <div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center"><i data-lucide="${icon}" class="w-5 h-5"></i></div>
+                            <div><p class="font-semibold text-slate-800">${title}</p><p class="text-xs text-slate-500">${desc}</p></div></div>
+                            <div class="text-right"><p class="font-bold text-slate-900">${evt.type==='withdraw'?'+':'-'}$${formatMoney(evt.amount)}</p><a href="https://etherscan.io/tx/${evt.hash}" target="_blank" class="text-xs text-blue-500 hover:underline">View Tx</a></div></div>`;
+                    }).join('');
+                }
+                lucide.createIcons();
+                
+            } catch (error) {
+                console.error("Error loading activity", err);
+                if (loader) loader.classList.add('hidden');
+            }
+        }
+
+        // --- ECOSYSTEM ---
+        async function loadEcosystemData() {
+            if(!vaultContract) return;
+            try {
+                const totalAssets = await vaultContract.totalManagedAssets();
+                const totalShares = await vaultContract.totalShares();
+                const capitalInKernel = await vaultContract.capitalInKernel();
+
+                const assetsFmt = parseFloat(ethers.utils.formatUnits(totalAssets, 6));
+                const sharesFmt = parseFloat(ethers.utils.formatUnits(totalShares, 6));
+                let price = 1.0;
+                if(sharesFmt > 0) price = assetsFmt / sharesFmt;
+
+                const kernelFmt = parseFloat(ethers.utils.formatUnits(capitalInKernel, 6));
+                let util = 0;
+                if(assetsFmt > 0) util = (kernelFmt / assetsFmt) * 100;
+
+                // Calculate Idle Liquidity (Vault Balance)
+                // We use USDC balance of Vault Address for accuracy
+                const vaultBal = await usdcContract.balanceOf(vaultAddress);
+                const idleFmt = parseFloat(ethers.utils.formatUnits(vaultBal, 6));
+
+                document.getElementById('eco-tvl').innerText = formatMoney(assetsFmt);
+                document.getElementById('eco-deployed').innerText = formatMoney(kernelFmt);
+                
+                // FIX: Check if eco-idle exists before updating
+                const idleEl = document.getElementById('eco-idle');
+                if(idleEl) idleEl.innerText = formatMoney(idleFmt);
+                
+                document.getElementById('eco-share-price').innerText = "$" + price.toFixed(4);
+                document.getElementById('eco-share-ratio').innerText = price.toFixed(4);
+                document.getElementById('eco-util-bar').style.width = `${util}%`;
+                document.getElementById('eco-util-pct').innerText = `${util.toFixed(1)}%`;
+                
+                // Load BTC info here too if address exists
+                if(userBtcAddress) fetchBitcoinData();
+            } catch(err) { console.error("Eco data failed", err); }
+        }
+
+        // --- SOLVER LOGIC ---
+        async function loadSolverData() {
+            if(!kernelContract || !userAddress) return;
+            try {
+                const principal = await kernelContract.activePrincipal(userAddress);
+                const prinFmt = ethers.utils.formatUnits(principal, 6);
+                document.getElementById('my-principal').innerText = formatMoney(prinFmt);
+
+                // Fetch Available Liquidity from Kernel USDC Balance
+                const kernelBal = await usdcContract.balanceOf(kernelAddress);
+                const kernelBalFmt = ethers.utils.formatUnits(kernelBal, 6);
+                document.getElementById('solver-available-liquidity').innerText = formatMoney(kernelBalFmt);
+
+            } catch(err) { console.error("Solver data failed", err); }
+        }
+
+        function calculateRepayment() {
+            const input = document.getElementById('input-repay-principal').value;
+            const amount = parseFloat(input || 0);
+            
+            // 10% Interest Calculation
+            const fee = amount * 0.10;
+            const total = amount + fee;
+
+            document.getElementById('calc-principal').innerText = formatMoney(amount);
+            document.getElementById('calc-fee').innerText = formatMoney(fee);
+            document.getElementById('calc-total').innerText = formatMoney(total);
+        }
+
+        async function approveUSDCForKernel() {
+            // Solvers pay from their EOA, not the Checking Account contract
+            const amount = document.getElementById('input-repay-principal').value;
+            if(!amount) return;
+            
+            // Approval must cover Principal + 10% Fee
+            const total = parseFloat(amount) * 1.10;
+            const totalWei = ethers.utils.parseUnits(total.toFixed(6), 6);
+
+            try {
+                showToast("Approving USDC...");
+                const tx = await usdcContract.approve(kernelAddress, totalWei);
+                await tx.wait();
+                showToast("Approved! You can now repay.", "success");
+            } catch(err) {
+                console.error(err);
+                showToast("Approval failed", "error");
+            }
+        }
+
+        async function executeRepay() {
+            const amount = document.getElementById('input-repay-principal').value;
+            if(!amount) return;
+
+            const principalWei = ethers.utils.parseUnits(amount, 6);
+            
+            // Calculate Fee Wei (10%)
+            // We use JS math here for demo, but ideal to use BigNumber math
+            const feeWei = principalWei.div(10); 
+
+            try {
+                showToast("Repaying Loan...");
+                // EOA calls Kernel directly
+                const tx = await kernelContractSigner.repayLoan(principalWei, feeWei);
+                await tx.wait();
+                showToast("Loan Repaid Successfully!", "success");
+                loadSolverData(); // Refresh UI
+                document.getElementById('input-repay-principal').value = "";
+                calculateRepayment();
+            } catch(err) {
+                console.error(err);
+                showToast("Repayment failed", "error");
+            }
+        }
+
+        // --- ADMIN LOGIC ---
+        async function loadAdminData() {
+            if(!vaultContract) return;
+            try {
+                // Get Kernel Status for Upgrades
+                const currentKernel = await vaultContract.kernel();
+                const pendingKernel = await vaultContract.pendingKernel();
+                const unlockTime = await vaultContract.kernelUpdateTime();
+
+                document.getElementById('adm-curr-kernel').innerText = `${currentKernel.substring(0,6)}...${currentKernel.substring(38)}`;
+                
+                if(pendingKernel !== ethers.constants.AddressZero) {
+                    document.getElementById('adm-pending-kernel').innerText = `${pendingKernel.substring(0,6)}...${pendingKernel.substring(38)}`;
+                    
+                    const now = Math.floor(Date.now() / 1000);
+                    if(now >= unlockTime) {
+                        document.getElementById('adm-unlock-time').innerText = "Ready to Execute";
+                        document.getElementById('adm-unlock-time').className = "font-medium text-green-600";
+                        // Enable Button
+                        const btn = document.getElementById('btn-upgrade-kernel');
+                        btn.disabled = false;
+                        btn.className = "w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2";
+                        btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4"></i> 2. Execute Upgrade`;
+                    } else {
+                        const timeLeft = unlockTime - now;
+                        const hours = Math.ceil(timeLeft / 3600);
+                        document.getElementById('adm-unlock-time').innerText = `Locked (${hours}h remaining)`;
+                    }
+                } else {
+                    document.getElementById('adm-pending-kernel').innerText = "None";
+                    document.getElementById('adm-unlock-time').innerText = "--";
+                }
+                
+            } catch(err) { console.error("Admin data failed", err); }
+        }
+
+        async function executeProposeKernel() {
+            const newKernel = document.getElementById('input-new-kernel').value;
+            if(!ethers.utils.isAddress(newKernel)) return showToast("Invalid Address", "error");
+
+            try {
+                showToast("Proposing Kernel Update...");
+                const tx = await vaultContractSigner.proposeKernel(newKernel);
+                await tx.wait();
+                showToast("Proposal Submitted! (24h Lock)", "success");
+                loadAdminData();
+            } catch(err) {
+                console.error(err);
+                showToast("Proposal Failed", "error");
+            }
+        }
+
+        async function executeUpgradeKernel() {
+            try {
+                showToast("Executing Upgrade...");
+                const tx = await vaultContractSigner.upgradeKernel();
+                await tx.wait();
+                showToast("Kernel Upgraded Successfully!", "success");
+                loadAdminData();
+            } catch(err) {
+                console.error(err);
+                showToast("Execution Failed (Check Timelock)", "error");
+            }
+        }
+
+        async function setSolverStatus(status) {
+            const addr = document.getElementById('input-admin-solver').value;
+            if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
+
+            try {
+                showToast(status ? "Whitelisting Solver..." : "Revoking Solver...");
+                const tx = await kernelContractSigner.setSolver(addr, status);
+                await tx.wait();
+                showToast("Solver Status Updated!", "success");
+            } catch(err) {
+                console.error(err);
+                showToast("Admin Action Failed", "error");
+            }
+        }
+
+        async function setInvestorStatus(status) {
+            const addr = document.getElementById('input-admin-investor').value;
+            if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
+
+            try {
+                showToast(status ? "Whitelisting Investor..." : "Revoking Investor...");
+                const tx = await vaultContractSigner.setInvestorStatus(addr, status);
+                await tx.wait();
+                showToast("Investor Status Updated!", "success");
+            } catch(err) {
+                console.error(err);
+                showToast("Admin Action Failed", "error");
+            }
+        }
+
+        // MANUAL PUSH REMOVED - Only allowing Automatic via Deploy
+
+        async function executeDeployCapital() {
+            const solver = document.getElementById('input-loan-solver').value;
+            const amount = document.getElementById('input-loan-amount').value;
+            const ref = document.getElementById('input-loan-ref').value || "LOAN-" + Date.now();
+
+            if(!ethers.utils.isAddress(solver)) return showToast("Invalid Solver Address", "error");
+            if(!amount) return;
+
+            // Permission Check
+            try {
+                const owner = await kernelContract.owner();
+                if(owner.toLowerCase() !== userAddress.toLowerCase()) {
+                    return showToast("Admin Access Required", "error");
+                }
+            } catch(e) { console.error("Owner check failed", e); }
+
+            try {
+                // Liquidity Check
+                const kernelBal = await usdcContract.balanceOf(kernelAddress);
+                const loanWei = ethers.utils.parseUnits(amount, 6);
+
+                if (loanWei.gt(kernelBal)) {
+                    const balFmt = ethers.utils.formatUnits(kernelBal, 6);
+                    showToast(`Insufficient Kernel Liquidity (Max: $${formatMoney(balFmt)})`, "error");
+                    return;
+                }
+
+                showToast("Deploying Capital...");
+                
+                // Admin (Owner) calls this on Kernel
+                const overrides = { gasLimit: 2500000 };
+                const tx = await kernelContractSigner.deployCapital(solver, loanWei, ref, overrides);
+                await tx.wait();
+                
+                showToast("Capital Deployed Successfully!", "success");
+                // Clear inputs
+                document.getElementById('input-loan-amount').value = "";
+                document.getElementById('input-loan-ref').value = "";
+                loadEcosystemData(); // refresh stats
+            } catch(err) {
+                console.error(err);
+                showToast("Deployment Failed", "error");
+            }
+        }
+
+        async function checkSolver() {
+            const addr = document.getElementById('input-solver-addr').value;
+            if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
+
+            try {
+                const isWhitelisted = await kernelContract.whitelistedSolvers(addr);
+                const principal = await kernelContract.activePrincipal(addr);
+                
+                const panel = document.getElementById('solver-result');
+                const statusText = document.getElementById('solver-status-text');
+                const statusIcon = document.getElementById('solver-status-icon');
+                const prinText = document.getElementById('solver-principal');
+                document.getElementById('solver-addr-display').innerText = addr;
+
+                panel.classList.remove('hidden');
+
+                if(isWhitelisted) {
+                    statusText.innerText = "Whitelisted";
+                    statusText.classList.remove('text-red-600');
+                    statusText.classList.add('text-green-600');
+                    statusIcon.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>`;
+                    statusIcon.className = "w-8 h-8 rounded-full bg-green-100 flex items-center justify-center";
+                } else {
+                    statusText.innerText = "Not Whitelisted";
+                    statusText.classList.add('text-red-600');
+                    statusText.classList.remove('text-green-600');
+                    statusIcon.innerHTML = `<i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>`;
+                    statusIcon.className = "w-8 h-8 rounded-full bg-red-100 flex items-center justify-center";
+                }
+
+                const prinFmt = ethers.utils.formatUnits(principal, 6);
+                prinText.innerText = `$${formatMoney(prinFmt)}`;
+                lucide.createIcons();
+            } catch(err) { console.error(err); showToast("Check failed", "error"); }
+        }
+
+        // --- SHARED ACTIONS (TOPUP/TRANSFER/ETC) ---
+        // (Existing functions kept as is)
+        function fillMax(inputId, type) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            if (type === 'checking') input.value = currentCheckingBal;
+            else if (type === 'savings-dynamic') {
+                if (currentSavingsAction === 'deposit') input.value = currentCheckingBal;
+                else input.value = currentSavingsBal;
+            }
+        }
+        
+        // --- WALLET DATA FETCH ---
+        async function loadWalletData() {
+            if(!userAddress || !provider) return;
+            
+            // Address
+            document.getElementById('wallet-addr-full').innerText = `${userAddress.substring(0,6)}...${userAddress.substring(userAddress.length-4)}`;
+            document.getElementById('wallet-explorer-link').href = `https://arbiscan.io/address/${userAddress}`;
+            
+            // ETH Balance
+            const ethBal = await provider.getBalance(userAddress);
+            document.getElementById('wallet-bal-eth').innerText = parseFloat(ethers.utils.formatEther(ethBal)).toFixed(4);
+            
+            // USDC Balance (Wallet)
+            if(usdcContract) {
+                const usdcBal = await usdcContract.balanceOf(userAddress);
+                document.getElementById('wallet-bal-usdc').innerText = parseFloat(ethers.utils.formatUnits(usdcBal, 6)).toFixed(2);
+            }
+        }
+
+        function copyUserAddress() {
+            navigator.clipboard.writeText(userAddress);
+            showToast("Wallet Address Copied!", "success");
         }
         
         // --- SMART LINKING (DEPOSIT) ---
@@ -1314,14 +1994,12 @@
                 if(assetsFmt > 0) util = (kernelFmt / assetsFmt) * 100;
 
                 // Calculate Idle Liquidity (Vault Balance)
-                // We use USDC balance of Vault Address for accuracy
                 const vaultBal = await usdcContract.balanceOf(vaultAddress);
                 const idleFmt = parseFloat(ethers.utils.formatUnits(vaultBal, 6));
 
                 document.getElementById('eco-tvl').innerText = formatMoney(assetsFmt);
                 document.getElementById('eco-deployed').innerText = formatMoney(kernelFmt);
                 
-                // FIX: Check if eco-idle exists before updating
                 const idleEl = document.getElementById('eco-idle');
                 if(idleEl) idleEl.innerText = formatMoney(idleFmt);
                 
@@ -1329,6 +2007,8 @@
                 document.getElementById('eco-share-ratio').innerText = price.toFixed(4);
                 document.getElementById('eco-util-bar').style.width = `${util}%`;
                 document.getElementById('eco-util-pct').innerText = `${util.toFixed(1)}%`;
+                
+                if(userBtcAddress) fetchBitcoinData();
             } catch(err) { console.error("Eco data failed", err); }
         }
 
@@ -1352,66 +2032,46 @@
         function calculateRepayment() {
             const input = document.getElementById('input-repay-principal').value;
             const amount = parseFloat(input || 0);
-            
-            // 10% Interest Calculation
             const fee = amount * 0.10;
             const total = amount + fee;
-
             document.getElementById('calc-principal').innerText = formatMoney(amount);
             document.getElementById('calc-fee').innerText = formatMoney(fee);
             document.getElementById('calc-total').innerText = formatMoney(total);
         }
 
         async function approveUSDCForKernel() {
-            // Solvers pay from their EOA, not the Checking Account contract
             const amount = document.getElementById('input-repay-principal').value;
             if(!amount) return;
-            
-            // Approval must cover Principal + 10% Fee
             const total = parseFloat(amount) * 1.10;
             const totalWei = ethers.utils.parseUnits(total.toFixed(6), 6);
-
             try {
                 showToast("Approving USDC...");
                 const tx = await usdcContract.approve(kernelAddress, totalWei);
                 await tx.wait();
-                showToast("Approved! You can now repay.", "success");
-            } catch(err) {
-                console.error(err);
-                showToast("Approval failed", "error");
-            }
+                showToast("Approved!", "success");
+            } catch(err) { console.error(err); showToast("Approval failed", "error"); }
         }
 
         async function executeRepay() {
             const amount = document.getElementById('input-repay-principal').value;
             if(!amount) return;
-
             const principalWei = ethers.utils.parseUnits(amount, 6);
-            
-            // Calculate Fee Wei (10%)
-            // We use JS math here for demo, but ideal to use BigNumber math
             const feeWei = principalWei.div(10); 
-
             try {
                 showToast("Repaying Loan...");
-                // EOA calls Kernel directly
                 const tx = await kernelContractSigner.repayLoan(principalWei, feeWei);
                 await tx.wait();
-                showToast("Loan Repaid Successfully!", "success");
-                loadSolverData(); // Refresh UI
+                showToast("Loan Repaid!", "success");
+                loadSolverData();
                 document.getElementById('input-repay-principal').value = "";
                 calculateRepayment();
-            } catch(err) {
-                console.error(err);
-                showToast("Repayment failed", "error");
-            }
+            } catch(err) { console.error(err); showToast("Repayment failed", "error"); }
         }
 
         // --- ADMIN LOGIC ---
         async function loadAdminData() {
             if(!vaultContract) return;
             try {
-                // Get Kernel Status for Upgrades
                 const currentKernel = await vaultContract.kernel();
                 const pendingKernel = await vaultContract.pendingKernel();
                 const unlockTime = await vaultContract.kernelUpdateTime();
@@ -1420,12 +2080,10 @@
                 
                 if(pendingKernel !== ethers.constants.AddressZero) {
                     document.getElementById('adm-pending-kernel').innerText = `${pendingKernel.substring(0,6)}...${pendingKernel.substring(38)}`;
-                    
                     const now = Math.floor(Date.now() / 1000);
                     if(now >= unlockTime) {
                         document.getElementById('adm-unlock-time').innerText = "Ready to Execute";
                         document.getElementById('adm-unlock-time').className = "font-medium text-green-600";
-                        // Enable Button
                         const btn = document.getElementById('btn-upgrade-kernel');
                         btn.disabled = false;
                         btn.className = "w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2";
@@ -1439,24 +2097,19 @@
                     document.getElementById('adm-pending-kernel').innerText = "None";
                     document.getElementById('adm-unlock-time').innerText = "--";
                 }
-                
             } catch(err) { console.error("Admin data failed", err); }
         }
 
         async function executeProposeKernel() {
             const newKernel = document.getElementById('input-new-kernel').value;
             if(!ethers.utils.isAddress(newKernel)) return showToast("Invalid Address", "error");
-
             try {
                 showToast("Proposing Kernel Update...");
                 const tx = await vaultContractSigner.proposeKernel(newKernel);
                 await tx.wait();
                 showToast("Proposal Submitted! (24h Lock)", "success");
                 loadAdminData();
-            } catch(err) {
-                console.error(err);
-                showToast("Proposal Failed", "error");
-            }
+            } catch(err) { console.error(err); showToast("Proposal Failed", "error"); }
         }
 
         async function executeUpgradeKernel() {
@@ -1466,40 +2119,29 @@
                 await tx.wait();
                 showToast("Kernel Upgraded Successfully!", "success");
                 loadAdminData();
-            } catch(err) {
-                console.error(err);
-                showToast("Execution Failed (Check Timelock)", "error");
-            }
+            } catch(err) { console.error(err); showToast("Execution Failed (Check Timelock)", "error"); }
         }
 
         async function setSolverStatus(status) {
             const addr = document.getElementById('input-admin-solver').value;
             if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
-
             try {
                 showToast(status ? "Whitelisting Solver..." : "Revoking Solver...");
                 const tx = await kernelContractSigner.setSolver(addr, status);
                 await tx.wait();
                 showToast("Solver Status Updated!", "success");
-            } catch(err) {
-                console.error(err);
-                showToast("Admin Action Failed", "error");
-            }
+            } catch(err) { console.error(err); showToast("Admin Action Failed", "error"); }
         }
 
         async function setInvestorStatus(status) {
             const addr = document.getElementById('input-admin-investor').value;
             if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
-
             try {
                 showToast(status ? "Whitelisting Investor..." : "Revoking Investor...");
                 const tx = await vaultContractSigner.setInvestorStatus(addr, status);
                 await tx.wait();
                 showToast("Investor Status Updated!", "success");
-            } catch(err) {
-                console.error(err);
-                showToast("Admin Action Failed", "error");
-            }
+            } catch(err) { console.error(err); showToast("Admin Action Failed", "error"); }
         }
 
         // MANUAL PUSH REMOVED - Only allowing Automatic via Deploy
@@ -1508,84 +2150,57 @@
             const solver = document.getElementById('input-loan-solver').value;
             const amount = document.getElementById('input-loan-amount').value;
             const ref = document.getElementById('input-loan-ref').value || "LOAN-" + Date.now();
-
             if(!ethers.utils.isAddress(solver)) return showToast("Invalid Solver Address", "error");
             if(!amount) return;
 
-            // Permission Check
             try {
-                const owner = await kernelContract.owner();
-                if(owner.toLowerCase() !== userAddress.toLowerCase()) {
-                    return showToast("Admin Access Required", "error");
-                }
-            } catch(e) { console.error("Owner check failed", e); }
-
-            try {
-                // FIX: Liquidity Check uses VAULT balance, not Kernel
                 const vaultBal = await usdcContract.balanceOf(vaultAddress);
                 const loanWei = ethers.utils.parseUnits(amount, 6);
-
                 if (loanWei.gt(vaultBal)) {
                     const balFmt = ethers.utils.formatUnits(vaultBal, 6);
                     showToast(`Insufficient Vault Liquidity (Max: $${formatMoney(balFmt)})`, "error");
                     return;
                 }
-
                 showToast("Deploying Capital...");
-                
                 const overrides = { gasLimit: 2500000 };
                 const tx = await kernelContractSigner.deployCapital(solver, loanWei, ref, overrides);
                 await tx.wait();
-                
                 showToast("Capital Deployed Successfully!", "success");
-                // Clear inputs
                 document.getElementById('input-loan-amount').value = "";
-                document.getElementById('input-loan-ref').value = "";
-                loadEcosystemData(); // refresh stats
-            } catch(err) {
-                console.error(err);
-                showToast("Deployment Failed", "error");
-            }
+                loadEcosystemData(); 
+            } catch(err) { console.error(err); showToast("Deployment Failed", "error"); }
         }
 
         async function checkSolver() {
             const addr = document.getElementById('input-solver-addr').value;
             if(!ethers.utils.isAddress(addr)) return showToast("Invalid Address", "error");
-
             try {
                 const isWhitelisted = await kernelContract.whitelistedSolvers(addr);
                 const principal = await kernelContract.activePrincipal(addr);
-                
                 const panel = document.getElementById('solver-result');
                 const statusText = document.getElementById('solver-status-text');
                 const statusIcon = document.getElementById('solver-status-icon');
                 const prinText = document.getElementById('solver-principal');
                 document.getElementById('solver-addr-display').innerText = addr;
-
                 panel.classList.remove('hidden');
-
                 if(isWhitelisted) {
                     statusText.innerText = "Whitelisted";
-                    statusText.classList.remove('text-red-600');
-                    statusText.classList.add('text-green-600');
+                    statusText.classList.remove('text-red-600'); statusText.classList.add('text-green-600');
                     statusIcon.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>`;
                     statusIcon.className = "w-8 h-8 rounded-full bg-green-100 flex items-center justify-center";
                 } else {
                     statusText.innerText = "Not Whitelisted";
-                    statusText.classList.add('text-red-600');
-                    statusText.classList.remove('text-green-600');
+                    statusText.classList.add('text-red-600'); statusText.classList.remove('text-green-600');
                     statusIcon.innerHTML = `<i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>`;
                     statusIcon.className = "w-8 h-8 rounded-full bg-red-100 flex items-center justify-center";
                 }
-
                 const prinFmt = ethers.utils.formatUnits(principal, 6);
                 prinText.innerText = `$${formatMoney(prinFmt)}`;
                 lucide.createIcons();
             } catch(err) { console.error(err); showToast("Check failed", "error"); }
         }
 
-        // --- SHARED ACTIONS (TOPUP/TRANSFER/ETC) ---
-        // (Existing functions kept as is)
+        // --- SHARED UTILS ---
         function fillMax(inputId, type) {
             const input = document.getElementById(inputId);
             if (!input) return;
@@ -1595,7 +2210,7 @@
                 else input.value = currentSavingsBal;
             }
         }
-
+        
         async function executeTopUp() {
             const amount = document.getElementById('input-topup').value;
             if (!amount) return;
@@ -1611,18 +2226,12 @@
         }
 
         function openTransferModal() { toggleModal('modal-transfer'); }
-
         async function executeTransfer() {
             const to = document.getElementById('input-transfer-to').value;
             const amount = document.getElementById('input-transfer-amount').value;
             if (!to || !amount) return;
-            // Pre-flight Check
-            if (parseFloat(amount) > parseFloat(currentCheckingBal)) {
-                showToast("Insufficient Balance", "error");
-                return;
-            }
+            if (parseFloat(amount) > parseFloat(currentCheckingBal)) { showToast("Insufficient Balance", "error"); return; }
             try {
-                // Add Gas Limit
                 const wei = ethers.utils.parseUnits(amount, 6);
                 const tx = await accountContract.pay(to, wei, { gasLimit: 250000 });
                 toggleModal('modal-transfer');
@@ -1639,7 +2248,6 @@
             const title = document.getElementById('savings-title');
             const desc = document.getElementById('savings-desc');
             document.getElementById('input-savings-amount').value = "";
-            
             if (type === 'deposit') {
                 title.innerText = "Invest in Vault"; desc.innerText = "Move USDC from Checking to Savings.";
                 btn.innerText = "Confirm Deposit"; btn.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-medium transition-colors";
@@ -1653,35 +2261,19 @@
         async function executeSavingsAction() {
             const amount = document.getElementById('input-savings-amount').value;
             if (!amount) return;
-            
-            // Pre-flight Check
             if (currentSavingsAction === 'deposit') {
-                if (parseFloat(amount) > parseFloat(currentCheckingBal)) {
-                    showToast("Insufficient Checking Balance", "error");
-                    return;
-                }
+                if (parseFloat(amount) > parseFloat(currentCheckingBal)) { showToast("Insufficient Checking Balance", "error"); return; }
             } else {
-                if (parseFloat(amount) > parseFloat(currentSavingsBal)) {
-                    showToast("Insufficient Savings Balance", "error");
-                    return;
-                }
+                if (parseFloat(amount) > parseFloat(currentSavingsBal)) { showToast("Insufficient Savings Balance", "error"); return; }
             }
-
             try {
                 let tx;
                 toggleModal('modal-savings');
                 showToast("Interacting with Vault...");
-                
-                // Add Manual Gas Limit to Prevent Estimation Crashes
                 const overrides = { gasLimit: 2500000 };
-
-                // Whitelist Check before Transaction
                 if(currentSavingsAction === 'deposit') {
                     const isWhitelisted = await vaultContract.isWhitelisted(accountAddress);
-                    if(!isWhitelisted) {
-                        showToast("Account not whitelisted by Admin!", "error");
-                        return;
-                    }
+                    if(!isWhitelisted) { showToast("Account not whitelisted by Admin!", "error"); return; }
                     const wei = ethers.utils.parseUnits(amount, 6);
                     tx = await accountContract.depositToSavings(wei, 0, overrides); 
                 } else {
@@ -1708,16 +2300,13 @@
             } catch (err) { console.error(err); showToast("Update failed", "error"); }
         }
 
-        // --- UTILS ---
         function toggleModal(id) {
             const el = document.getElementById(id);
             if (el.classList.contains('hidden')) el.classList.remove('hidden');
             else el.classList.add('hidden');
         }
 
-        function formatMoney(amount) {
-            return parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
+        function formatMoney(amount) { return parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
         function setBtnLoading(id, isLoading) {
             const btn = document.getElementById(id);
