@@ -355,6 +355,16 @@
                                     <option value="56">BSC</option>
                                 </select>
                             </div>
+
+                            <!-- Added missing Token Selector below -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Asset to Bridge</label>
+                                <select id="link-source-token" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                                    <option value="USDC">USDC</option>
+                                    <option value="ETH">ETH</option>
+                                    <option value="USDT">USDT</option>
+                                </select>
+                            </div>
                             
                             <button onclick="openBridgeLink()" class="w-full bridge-gradient text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:opacity-90 flex items-center justify-center gap-2 mt-4">
                                 Bridge Now <i data-lucide="external-link" class="w-4 h-4"></i>
@@ -362,7 +372,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Option 2: Buy Crypto (On-Ramp) -->
                 <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-1 overflow-hidden relative">
                     <div class="absolute top-0 left-0 w-full h-2 bg-green-500"></div>
